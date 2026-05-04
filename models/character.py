@@ -150,14 +150,11 @@ class Character:
     def assign_routine(self, task: Callable):
         self.__task = task
 
-    def work(self):
+    async def work(self):
         if self.__task is None:
             print("❌ No task assigned to character")
             return
         self.__working = True
-        asyncio.run(self.__work())
-
-    async def __work(self):
         while self.__working:
             if self.__task is None:
                 print("❌ No task assigned to character")

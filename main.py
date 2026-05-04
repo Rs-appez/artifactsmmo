@@ -1,16 +1,21 @@
 #!.venv/bin/python
 from models import Character
-from routines import chicken_farm
+from routines import chicken_farm, copper_farm
+import asyncio
 
 
-def main():
+async def main():
     bob = Character("rs_bob")
     bob.assign_routine(chicken_farm)
-    bob.work()
 
-    # alice = Character("rs_alice")
-    # asyncio.run(chicken_farm(alice))
+    alice = Character("rs_alice")
+    alice.assign_routine(copper_farm)
+
+    _ = await asyncio.gather(
+        bob.work(),
+        alice.work(),
+    )
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
