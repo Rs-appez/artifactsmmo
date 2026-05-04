@@ -46,6 +46,7 @@ class Character:
 
         self.__task: Callable | None = None
         self.__working = False
+        self.__work_task: asyncio.Task | None = None
 
         self.__current_location: tuple[int, int] = (0, 0)
         self.__current_layer: Layer = Layer.INTERIOR
@@ -155,12 +156,25 @@ class Character:
             print("❌ No task assigned to character")
             return
         self.__working = True
-        while self.__working:
-            if self.__task is None:
-                print("❌ No task assigned to character")
-                self.__working = False
-                return
-            await self.__task(self)
+        self.__work_task = asyncio.current_task()
+        try:
+            while self.__working:
+                if self.__task is None:
+                    print("❌ No task assigned to character")
+                    self.stop()
+                    return
+                await self.__task(self)
+        except asyncio.CancelledError:
+            pass
+        finally:
+            self.__working = False
+            self.__work_task = None
+
+    def stop(self):
+        self.__working = False
+        if self.__work_task is not None:
+            _ = self.__work_task.cancel()
+            self.__work_task = None
 
     @request_action
     async def move(self, position: tuple[int, int]) -> bool:
