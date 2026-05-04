@@ -38,9 +38,7 @@ async def cli(characters: dict[str, Character]):
             print("⏹ Stopped all characters")
         elif action == "status":
             for name, char in characters.items():
-                print(
-                    f"{name}: working={char.is_working}, hp={char.hp}/{char.max_hp}, level={char.level}"
-                )
+                print(f"{name}: working={char.is_working}")
         else:
             print(f"❌ Unknown command: {action}")
 
