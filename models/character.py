@@ -108,6 +108,14 @@ class Character:
         return (cooldown - datetime.now(TIMEZONE)).total_seconds()
 
     @property
+    async def available(self):
+        while True:
+            remaining = self.cooldown
+            if remaining <= 0:
+                break
+            await asyncio.sleep(min(3.0, remaining))
+
+    @property
     def hp(self) -> int:
         return self.__hp
 
@@ -138,14 +146,6 @@ class Character:
     @property
     def is_inventory_full(self) -> bool:
         return sum(self.__inventory.values()) >= self.__inventory_max_items - 5
-
-    @property
-    async def available(self):
-        while True:
-            remaining = self.cooldown
-            if remaining <= 0:
-                break
-            await asyncio.sleep(min(1.0, remaining))
 
     def assign_routine(self, task: Callable):
         self.__task = task
