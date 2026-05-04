@@ -32,6 +32,16 @@ async def cli(characters: dict[str, Character]):
                 print(f"▶️ Started {name}")
             else:
                 print(f"❌ Unknown character: {name}")
+        elif action == "gobank":
+            if not args:
+                print("Usage: gobank <name>")
+                continue
+            name = args[0]
+            if name in characters:
+                _ = asyncio.create_task(characters[name].deposit_all_in_bank())
+                print(f"🏦 {name} is going to the bank")
+            else:
+                print(f"❌ Unknown character: {name}")
         elif action == "stopall":
             for char in characters.values():
                 char.stop()
