@@ -185,6 +185,7 @@ class Character:
         self.__queue_priority_task(task)
         if not self.is_working:
             self.__working = True
+            self.refresh()
             while self.__priority_task:
                 priority = self.__priority_task.popleft()
                 _ = asyncio.create_task(priority(self))
