@@ -1,0 +1,15 @@
+[project]
+name = "artifactsmmo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "python-decouple>=3.8",
+    "requests>=2.33.1",
+]
+
+[dependency-groups]
+dev = [
+    "python-decouple-stubs>=3.8.0.4",
+]
