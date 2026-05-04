@@ -28,6 +28,7 @@ async def cli(characters: dict[str, Character]):
                 continue
             name = args[0]
             if name in characters:
+                characters[name].refresh()
                 _ = asyncio.create_task(characters[name].work())
                 print(f"▶️ Started {name}")
             else:
@@ -38,7 +39,7 @@ async def cli(characters: dict[str, Character]):
                 continue
             name = args[0]
             if name in characters:
-                characters[name].queue_priority_task(routines.empty_farm)
+                characters[name].do_one_time_task(routines.empty_farm)
                 print(f"🏦 {name} is going to the bank")
             else:
                 print(f"❌ Unknown character: {name}")

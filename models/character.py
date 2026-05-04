@@ -160,7 +160,6 @@ class Character:
             return
         self.__working = True
         self.__work_task = asyncio.current_task()
-        self.refresh()
         try:
             while self.__working:
                 if self.__task is None:
@@ -182,13 +181,22 @@ class Character:
             self.__working = False
             self.__work_task = None
 
+    def do_one_time_task(self, task: Callable):
+        self.__queue_priority_task(task)
+        if not self.is_working:
+            self.__working = True
+            while self.__priority_task:
+                priority = self.__priority_task.popleft()
+                _ = asyncio.create_task(priority(self))
+            self.__working = False
+
     def stop(self):
         self.__working = False
         if self.__work_task is not None:
             _ = self.__work_task.cancel()
             self.__work_task = None
 
-    def queue_priority_task(self, task: Callable):
+    def __queue_priority_task(self, task: Callable):
         self.__priority_task.append(task)
         if self.__work_task is not None:
             self.__interrupted = True
