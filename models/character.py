@@ -185,7 +185,7 @@ class Character:
             self.__refresh(character_data)
 
             print(
-                f"✅ Moved to ({destination['x']}, {destination['y']}) on {destination['name']}"
+                f"🏃{self.name} Moved to ({destination['x']}, {destination['y']}) on {destination['name']}"
             )
             return True
         except Exception as e:
