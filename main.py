@@ -38,13 +38,7 @@ async def cli(characters: dict[str, Character]):
                 continue
             name = args[0]
             if name in characters:
-                if characters[name].is_working:
-                    print(f"❌ {name} is currently working, stop it first")
-                    continue
-                characters[name].refresh()
-                _ = asyncio.create_task(
-                    characters[name].deposit_all_in_bank(comeback=False)
-                )
+                characters[name].queue_priority_task(routines.empty_farm)
                 print(f"🏦 {name} is going to the bank")
             else:
                 print(f"❌ Unknown character: {name}")
