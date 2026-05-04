@@ -1,7 +1,7 @@
 from .enums import Layer
 
 BANK_POS: dict[Layer, set[tuple[int, int]]] = {
-    Layer.OVERWORLD: {(4, 1)},
+    Layer.OVERWORLD: {(4, 1), (7, 13)},
 }
 
 
