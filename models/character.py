@@ -1,13 +1,14 @@
 import asyncio
-from collections import defaultdict
+from collections import defaultdict, deque
 from datetime import datetime, timezone
 from typing import Callable
-from .enums import Layer
-from .bank import nearest_bank
 
 import requests
 
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
+
+from .bank import nearest_bank
+from .enums import Layer
 
 
 def request_action(func):
@@ -47,6 +48,8 @@ class Character:
         self.__task: Callable | None = None
         self.__working = False
         self.__work_task: asyncio.Task | None = None
+        self.__interrupted: bool = False
+        self.__priority_task: deque[Callable] = deque()
 
         self.__current_location: tuple[int, int] = (0, 0)
         self.__current_layer: Layer = Layer.INTERIOR
@@ -164,7 +167,15 @@ class Character:
                     print("❌ No task assigned to character")
                     self.stop()
                     return
-                await self.__task(self)
+                try:
+                    await self.__task(self)
+                except asyncio.CancelledError:
+                    if not self.__interrupted:
+                        raise
+                    self.__interrupted = False
+                    while self.__priority_task:
+                        priority = self.__priority_task.popleft()
+                        await priority(self)
         except asyncio.CancelledError:
             pass
         finally:
@@ -176,6 +187,12 @@ class Character:
         if self.__work_task is not None:
             _ = self.__work_task.cancel()
             self.__work_task = None
+
+    def queue_priority_task(self, task: Callable):
+        self.__priority_task.append(task)
+        if self.__work_task is not None:
+            self.__interrupted = True
+            _ = self.__work_task.cancel()
 
     @request_action
     async def move(self, position: tuple[int, int]) -> bool:
