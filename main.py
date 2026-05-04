@@ -1,7 +1,6 @@
 #!.venv/bin/python
 from models import Character
 from routines import chicken_farm
-import asyncio
 
 
 def main():
