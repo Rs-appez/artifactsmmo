@@ -1,6 +1,6 @@
 #!.venv/bin/python
 from models import Character
-from routines import chicken_farm, copper_farm, ash_farm, gudgeon_farm, sunflower_farm
+import routines
 import asyncio
 
 
@@ -61,19 +61,19 @@ async def cli(characters: dict[str, Character]):
 
 async def main():
     bob = Character("rs_bob")
-    bob.assign_routine(chicken_farm)
+    bob.assign_routine(routines.yellow_slime_farm)
 
     alice = Character("rs_alice")
-    alice.assign_routine(ash_farm)
+    alice.assign_routine(routines.ash_farm)
 
     john = Character("rs_john")
-    john.assign_routine(copper_farm)
+    john.assign_routine(routines.copper_farm)
 
     jane = Character("rs_jane")
-    jane.assign_routine(gudgeon_farm)
+    jane.assign_routine(routines.gudgeon_farm)
 
     charlie = Character("rs_charlie")
-    charlie.assign_routine(sunflower_farm)
+    charlie.assign_routine(routines.sunflower_farm)
 
     characters = {
         "bob": bob,
