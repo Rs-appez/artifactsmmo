@@ -1,18 +1,18 @@
 from models import Character
 
 
-async def __mob_farm(character: Character, mob_position: tuple):
+async def __mob_farm(character: Character, mob_position: tuple, hp_threshold: int):
     if character.is_inventory_full:
         _ = await character.deposit_all_in_bank()
     _ = await character.move(mob_position)
-    if character.hp < 40:
+    if character.hp < hp_threshold:
         _ = await character.rest()
     _ = await character.fight()
 
 
 async def chicken_farm(character: Character):
-    await __mob_farm(character, (0, 1))
+    await __mob_farm(character, (0, 1), 40)
 
 
 async def yellow_slime_farm(character: Character):
-    await __mob_farm(character, (4, -1))
+    await __mob_farm(character, (4, -1), 85)
