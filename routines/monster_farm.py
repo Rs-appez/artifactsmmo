@@ -1,11 +1,18 @@
 from models import Character
 
 
-async def chicken_farm(character: Character):
+async def __mob_farm(character: Character, mob_position: tuple):
     if character.is_inventory_full:
         _ = await character.deposit_all_in_bank()
-    _ = await character.move((0, 1))
+    _ = await character.move(mob_position)
     if character.hp < 40:
         _ = await character.rest()
-    if not await character.fight():
-        _ = await character.move((0, 1))
+    _ = await character.fight()
+
+
+async def chicken_farm(character: Character):
+    await __mob_farm(character, (0, 1))
+
+
+async def yellow_slime_farm(character: Character):
+    await __mob_farm(character, (4, -1))
