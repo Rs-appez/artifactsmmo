@@ -196,6 +196,27 @@ class Character:
             return False
 
     @request_action
+    async def gather(self) -> bool:
+        try:
+            response = requests.post(
+                f"{self.__url}/action/gathering",
+                headers=HEADERS,
+            )
+            data = response.json()
+
+            if "error" in data:
+                print("data : ", data)
+                raise Exception(data["error"]["message"])
+
+            character_data = data["data"]["character"]
+            self.__refresh(character_data)
+
+            return True
+        except Exception as e:
+            print(f"❌ {e}")
+            return False
+
+    @request_action
     async def fight(self) -> bool:
         try:
             response = requests.post(
