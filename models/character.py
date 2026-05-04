@@ -137,7 +137,7 @@ class Character:
 
     @property
     def is_inventory_full(self) -> bool:
-        return sum(self.__inventory.values()) >= self.__inventory_max_items
+        return sum(self.__inventory.values()) >= self.__inventory_max_items - 5
 
     @property
     async def available(self):
