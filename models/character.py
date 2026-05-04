@@ -290,8 +290,8 @@ class Character:
             print("❌ Failed to deposit items in bank")
             return
 
-    @request_action
     @need_bank
+    @request_action
     async def deposit_gold_in_bank(self, quantity: int, comeback: bool = True) -> bool:
         if quantity > self.gold:
             print(f"❌ Cannot deposit {quantity} gold, only {self.gold} available")
@@ -320,8 +320,8 @@ class Character:
             print(f"❌ {e}")
             return False
 
-    @request_action
     @need_bank
+    @request_action
     async def deposit_item_in_bank(
         self, items: list[dict[str, int]], comeback: bool = True
     ) -> bool:
