@@ -157,6 +157,7 @@ class Character:
             return
         self.__working = True
         self.__work_task = asyncio.current_task()
+        self.refresh()
         try:
             while self.__working:
                 if self.__task is None:
