@@ -325,7 +325,6 @@ class Character:
     async def deposit_item_in_bank(
         self, items: list[dict[str, int]], comeback: bool = True
     ) -> bool:
-        print("items : ", items)
         try:
             response = requests.post(
                 f"{self.__url}/action/bank/deposit/item",
