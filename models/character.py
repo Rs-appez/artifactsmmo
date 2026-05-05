@@ -345,7 +345,6 @@ class Character:
 
             character_data = data["data"]["character"]
 
-            print(f"✅ Rested and recovered HP to {self.hp}/{self.max_hp}")
             return True, character_data
         except Exception as e:
             print(f"❌ {e}")
