@@ -51,10 +51,12 @@ class CharacterData:
     @classmethod
     def __get_jobs(cls, data: dict) -> dict[str, int]:
         jobs = {}
-        jobs["fishing"] = data.get("fishing_level", 0)
+        jobs["mining"] = data.get("mining_level", 0)
         jobs["woodcutting"] = data.get("woodcutting_level", 0)
-        jobs["weaponcrafting_level"] = data.get("weaponcrafting_level", 0)
-        jobs["gearcrafting_level"] = data.get("gearcrafting_level", 0)
-        jobs["jewelrycrafting_level"] = data.get("jewelrycrafting_level", 0)
-        jobs["alchemy_level"] = data.get("alchemy_level", 0)
+        jobs["fishing"] = data.get("fishing_level", 0)
+        jobs["weaponcrafting"] = data.get("weaponcrafting_level", 0)
+        jobs["gearcrafting"] = data.get("gearcrafting_level", 0)
+        jobs["jewelrycrafting"] = data.get("jewelrycrafting_level", 0)
+        jobs["cooking"] = data.get("cooking_level", 0)
+        jobs["alchemy"] = data.get("alchemy_level", 0)
         return jobs
