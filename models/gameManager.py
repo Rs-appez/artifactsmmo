@@ -32,7 +32,7 @@ class GameManager:
     @property
     async def items_loaded(self) -> bool:
         while not self.__items_loaded:
-            _ = asyncio.sleep(1)
+            _ = await asyncio.sleep(1)
         return self.__items_loaded
 
     def __load_characters(self):
