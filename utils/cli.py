@@ -37,8 +37,11 @@ async def cli(characters: dict[str, Character]):
         if action in dict_routines_all:
             dict_routines_all[action](characters.values())
             continue
+        if len(args) < 1:
+            print(f"Usage: {action} <name>")
+            continue
 
-        name, *args = args
+        name, *rests = args
         if not name:
             print("Usage: stop <name>")
             continue
