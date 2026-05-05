@@ -2,7 +2,7 @@ import asyncio
 import sys
 
 from models import Character
-from .cli_action import stop, start, stop_all, go_bank
+from .cli_action import stop, start, stop_all, go_bank, status
 
 dict_routines = {
     "stop": stop,
@@ -12,6 +12,7 @@ dict_routines = {
 
 dict_routines_all = {
     "stopall": stop_all,
+    "status": status,
 }
 
 
