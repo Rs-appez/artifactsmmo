@@ -159,6 +159,7 @@ class Character:
             return
         self.__working = True
         self.__work_task = asyncio.current_task()
+        print(f"🚀 {self.name} started working on routine {self.__task.__name__}")
         try:
             while self.__working:
                 if self.__task is None:
