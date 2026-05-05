@@ -3,25 +3,17 @@ import asyncio
 import signal
 import sys
 
-import routines
 from models import CharacterManager
 from utils.cli import cli
 
 
 async def main():
-    default_tasks = {
-        "bob": routines.yellow_slime_farm,
-        "alice": routines.spruce_farm,
-        "john": routines.iron_farm,
-        "jane": routines.shrimp_farm,
-        "charlie": routines.sunflower_farm,
-    }
     manager = CharacterManager()
     characters = manager.characters
 
     for char_name, character in characters.items():
-        if char_name in default_tasks:
-            character.assign_routine(default_tasks[char_name])
+        if char_name in manager.default_tasks:
+            character.assign_routine(manager.default_tasks[char_name])
         else:
             print(f"No default task found for {char_name}, skipping task assignment.")
 

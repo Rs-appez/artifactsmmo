@@ -1,9 +1,19 @@
-from models import Character, CharacterData
 import httpx
+
+import routines
 from config import ARTIFACTSMMO_URL, HEADERS
+from models import Character, CharacterData
 
 
 class CharacterManager:
+    default_tasks = {
+        "bob": routines.yellow_slime_farm,
+        "alice": routines.spruce_farm,
+        "john": routines.iron_farm,
+        "jane": routines.shrimp_farm,
+        "charlie": routines.sunflower_farm,
+    }
+
     def __init__(self):
         self.characters: dict[str, Character] = {}
         with httpx.Client() as client:
