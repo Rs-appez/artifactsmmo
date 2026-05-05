@@ -3,8 +3,8 @@ from collections import defaultdict, deque
 from datetime import datetime, timezone
 from typing import Callable
 
+import httpx
 import requests
-
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
 
 from .bank import nearest_bank
@@ -44,6 +44,7 @@ class Character:
     def __init__(self, name: str):
         self.__name = name
         self.__url = f"{ARTIFACTSMMO_URL}/my/{self.name}"
+        self.__client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
 
         self.__task: Callable | None = None
         self.__working = False
@@ -208,7 +209,7 @@ class Character:
         if position == self.location:
             return True
         try:
-            response = requests.post(
+            response = await self.__client.post(
                 f"{self.__url}/action/move",
                 json={"x": position[0], "y": position[1]},
                 headers=HEADERS,
@@ -236,7 +237,7 @@ class Character:
     @request_action
     async def gather(self) -> bool:
         try:
-            response = requests.post(
+            response = await self.__client.post(
                 f"{self.__url}/action/gathering",
                 headers=HEADERS,
             )
@@ -257,7 +258,7 @@ class Character:
     @request_action
     async def fight(self) -> bool:
         try:
-            response = requests.post(
+            response = await self.__client.post(
                 f"{self.__url}/action/fight",
                 headers=HEADERS,
             )
@@ -282,7 +283,7 @@ class Character:
     @request_action
     async def rest(self) -> bool:
         try:
-            response = requests.post(
+            response = await self.__client.post(
                 f"{self.__url}/action/rest",
                 headers=HEADERS,
             )
@@ -327,7 +328,7 @@ class Character:
             print(f"❌ Cannot deposit non-positive quantity of gold: {quantity}")
             return False
         try:
-            response = requests.post(
+            response = await self.__client.post(
                 f"{self.__url}/action/bank/deposit/gold",
                 headers=HEADERS,
                 json={"quantity": quantity},
@@ -353,7 +354,7 @@ class Character:
         self, items: list[dict[str, int]], comeback: bool = True
     ) -> bool:
         try:
-            response = requests.post(
+            response = await self.__client.post(
                 f"{self.__url}/action/bank/deposit/item",
                 headers=HEADERS,
                 json=items,
