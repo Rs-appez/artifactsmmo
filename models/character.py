@@ -369,7 +369,7 @@ class Character:
             character_data = data["data"]["character"]
             self.__refresh(CharacterData.from_dict(character_data))
 
-            print(f"✅ Deposited {quantity} gold in bank")
+            print(f"󱉏  {self.surname} Deposited {quantity} gold in bank")
             return True
         except Exception as e:
             print(f"❌ {e}")
@@ -396,7 +396,7 @@ class Character:
             self.__refresh(CharacterData.from_dict(character_data))
 
             print(
-                f"✅ Deposited {', '.join([f'{item["quantity"]}x {item["code"]}' for item in items])} in bank"
+                f"📥 {self.surname} Deposited {', '.join([f'{item["quantity"]}x {item["code"]}' for item in items])} in bank"
             )
             return True
         except Exception as e:
@@ -424,7 +424,7 @@ class Character:
             self.__refresh(CharacterData.from_dict(character_data))
 
             print(
-                f"✅ {self.surname} Withdrew {', '.join([f'{item[0]}x {item[0]}' for item in items])} from bank"
+                f"📤 {self.surname} Withdrew {', '.join([f'{item[0]}x {item[0]}' for item in items])} from bank"
             )
             return True
         except Exception as e:
