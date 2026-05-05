@@ -6,7 +6,7 @@ from config import ARTIFACTSMMO_URL, HEADERS
 from models import Character, CharacterData
 
 
-class CharacterManager:
+class GameManager:
     default_tasks = {
         "bob": routines.yellow_slime_farm,
         "alice": routines.spruce_farm,

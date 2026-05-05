@@ -3,12 +3,12 @@ import asyncio
 import signal
 import sys
 
-from models import CharacterManager
+from models import GameManager
 from utils.cli import cli
 
 
 async def main():
-    manager = CharacterManager()
+    manager = GameManager()
     characters = manager.characters
 
     loop = asyncio.get_event_loop()
