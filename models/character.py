@@ -1,15 +1,17 @@
 import asyncio
 from collections import deque
+from collections.abc import Awaitable
 from datetime import datetime
-from typing import Callable
+from typing import Callable, ParamSpec
 
 import httpx
+
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
 from models.items import Item
 
 from .bank import nearest_bank
-from .enums import Layer
 from .character_data import CharacterData
+from .enums import Layer
 
 
 def request_action(func):
@@ -36,6 +38,23 @@ def need_bank(func):
             if not await self.move(current_location):
                 print("❌ Failed to move back to original location")
 
+        return result
+
+    return wrapper
+
+
+P = ParamSpec("P")
+
+
+def refresh_after(
+    func: Callable[P, Awaitable[tuple[bool, dict | None]]],
+) -> Callable[P, Awaitable[bool]]:
+    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> bool:
+        result, character_data = await func(*args, **kwargs)
+        if character_data is not None:
+            character_class = args[0]
+            if isinstance(character_class, Character):
+                character_class.refresh_data(CharacterData.from_dict(character_data))
         return result
 
     return wrapper
@@ -71,7 +90,8 @@ class Character:
 
         self.__jobs = data.jobs
 
-    async def refresh(self):
+    @refresh_after
+    async def refresh(self) -> tuple[bool, dict | None]:
         try:
             response = await self.__client.get(
                 f"{ARTIFACTSMMO_URL}/characters/{self.name}", headers=HEADERS
@@ -81,11 +101,11 @@ class Character:
                 print("data : ", data)
                 raise Exception(data["error"]["message"])
             character_data = data["data"]
-            self.__refresh(CharacterData.from_dict(character_data))
+            return True, character_data
 
         except Exception as e:
             print(f"❌ {e}")
-            return
+            return False, None
 
     @property
     def name(self):
@@ -232,9 +252,10 @@ class Character:
         return self.__jobs.get(job_name, 0) >= level
 
     @request_action
-    async def move(self, position: tuple[int, int]) -> bool:
+    @refresh_after
+    async def move(self, position: tuple[int, int]) -> tuple[bool, dict | None]:
         if position == self.location:
-            return True
+            return True, None
         try:
             response = await self.__client.post(
                 f"{self.__url}/action/move",
@@ -246,23 +267,23 @@ class Character:
             if "error" in data:
                 print("data : ", data)
                 if data["error"]["code"] == 490:
-                    return True
+                    return True, None
                 raise Exception(data["error"]["message"])
 
             destination = data["data"]["destination"]
             character_data = data["data"]["character"]
-            self.__refresh(CharacterData.from_dict(character_data))
 
             print(
                 f"🏃{self.name} Moved to ({destination['x']}, {destination['y']}) on {destination['name']}"
             )
-            return True
+            return True, character_data
         except Exception as e:
             print(f"❌ {e}")
-            return False
+            return False, None
 
     @request_action
-    async def gather(self) -> bool:
+    @refresh_after
+    async def gather(self) -> tuple[bool, dict | None]:
         try:
             response = await self.__client.post(
                 f"{self.__url}/action/gathering",
@@ -275,15 +296,15 @@ class Character:
                 raise Exception(data["error"]["message"])
 
             character_data = data["data"]["character"]
-            self.__refresh(CharacterData.from_dict(character_data))
 
-            return True
+            return True, character_data
         except Exception as e:
             print(f"❌ {e}")
-            return False
+            return False, None
 
     @request_action
-    async def fight(self) -> bool:
+    @refresh_after
+    async def fight(self) -> tuple[bool, dict | None]:
         try:
             response = await self.__client.post(
                 f"{self.__url}/action/fight",
@@ -293,22 +314,24 @@ class Character:
 
             fight = data["fight"]
             characters = data["characters"]
+            character_data = None
             for character in characters:
                 if character["name"] == self.name:
-                    self.__refresh(CharacterData.from_dict(character))
+                    character_data = character
                     break
             result = True if fight["result"] == "win" else False
             print(
                 f"󰓥 {self.surname} Fought and {'won' if result else 'lost'} against {fight['opponent']}"
             )
 
-            return result
+            return result, character_data
         except Exception as e:
             print(f"❌ {e}")
-            return False
+            return False, None
 
     @request_action
-    async def rest(self) -> bool:
+    @refresh_after
+    async def rest(self) -> tuple[bool, dict | None]:
         try:
             response = await self.__client.post(
                 f"{self.__url}/action/rest",
@@ -321,13 +344,12 @@ class Character:
                 raise Exception(data["error"]["message"])
 
             character_data = data["data"]["character"]
-            self.__refresh(CharacterData.from_dict(character_data))
 
             print(f"✅ Rested and recovered HP to {self.hp}/{self.max_hp}")
-            return True
+            return True, character_data
         except Exception as e:
             print(f"❌ {e}")
-            return False
+            return False, None
 
     async def deposit_all_in_bank(self, comeback: bool = True):
         if self.gold > 0:
@@ -335,7 +357,7 @@ class Character:
                 print("❌ Failed to deposit gold in bank")
                 return
         if not await self.deposit_item_in_bank(
-            [
+            [  # pyright: ignore[reportArgumentType]
                 {"code": code, "quantity": quantity}
                 for code, quantity in self.inventory.items()
                 if code
@@ -347,13 +369,16 @@ class Character:
 
     @need_bank
     @request_action
-    async def deposit_gold_in_bank(self, quantity: int, comeback: bool = True) -> bool:
+    @refresh_after
+    async def deposit_gold_in_bank(
+        self, quantity: int, comeback: bool = True
+    ) -> tuple[bool, dict | None]:
         if quantity > self.gold:
             print(f"❌ Cannot deposit {quantity} gold, only {self.gold} available")
-            return False
+            return False, None
         if quantity <= 0:
             print(f"❌ Cannot deposit non-positive quantity of gold: {quantity}")
-            return False
+            return False, None
         try:
             response = await self.__client.post(
                 f"{self.__url}/action/bank/deposit/gold",
@@ -367,19 +392,19 @@ class Character:
                 raise Exception(data["error"]["message"])
 
             character_data = data["data"]["character"]
-            self.__refresh(CharacterData.from_dict(character_data))
 
             print(f"󱉏  {self.surname} Deposited {quantity} gold in bank")
-            return True
+            return True, character_data
         except Exception as e:
             print(f"❌ {e}")
-            return False
+            return False, None
 
     @need_bank
     @request_action
+    @refresh_after
     async def deposit_item_in_bank(
         self, items: list[dict[str, int]], comeback: bool = True
-    ) -> bool:
+    ) -> tuple[bool, dict | None]:
         try:
             response = await self.__client.post(
                 f"{self.__url}/action/bank/deposit/item",
@@ -393,21 +418,21 @@ class Character:
                 raise Exception(data["error"]["message"])
 
             character_data = data["data"]["character"]
-            self.__refresh(CharacterData.from_dict(character_data))
 
             print(
                 f"📥 {self.surname} Deposited {', '.join([f'{item["quantity"]}x {item["code"]}' for item in items])} in bank"
             )
-            return True
+            return True, character_data
         except Exception as e:
             print(f"❌ {e}")
-            return False
+            return False, None
 
     @need_bank
     @request_action
+    @refresh_after
     async def withdraw_item_from_bank(
         self, items: list[tuple[str, int]], comeback: bool = False
-    ) -> bool:
+    ) -> tuple[bool, dict | None]:
         try:
             response = await self.__client.post(
                 f"{self.__url}/action/bank/withdraw/item",
@@ -421,26 +446,26 @@ class Character:
                 raise Exception(data["error"]["message"])
 
             character_data = data["data"]["character"]
-            self.__refresh(CharacterData.from_dict(character_data))
 
             print(
                 f"📤 {self.surname} Withdrew {', '.join([f'{item[0]}x {item[0]}' for item in items])} from bank"
             )
-            return True
+            return True, character_data
         except Exception as e:
             print(f"❌ {e}")
-            return False
+            return False, None
 
     @request_action
-    async def craft(self, item: Item, quantity: int) -> bool:
+    @refresh_after
+    async def craft(self, item: Item, quantity: int) -> tuple[bool, dict | None]:
         if not self.has_job(item.job, item.craft_level):
             print(
                 f"❌ Cannot craft {item.name}, requires {item.job} level {item.craft_level}"
             )
-            return False
+            return False, None
         if quantity <= 0:
             print(f"❌ Cannot craft non-positive quantity of items: {quantity}")
-            return False
+            return False, None
 
         try:
             response = await self.__client.post(
@@ -455,15 +480,14 @@ class Character:
                 raise Exception(data["error"]["message"])
 
             character_data = data["data"]["character"]
-            self.__refresh(CharacterData.from_dict(character_data))
 
             print(f"✅ {self.surname} Crafted {quantity}x {item.name}")
-            return True
+            return True, character_data
         except Exception as e:
             print(f"❌ {e}")
-            return False
+            return False, None
 
-    def __refresh(self, data: CharacterData):
+    def refresh_data(self, data: CharacterData):
         self.__current_location = data.location
         self.__current_layer = data.layer
         self.__current_map_id = data.map
