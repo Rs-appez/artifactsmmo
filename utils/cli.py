@@ -1,12 +1,24 @@
-from models import Character
-import routines
 import asyncio
+import sys
+
+import routines
+from models import Character
 
 
 async def cli(characters: dict[str, Character]):
     loop = asyncio.get_event_loop()
+    queue: asyncio.Queue[str] = asyncio.Queue()
+
+    def on_stdin():
+        line = sys.stdin.readline()
+        if line:
+            queue.put_nowait(line)
+        else:
+            _ = loop.remove_reader(sys.stdin.fileno())
+
+    loop.add_reader(sys.stdin.fileno(), on_stdin)
     while True:
-        command = await loop.run_in_executor(None, input, "> ")
+        command = await queue.get()
         parts = command.strip().lower().split()
         if not parts:
             continue
