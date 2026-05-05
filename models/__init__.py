@@ -1,5 +1,5 @@
 from .character import Character
 from .character_data import CharacterData
-from .gameManager import GameManager
+from .characterManager import CharacterManager
 
-__all__ = ["Character", "CharacterData", "GameManager"]
+__all__ = ["Character", "CharacterData", "CharacterManager"]

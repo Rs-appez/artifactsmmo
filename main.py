@@ -4,7 +4,7 @@ import signal
 import sys
 
 import routines
-from models import GameManager
+from models import CharacterManager
 from utils.cli import cli
 
 
@@ -16,7 +16,7 @@ async def main():
         "jane": routines.shrimp_farm,
         "charlie": routines.sunflower_farm,
     }
-    manager = GameManager()
+    manager = CharacterManager()
     characters = manager.characters
 
     for char_name, character in characters.items():

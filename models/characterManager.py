@@ -3,7 +3,7 @@ import httpx
 from config import ARTIFACTSMMO_URL, HEADERS
 
 
-class GameManager:
+class CharacterManager:
     def __init__(self):
         self.characters: dict[str, Character] = {}
         with httpx.Client() as client:
