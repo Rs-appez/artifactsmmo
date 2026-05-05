@@ -17,10 +17,10 @@ class GameManager:
 
     def __init__(self):
         self.characters: dict[str, Character] = {}
-        self.__log_characters()
+        self.__load_characters()
         self.__assign_default_tasks()
 
-    def __log_characters(self):
+    def __load_characters(self):
         with httpx.Client() as client:
             response = client.get(f"{ARTIFACTSMMO_URL}/my/characters", headers=HEADERS)
             if response.status_code != 200:
