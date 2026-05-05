@@ -1,4 +1,5 @@
-from collections.abc import Coroutine
+from collections.abc import Sequence
+from typing import Coroutine
 import httpx
 
 import routines
@@ -23,11 +24,7 @@ class GameManager:
         self.characters: dict[str, Character] = {}
         self.items: dict[str, Item] = {}
 
-        self.__load_items()
-        print(f"Loaded {len(self.items)} items.")
-        print(f"{self.items['raw_beef']}")
         self.__load_characters()
-
         self.__assign_default_tasks()
 
     def __load_characters(self):
@@ -45,12 +42,12 @@ class GameManager:
                     CharacterData.from_dict(char_data)
                 )
 
-    def __load_items(self):
+    async def __load_items(self):
         page = 1
-        max_pages = 5  # Limit to prevent infinite loops
+        max_pages = 2
         while page <= max_pages:
-            with httpx.Client() as client:
-                response = client.get(
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
                     f"{ARTIFACTSMMO_URL}/items?page={page}", headers=HEADERS
                 )
                 if response.status_code != 200:
@@ -69,6 +66,8 @@ class GameManager:
                 page += 1
                 max_pages = items_data["pages"]
 
+        print(f"Loaded {len(self.items)} items.")
+
     def __assign_default_tasks(self):
         for char_name, character in self.characters.items():
             if char_name in self.default_tasks:
@@ -78,6 +77,8 @@ class GameManager:
                     f"No default task found for {char_name}, skipping task assignment."
                 )
 
-    def start(self) -> list[Coroutine]:
+    def start(self) -> Sequence[Coroutine]:
 
-        return [char.work() for char in self.characters.values()]
+        tasks = [char.work() for char in self.characters.values()]
+        tasks.append(self.__load_items())
+        return tasks
