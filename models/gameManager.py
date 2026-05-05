@@ -88,3 +88,12 @@ class GameManager:
         tasks = [char.work() for char in self.characters.values()]
         tasks.append(self.__load_items())
         return tasks
+
+    async def get_item_by_code(self, code: str) -> Item:
+        await self.items_loaded
+
+        item = self.items.get(code)
+        if not item:
+            raise ValueError(f"Item with code '{code}' not found.")
+
+        return item
