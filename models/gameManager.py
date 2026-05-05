@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import Sequence
 from typing import Coroutine
 import httpx
@@ -23,9 +24,16 @@ class GameManager:
     def __init__(self):
         self.characters: dict[str, Character] = {}
         self.items: dict[str, Item] = {}
+        self.__items_loaded = False
 
         self.__load_characters()
         self.__assign_default_tasks()
+
+    @property
+    async def items_loaded(self) -> bool:
+        while not self.__items_loaded:
+            _ = asyncio.sleep(1)
+        return self.__items_loaded
 
     def __load_characters(self):
         with httpx.Client() as client:
@@ -66,7 +74,7 @@ class GameManager:
                 page += 1
                 max_pages = items_data["pages"]
 
-        print(f"Loaded {len(self.items)} items.")
+        self.__items_loaded = True
 
     def __assign_default_tasks(self):
         for char_name, character in self.characters.items():
