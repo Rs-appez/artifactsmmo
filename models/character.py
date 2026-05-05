@@ -67,6 +67,8 @@ class Character:
         self.__inventory = data.inventory
         self.__inventory_max_items = data.inventory_max_items
 
+        self.__jobs = data.jobs
+
     async def refresh(self):
         try:
             response = await self.__client.get(
@@ -202,6 +204,9 @@ class Character:
         if self.__work_task is not None:
             self.__interrupted = True
             _ = self.__work_task.cancel()
+
+    def has_job(self, job_name: str, level=1) -> bool:
+        return self.__jobs.get(job_name, 0) >= level
 
     @request_action
     async def move(self, position: tuple[int, int]) -> bool:
