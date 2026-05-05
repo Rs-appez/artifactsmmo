@@ -299,7 +299,7 @@ class Character:
                     break
             result = True if fight["result"] == "win" else False
             print(
-                f"✅ {self.surname} Fought and {'won' if result else 'lost'} against {fight['opponent']}"
+                f"󰓥 {self.surname} Fought and {'won' if result else 'lost'} against {fight['opponent']}"
             )
 
             return result
