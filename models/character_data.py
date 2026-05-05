@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 @dataclass
 class CharacterData:
     name: str
+    surname: str
     location: tuple[int, int]
     layer: Layer
     map: int
@@ -26,6 +27,7 @@ class CharacterData:
 
         return cls(
             name=data["name"],
+            surname=data["name"][3:],
             location=(data["x"], data["y"]),
             layer=Layer(data["layer"]),
             map=data["map_id"],

@@ -5,6 +5,7 @@ from typing import Callable
 
 import httpx
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
+from models.items import Item
 
 from .bank import nearest_bank
 from .enums import Layer
@@ -43,6 +44,7 @@ def need_bank(func):
 class Character:
     def __init__(self, data: CharacterData):
         self.__name = data.name
+        self.__surname = data.surname
         self.__url = f"{ARTIFACTSMMO_URL}/my/{self.name}"
         self.__client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
 
@@ -90,8 +92,22 @@ class Character:
         return self.__name
 
     @property
+    def surname(self):
+        return self.__surname
+
+    @property
     def is_working(self) -> bool:
         return self.__working
+
+    @property
+    def work_on(self) -> str | None:
+        if self.__task is None:
+            return None
+        return self.__task.__name__
+
+    @property
+    def is_interrupted(self) -> bool:
+        return self.__interrupted
 
     @property
     def location(self) -> tuple[int, int]:
@@ -147,6 +163,10 @@ class Character:
     @property
     def inventory(self) -> dict[str, int]:
         return self.__inventory.copy()
+
+    @property
+    def inventory_max_items(self) -> int:
+        return self.__inventory_max_items
 
     @property
     def is_inventory_full(self) -> bool:
@@ -380,6 +400,66 @@ class Character:
             print(f"❌ {e}")
             return False
 
+    @need_bank
+    @request_action
+    async def withdraw_item_from_bank(
+        self, items: list[tuple[str, int]], comeback: bool = False
+    ) -> bool:
+        try:
+            response = await self.__client.post(
+                f"{self.__url}/action/bank/withdraw/item",
+                headers=HEADERS,
+                json=[{"code": item, "quantity": quantity} for item, quantity in items],
+            )
+            data = response.json()
+
+            if "error" in data:
+                print("data : ", data)
+                raise Exception(data["error"]["message"])
+
+            character_data = data["data"]["character"]
+            self.__refresh(CharacterData.from_dict(character_data))
+
+            print(
+                f"✅ Withdrew {', '.join([f'{item["quantity"]}x {item["code"]}' for item in items])} from bank"
+            )
+            return True
+        except Exception as e:
+            print(f"❌ {e}")
+            return False
+
+    @request_action
+    async def craft(self, item: Item, quantity: int) -> bool:
+        if not self.has_job(item.job, item.craft_level):
+            print(
+                f"❌ Cannot craft {item.name}, requires {item.job} level {item.craft_level}"
+            )
+            return False
+        if quantity <= 0:
+            print(f"❌ Cannot craft non-positive quantity of items: {quantity}")
+            return False
+
+        try:
+            response = await self.__client.post(
+                f"{self.__url}/action/crafting",
+                headers=HEADERS,
+                json={"code": item.code, "quantity": quantity},
+            )
+            data = response.json()
+
+            if "error" in data:
+                print("data : ", data)
+                raise Exception(data["error"]["message"])
+
+            character_data = data["data"]["character"]
+            self.__refresh(CharacterData.from_dict(character_data))
+
+            print(f"✅ Crafted {quantity}x {item.name}")
+            return True
+        except Exception as e:
+            print(f"❌ {e}")
+            return False
+
     def __refresh(self, data: CharacterData):
         self.__current_location = data.location
         self.__current_layer = data.layer
@@ -392,3 +472,5 @@ class Character:
         self.__level = data.level
         self.__gold = data.gold
         self.__inventory = data.inventory
+        self.__inventory_max_items = data.inventory_max_items
+        self.__jobs = data.jobs
