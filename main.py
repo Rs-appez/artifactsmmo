@@ -59,13 +59,13 @@ async def main():
     bob.assign_routine(routines.yellow_slime_farm)
 
     alice = Character("rs_alice")
-    alice.assign_routine(routines.ash_farm)
+    alice.assign_routine(routines.spruce_farm)
 
     john = Character("rs_john")
-    john.assign_routine(routines.copper_farm)
+    john.assign_routine(routines.iron_farm)
 
     jane = Character("rs_jane")
-    jane.assign_routine(routines.gudgeon_farm)
+    jane.assign_routine(routines.shrimp_farm)
 
     charlie = Character("rs_charlie")
     charlie.assign_routine(routines.sunflower_farm)
