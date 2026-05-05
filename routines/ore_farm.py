@@ -1,8 +1,10 @@
 from models import Character
+from .gather import gather
 
 
 async def copper_farm(character: Character):
-    if character.is_inventory_full:
-        _ = await character.deposit_all_in_bank()
-    _ = await character.move((2, 0))
-    _ = await character.gather()
+    await gather(character, (2, 0))
+
+
+async def iron_farm(character: Character):
+    await gather(character, (1, 7))

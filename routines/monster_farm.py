@@ -14,5 +14,13 @@ async def chicken_farm(character: Character):
     await __mob_farm(character, (0, 1), 40)
 
 
+async def sheep_farm(character: Character):
+    await __mob_farm(character, (5, 12), 60)
+
+
 async def yellow_slime_farm(character: Character):
     await __mob_farm(character, (4, -1), 85)
+
+
+async def mushroom_farm(character: Character):
+    await __mob_farm(character, (5, 3), 100)

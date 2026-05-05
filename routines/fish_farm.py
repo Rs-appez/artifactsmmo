@@ -1,8 +1,10 @@
 from models import Character
+from .gather import gather
 
 
 async def gudgeon_farm(character: Character):
-    if character.is_inventory_full:
-        _ = await character.deposit_all_in_bank()
-    _ = await character.move((4, 2))
-    _ = await character.gather()
+    await gather(character, (4, 2))
+
+
+async def shrimp_farm(character: Character):
+    await gather(character, (5, 2))
