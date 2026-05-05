@@ -41,7 +41,7 @@ class CharacterData:
             name=data["name"],
             location=(data["x"], data["y"]),
             layer=Layer(data["layer"]),
-            map=data["map"],
+            map=data["map_id"],
             cooldown=datetime.strptime(
                 data["cooldown_expiration"], "%Y-%m-%dT%H:%M:%S.%fZ"
             ).replace(tzinfo=timezone.utc),
