@@ -15,7 +15,7 @@ class GameManager:
 
             characters_data = response.json()["data"]
             for char_data in characters_data:
-                char_name = char_data["surname"]
+                char_name = char_data["name"][3:]
                 self.characters[char_name] = Character(
                     CharacterData.from_dict(char_data)
                 )
