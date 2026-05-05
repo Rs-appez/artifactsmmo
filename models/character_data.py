@@ -22,6 +22,7 @@ class CharacterData:
         inventory_max_items: int,
     ):
         self.name = name
+        self.surname = name[4:]
         self.location = location
         self.layer = layer
         self.map = map
