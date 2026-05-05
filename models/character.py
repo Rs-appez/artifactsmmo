@@ -266,7 +266,7 @@ class Character:
             characters = data["characters"]
             for character in characters:
                 if character["name"] == self.name:
-                    self.__refresh(CharacterData.from_dict(character_data))
+                    self.__refresh(CharacterData.from_dict(character))
                     break
             result = True if fight["result"] == "win" else False
             print(
