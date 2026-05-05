@@ -2,7 +2,7 @@ from .monster_farm import chicken_farm, yellow_slime_farm, sheep_farm, mushroom_
 from .ore_farm import copper_farm, iron_farm
 from .wood_farm import ash_farm, spruce_farm
 from .fish_farm import gudgeon_farm, shrimp_farm
-from .fish_craft import craft_fish
+from .cooking_craft import craft_cooking
 from .alchemy_farm import sunflower_farm
 from .utils import empty_farm
 
@@ -16,7 +16,7 @@ __all__ = [
     "spruce_farm",
     "gudgeon_farm",
     "shrimp_farm",
-    "craft_fish",
+    "craft_cooking",
     "sunflower_farm",
     "yellow_slime_farm",
     "mushroom_farm",
