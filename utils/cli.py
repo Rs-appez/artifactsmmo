@@ -1,8 +1,18 @@
 import asyncio
 import sys
 
-import routines
 from models import Character
+from .cli_action import stop, start, stop_all, go_bank
+
+dict_routines = {
+    "stop": stop,
+    "start": start,
+    "gobank": go_bank,
+}
+
+dict_routines_all = {
+    "stopall": stop_all,
+}
 
 
 async def cli(characters: dict[str, Character]):
@@ -23,43 +33,23 @@ async def cli(characters: dict[str, Character]):
         if not parts:
             continue
         action, *args = parts
-        if action == "stop":
-            if not args:
-                print("Usage: stop <name>")
-                continue
-            name = args[0]
-            if name in characters:
-                characters[name].stop()
-                print(f"⏹ Stopped {name}")
-            else:
-                print(f"❌ Unknown character: {name}")
-        elif action == "start":
-            if not args:
-                print("Usage: start <name>")
-                continue
-            name = args[0]
-            if name in characters:
-                await characters[name].refresh()
-                _ = asyncio.create_task(characters[name].work())
-                print(f"▶️ Started {name}")
-            else:
-                print(f"❌ Unknown character: {name}")
-        elif action == "gobank":
-            if not args:
-                print("Usage: gobank <name>")
-                continue
-            name = args[0]
-            if name in characters:
-                characters[name].do_one_time_task(routines.empty_farm)
-                print(f"🏦 {name} is going to the bank")
-            else:
-                print(f"❌ Unknown character: {name}")
-        elif action == "stopall":
-            for char in characters.values():
-                char.stop()
-            print("⏹ Stopped all characters")
-        elif action == "status":
-            for name, char in characters.items():
-                print(f"{name}: working={char.is_working}")
-        else:
-            print(f"❌ Unknown command: {action}")
+
+        if action in dict_routines_all:
+            dict_routines_all[action](characters.values())
+            continue
+
+        name, *args = args
+        if not name:
+            print("Usage: stop <name>")
+            continue
+
+        character = characters.get(name)
+        if not character:
+            print(f"❌ Unknown character: {name}")
+            continue
+
+        result = dict_routines.get(
+            action, lambda char: print(f"❌ Unknown command: {action}")
+        )(character)
+        if asyncio.iscoroutine(result):
+            await result
