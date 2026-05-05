@@ -1,7 +1,9 @@
+from dataclasses import dataclass
 from .enums import Layer
 from datetime import datetime, timezone
 
 
+@dataclass
 class CharacterData:
     def __init__(
         self,
@@ -34,7 +36,7 @@ class CharacterData:
         self.inventory_max_items = inventory_max_items
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: dict) -> "CharacterData":
         return cls(
             name=data["name"],
             location=(data["x"], data["y"]),
@@ -52,3 +54,6 @@ class CharacterData:
             inventory={item["code"]: item["quantity"] for item in data["inventory"]},
             inventory_max_items=data["inventory_max_items"],
         )
+        # cooldown=datetime.fromisoformat(
+        #     data["cooldown_expiration"].replace("Z", "+00:00")
+        # ),
