@@ -1,14 +1,14 @@
 import asyncio
-from collections import defaultdict, deque
-from datetime import datetime, timezone
+from collections import deque
+from datetime import datetime
 from typing import Callable
 
 import httpx
-import requests
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
 
 from .bank import nearest_bank
 from .enums import Layer
+from .character_data import CharacterData
 
 
 def request_action(func):
@@ -41,8 +41,8 @@ def need_bank(func):
 
 
 class Character:
-    def __init__(self, name: str):
-        self.__name = name
+    def __init__(self, data: CharacterData):
+        self.__name = data.name
         self.__url = f"{ARTIFACTSMMO_URL}/my/{self.name}"
         self.__client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
 
@@ -52,26 +52,24 @@ class Character:
         self.__interrupted: bool = False
         self.__priority_task: deque[Callable] = deque()
 
-        self.__current_location: tuple[int, int] = (0, 0)
-        self.__current_layer: Layer = Layer.INTERIOR
-        self.__current_map_id: int = 0
+        self.__current_location = data.location
+        self.__current_layer = data.layer
+        self.__current_map_id = data.map
 
-        self.__cooldown: datetime | None = None
+        self.__cooldown = data.cooldown
 
-        self.__hp: int = 0
-        self.__max_hp: int = 0
-        self.__level: int = 0
-        self.__xp: int = 0
-        self.__max_xp: int = 0
-        self.__gold: int = 0
-        self.__inventory: defaultdict[str, int] = defaultdict(int)
-        self.__inventory_max_items: int = 0
+        self.__hp = data.hp
+        self.__max_hp = data.max_hp
+        self.__level = data.level
+        self.__xp = data.xp
+        self.__max_xp = data.max_xp
+        self.__gold = data.gold
+        self.__inventory = data.inventory
+        self.__inventory_max_items = data.inventory_max_items
 
-        self.refresh()
-
-    def refresh(self):
+    async def refresh(self):
         try:
-            response = requests.get(
+            response = await self.__client.get(
                 f"{ARTIFACTSMMO_URL}/characters/{self.name}", headers=HEADERS
             )
             data = response.json()
@@ -79,7 +77,7 @@ class Character:
                 print("data : ", data)
                 raise Exception(data["error"]["message"])
             character_data = data["data"]
-            self.__refresh(character_data)
+            self.__refresh(CharacterData.from_dict(character_data))
 
         except Exception as e:
             print(f"❌ {e}")
@@ -224,7 +222,7 @@ class Character:
 
             destination = data["data"]["destination"]
             character_data = data["data"]["character"]
-            self.__refresh(character_data)
+            self.__refresh(CharacterData.from_dict(character_data))
 
             print(
                 f"🏃{self.name} Moved to ({destination['x']}, {destination['y']}) on {destination['name']}"
@@ -248,7 +246,7 @@ class Character:
                 raise Exception(data["error"]["message"])
 
             character_data = data["data"]["character"]
-            self.__refresh(character_data)
+            self.__refresh(CharacterData.from_dict(character_data))
 
             return True
         except Exception as e:
@@ -268,7 +266,7 @@ class Character:
             characters = data["characters"]
             for character in characters:
                 if character["name"] == self.name:
-                    self.__refresh(character)
+                    self.__refresh(CharacterData.from_dict(character_data))
                     break
             result = True if fight["result"] == "win" else False
             print(
@@ -294,7 +292,7 @@ class Character:
                 raise Exception(data["error"]["message"])
 
             character_data = data["data"]["character"]
-            self.__refresh(character_data)
+            self.__refresh(CharacterData.from_dict(character_data))
 
             print(f"✅ Rested and recovered HP to {self.hp}/{self.max_hp}")
             return True
@@ -340,7 +338,7 @@ class Character:
                 raise Exception(data["error"]["message"])
 
             character_data = data["data"]["character"]
-            self.__refresh(character_data)
+            self.__refresh(CharacterData.from_dict(character_data))
 
             print(f"✅ Deposited {quantity} gold in bank")
             return True
@@ -366,7 +364,7 @@ class Character:
                 raise Exception(data["error"]["message"])
 
             character_data = data["data"]["character"]
-            self.__refresh(character_data)
+            self.__refresh(CharacterData.from_dict(character_data))
 
             print(
                 f"✅ Deposited {', '.join([f'{item["quantity"]}x {item["code"]}' for item in items])} in bank"
@@ -376,24 +374,15 @@ class Character:
             print(f"❌ {e}")
             return False
 
-    def __setup_cooldown(self, cooldown: str):
-        self.__cooldown = datetime.strptime(cooldown, "%Y-%m-%dT%H:%M:%S.%fZ").replace(
-            tzinfo=timezone.utc
-        )
-
-    def __refresh(self, data: dict):
-        self.__current_location = (data["x"], data["y"])
-        self.__current_layer = Layer(data["layer"])
-        self.__current_map_id = data["map_id"]
-        self.__level = data["level"]
-        self.__hp = data["hp"]
-        self.__max_hp = data["max_hp"]
-        self.__xp = data["xp"]
-        self.__max_xp = data["max_xp"]
-        self.__gold = data["gold"]
-        self.__inventory = defaultdict(
-            int,
-            {item["code"]: item["quantity"] for item in data["inventory"]},
-        )
-        self.__inventory_max_items = data["inventory_max_items"]
-        self.__setup_cooldown(data["cooldown_expiration"])
+    def __refresh(self, data: CharacterData):
+        self.__current_location = data.location
+        self.__current_layer = data.layer
+        self.__current_map_id = data.map
+        self.__cooldown = data.cooldown
+        self.__hp = data.hp
+        self.__max_hp = data.max_hp
+        self.__xp = data.xp
+        self.__max_xp = data.max_xp
+        self.__level = data.level
+        self.__gold = data.gold
+        self.__inventory = data.inventory
