@@ -54,7 +54,9 @@ class GameManager:
         while page <= max_pages:
             async with httpx.AsyncClient() as client:
                 response = await client.get(
-                    f"{ARTIFACTSMMO_URL}/items?page={page}", headers=HEADERS
+                    f"{ARTIFACTSMMO_URL}/items",
+                    headers=HEADERS,
+                    params={"size": 500, "page": page},
                 )
                 if response.status_code != 200:
                     raise Exception(
