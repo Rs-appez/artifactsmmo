@@ -421,7 +421,7 @@ class Character:
             self.__refresh(CharacterData.from_dict(character_data))
 
             print(
-                f"✅ Withdrew {', '.join([f'{item["quantity"]}x {item["code"]}' for item in items])} from bank"
+                f"✅ {self.surname} Withdrew {', '.join([f'{item[0]}x {item[0]}' for item in items])} from bank"
             )
             return True
         except Exception as e:
