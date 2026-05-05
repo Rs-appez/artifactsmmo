@@ -17,6 +17,10 @@ class CharacterManager:
 
     def __init__(self):
         self.characters: dict[str, Character] = {}
+        self.__log_characters()
+        self.__assign_default_tasks()
+
+    def __log_characters(self):
         with httpx.Client() as client:
             response = client.get(f"{ARTIFACTSMMO_URL}/my/characters", headers=HEADERS)
             if response.status_code != 200:
@@ -30,7 +34,6 @@ class CharacterManager:
                 self.characters[char_name] = Character(
                     CharacterData.from_dict(char_data)
                 )
-        self.__assign_default_tasks()
 
     def __assign_default_tasks(self):
         for char_name, character in self.characters.items():
