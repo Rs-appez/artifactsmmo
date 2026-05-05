@@ -1,7 +1,7 @@
 import asyncio
 import sys
 
-from models import Character, GameManager
+from models import GameManager
 from utils import cli_action
 
 dict_routines = {
@@ -20,7 +20,8 @@ dict_routines_all = {
 }
 
 
-async def cli(characters: dict[str, Character], game_manager: GameManager):
+async def cli(game_manager: GameManager):
+    characters = game_manager.characters
     loop = asyncio.get_event_loop()
     queue: asyncio.Queue[str] = asyncio.Queue()
 

@@ -9,14 +9,13 @@ from utils.cli import cli
 
 async def main():
     manager = GameManager()
-    characters = manager.characters
 
     loop = asyncio.get_event_loop()
 
     character_tasks = manager.start()
     tasks = asyncio.gather(
         *character_tasks,
-        cli(characters, manager),
+        cli(manager),
     )
 
     def shutdown():
