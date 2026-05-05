@@ -11,15 +11,11 @@ async def main():
     manager = CharacterManager()
     characters = manager.characters
 
-    for char_name, character in characters.items():
-        if char_name in manager.default_tasks:
-            character.assign_routine(manager.default_tasks[char_name])
-        else:
-            print(f"No default task found for {char_name}, skipping task assignment.")
-
     loop = asyncio.get_event_loop()
+
+    character_tasks = manager.start()
     tasks = asyncio.gather(
-        *[char.work() for char in characters.values()],
+        *character_tasks,
         cli(characters),
     )
 

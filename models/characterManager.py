@@ -1,3 +1,4 @@
+from typing import Coroutine
 import httpx
 
 import routines
@@ -29,3 +30,17 @@ class CharacterManager:
                 self.characters[char_name] = Character(
                     CharacterData.from_dict(char_data)
                 )
+        self.__assign_default_tasks()
+
+    def __assign_default_tasks(self):
+        for char_name, character in self.characters.items():
+            if char_name in self.default_tasks:
+                character.assign_routine(self.default_tasks[char_name])
+            else:
+                print(
+                    f"No default task found for {char_name}, skipping task assignment."
+                )
+
+    def start(self) -> list[Coroutine]:
+
+        return [char.work() for char in self.characters.values()]
