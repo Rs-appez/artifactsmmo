@@ -1,22 +1,26 @@
 import asyncio
 import sys
 
-from models import Character
-from .cli_action import stop, start, stop_all, go_bank, status
+from models import Character, GameManager
+from utils import cli_action
 
 dict_routines = {
-    "stop": stop,
-    "start": start,
-    "gobank": go_bank,
+    "stop": cli_action.stop,
+    "start": cli_action.start,
+    "gobank": cli_action.go_bank,
+}
+
+dict_actions = {
+    "craft": cli_action.craft,
 }
 
 dict_routines_all = {
-    "stopall": stop_all,
-    "status": status,
+    "stopall": cli_action.stop_all,
+    "status": cli_action.status,
 }
 
 
-async def cli(characters: dict[str, Character]):
+async def cli(characters: dict[str, Character], game_manager: GameManager):
     loop = asyncio.get_event_loop()
     queue: asyncio.Queue[str] = asyncio.Queue()
 
@@ -36,7 +40,7 @@ async def cli(characters: dict[str, Character]):
         action, *args = parts
 
         if action in dict_routines_all:
-            dict_routines_all[action](characters.values())
+            dict_routines_all[action](list(characters.values()))
             continue
         if len(args) < 1:
             print(f"Usage: {action} <name>")
@@ -52,8 +56,26 @@ async def cli(characters: dict[str, Character]):
             print(f"❌ Unknown character: {name}")
             continue
 
-        result = dict_routines.get(
-            action, lambda char: print(f"❌ Unknown command: {action}")
-        )(character)
-        if asyncio.iscoroutine(result):
-            await result
+        if len(rests) > 0:
+            item, *quantity = rests
+            if not quantity:
+                quantity = 1
+            else:
+                quantity = int(quantity[0])
+
+            try:
+                itemObject = await game_manager.get_item_by_code(item)
+            except Exception as e:
+                print(f"❌ {e}")
+                continue
+
+            dict_actions.get(
+                action, lambda char, it, qty: print(f"❌ Unknown command: {action}")
+            )(character, itemObject, quantity)
+
+        else:
+            result = dict_routines.get(
+                action, lambda char: print(f"❌ Unknown command: {action}")
+            )(character)
+            if asyncio.iscoroutine(result):
+                await result

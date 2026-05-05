@@ -16,7 +16,7 @@ async def main():
     character_tasks = manager.start()
     tasks = asyncio.gather(
         *character_tasks,
-        cli(characters),
+        cli(characters, manager),
     )
 
     def shutdown():
