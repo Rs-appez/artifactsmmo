@@ -134,7 +134,7 @@ class Character:
             remaining = self.cooldown
             if remaining <= 0:
                 break
-            await asyncio.sleep(min(3.0, remaining))
+            await asyncio.sleep(min(3.0, self.cooldown))
 
     @property
     def hp(self) -> int:
