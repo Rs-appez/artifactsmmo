@@ -206,12 +206,15 @@ class Character:
     def do_one_time_task(self, task: Callable):
         self.__queue_priority_task(task)
         if not self.is_working:
-            self.__working = True
-            self.refresh()
-            while self.__priority_task:
-                priority = self.__priority_task.popleft()
-                _ = asyncio.create_task(priority(self))
-            self.__working = False
+            _ = asyncio.create_task(self.__do_priority_task())
+
+    async def __do_priority_task(self):
+        self.__working = True
+        await self.refresh()
+        while self.__priority_task:
+            priority = self.__priority_task.popleft()
+            await priority(self)
+        self.__working = False
 
     def stop(self):
         self.__working = False
