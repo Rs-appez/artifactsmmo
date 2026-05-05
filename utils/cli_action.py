@@ -24,7 +24,7 @@ def craft(character: Character, item: Item, quantity: int = 1):
     character.do_one_time_task(
         lambda character: routines.craft_cooking(character, item, quantity)
     )
-    print(f"⚒️ {character.surname} is crafting")
+    print(f"⚒️ {character.surname} will craft {quantity}x {item.name}")
 
 
 def stop_all(characters: list[Character]):

@@ -296,7 +296,7 @@ class Character:
                     break
             result = True if fight["result"] == "win" else False
             print(
-                f"✅ Fought and {'won' if result else 'lost'} against {fight['opponent']}"
+                f"✅ {self.surname} Fought and {'won' if result else 'lost'} against {fight['opponent']}"
             )
 
             return result
@@ -454,7 +454,7 @@ class Character:
             character_data = data["data"]["character"]
             self.__refresh(CharacterData.from_dict(character_data))
 
-            print(f"✅ Crafted {quantity}x {item.name}")
+            print(f"✅ {self.surname} Crafted {quantity}x {item.name}")
             return True
         except Exception as e:
             print(f"❌ {e}")
