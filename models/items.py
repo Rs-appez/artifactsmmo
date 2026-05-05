@@ -19,6 +19,14 @@ class Item:
 
     @classmethod
     def from_dict(cls, data):
+        craft_data = data.get("craft")
+        if craft_data is None:
+            craft_data: dict = {
+                "skill": "",
+                "level": 0,
+                "items": [],
+                "quantity": 0,
+            }
         return cls(
             name=data["name"],
             code=data["code"],
@@ -28,9 +36,9 @@ class Item:
             description=data["description"],
             conditions=data.get("conditions", []),
             effects=data.get("effects", []),
-            job=data["craft"]["skill"],
-            craft_level=data["craft"]["level"],
-            craft_ingredients=data["craft"]["items"],
-            craft_quantity=data["craft"]["quantity"],
+            job=craft_data.get("skill", ""),
+            craft_level=craft_data.get("level", 0),
+            craft_ingredients=craft_data.get("items", []),
+            craft_quantity=craft_data.get("quantity", 0),
             tradeable=data["tradeable"] == "true",
         )
