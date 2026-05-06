@@ -10,11 +10,11 @@ from models import Character, CharacterData, Item
 
 class GameManager:
     default_tasks = {
-        "bob": routines.ash_farm,
-        "alice": routines.chicken_farm,
-        "john": routines.chicken_farm,
-        "jane": routines.chicken_farm,
-        "charlie": routines.yellow_slime_farm,
+        "bob": routines.red_slime_farm,
+        "alice": routines.blue_slime_farm,
+        "john": routines.red_slime_farm,
+        "jane": routines.yellow_slime_farm,
+        "charlie": routines.copper_farm,
     }
 
     jobs = {
