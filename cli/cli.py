@@ -1,7 +1,8 @@
 import asyncio
 
+from fuzzywuzzy import process  # pyright: ignore[reportMissingTypeStubs]
 from prompt_toolkit import PromptSession
-from prompt_toolkit.completion import NestedCompleter
+from prompt_toolkit.completion import NestedCompleter, FuzzyCompleter
 from prompt_toolkit.patch_stdout import patch_stdout
 
 from models import GameManager
@@ -23,6 +24,18 @@ dict_routines_all = {
 }
 
 
+async def fuzzy_find_item(item_code: str, threshold: int = 80):
+    """Fuzzy search for item by code. Returns best match or raises Exception."""
+    if item_code in GameManager.items:
+        return await GameManager.get_item_by_code(item_code)
+
+    matches = process.extract(item_code, GameManager.items.keys(), limit=1)
+    if matches and matches[0][1] >= threshold:
+        return await GameManager.get_item_by_code(matches[0][0])
+
+    raise Exception(f"Item '{item_code}' not found (no close matches)")
+
+
 async def cli(game_manager: GameManager):
     characters = game_manager.characters
     character_names = {name: None for name in characters.keys()}
@@ -34,7 +47,7 @@ async def cli(game_manager: GameManager):
         **{cmd: None for cmd in dict_routines_all},
     }
 
-    completer = NestedCompleter.from_nested_dict(completer_dict)
+    completer = FuzzyCompleter(NestedCompleter.from_nested_dict(completer_dict))
     session: PromptSession = PromptSession("> ", completer=completer)
 
     # Load items in background
@@ -48,7 +61,9 @@ async def cli(game_manager: GameManager):
             for cmd in dict_actions
         }
         completer_dict.update(updated_actions)
-        session.completer = NestedCompleter.from_nested_dict(completer_dict)
+        session.completer = FuzzyCompleter(
+            NestedCompleter.from_nested_dict(completer_dict)
+        )
 
     _ = asyncio.create_task(load_items())
 
@@ -89,7 +104,7 @@ async def cli(game_manager: GameManager):
                     quantity = int(quantity[0])
 
                 try:
-                    itemObject = await GameManager.get_item_by_code(item)
+                    itemObject = await fuzzy_find_item(item)
                 except Exception as e:
                     print(f"❌ {e}")
                     continue
