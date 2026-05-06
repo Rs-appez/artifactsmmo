@@ -16,7 +16,6 @@ class BankMixin(Protocol):
         all_items: list[dict[str, int | str]] = [
             {"code": str(code), "quantity": int(quantity)}
             for code, quantity in self.inventory.items()
-            if code
         ]
 
         if all_items:

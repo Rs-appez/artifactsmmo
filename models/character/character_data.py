@@ -40,7 +40,11 @@ class CharacterData:
             max_xp=data["max_xp"],
             level=data["level"],
             gold=data["gold"],
-            inventory={item["code"]: item["quantity"] for item in data["inventory"]},
+            inventory={
+                item["code"]: item["quantity"]
+                for item in data["inventory"]
+                if item["code"]
+            },
             inventory_max_items=data["inventory_max_items"],
             jobs=jobs,
         )
