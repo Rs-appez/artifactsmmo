@@ -22,7 +22,7 @@ def go_bank(character: Character):
 
 def craft(character: Character, item: Item, quantity: int = 1):
     character.do_one_time_task(
-        lambda character: routines.craft_cooking(character, item, quantity)
+        lambda character: routines.craft(character, item, quantity)
     )
     print(f"⚒️ {character.surname} will craft {quantity}x {item.name}")
 

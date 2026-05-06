@@ -2,7 +2,7 @@ import asyncio
 import sys
 
 from models import GameManager
-import cli_action
+from . import cli_action
 
 dict_routines = {
     "stop": cli_action.stop,
@@ -65,7 +65,7 @@ async def cli(game_manager: GameManager):
                 quantity = int(quantity[0])
 
             try:
-                itemObject = await game_manager.get_item_by_code(item)
+                itemObject = await GameManager.get_item_by_code(item)
             except Exception as e:
                 print(f"❌ {e}")
                 continue
