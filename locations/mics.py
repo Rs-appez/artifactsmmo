@@ -1,1 +1,1 @@
-bank_locations = [(4, 1), (7, 13)]
+bank_locations = [(4, 1), (7, 13), (-2, 19)]
