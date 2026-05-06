@@ -1,4 +1,4 @@
-workshop_location = {
+workshop_locations = {
     "woodcutting": [(-2, -3)],
     "mining": [(1, 5)],
     "cooking": [(1, 1)],
