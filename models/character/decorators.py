@@ -1,7 +1,7 @@
 from collections.abc import Awaitable, Callable
-from typing import ParamSpec, Protocol
+from typing import ParamSpec
 
-from models.bank import nearest_bank
+from utils.find_nearest import find_nearest_bank
 from models.character import CharacterData
 
 
@@ -15,7 +15,7 @@ def request_action(func):
 
 def need_bank(func):
     async def wrapper(self, *args, **kwargs):
-        bank_location = nearest_bank(self.layer, self.location)
+        bank_location = find_nearest_bank(self.location)
         current_location = self.location
         if current_location != bank_location and not await self.move(bank_location):
             print("❌ Failed to move to bank")
