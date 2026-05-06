@@ -21,19 +21,19 @@ class GameManager:
         "fishing": "jane",
     }
 
+    items: dict[str, Item] = {}
+    __items_loaded = False
+
     def __init__(self):
         self.characters: dict[str, Character] = {}
-        self.items: dict[str, Item] = {}
-        self.__items_loaded = False
 
         self.__load_characters()
         self.__assign_default_tasks()
 
-    @property
-    async def items_loaded(self) -> bool:
-        while not self.__items_loaded:
+    @classmethod
+    async def wait_item(cls) -> None:
+        while not cls.__items_loaded:
             _ = await asyncio.sleep(1)
-        return self.__items_loaded
 
     def __load_characters(self):
         with httpx.Client() as client:
@@ -88,13 +88,15 @@ class GameManager:
     def start(self) -> Sequence[Coroutine]:
 
         tasks = [char.work() for char in self.characters.values()]
-        tasks.append(self.__load_items())
+        if not self.__items_loaded:
+            tasks.append(self.__load_items())
         return tasks
 
-    async def get_item_by_code(self, code: str) -> Item:
-        await self.items_loaded
+    @staticmethod
+    async def get_item_by_code(code: str) -> Item:
+        await GameManager.wait_item()
 
-        item = self.items.get(code)
+        item = GameManager.items.get(code)
         if not item:
             raise ValueError(f"Item with code '{code}' not found.")
 
