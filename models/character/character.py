@@ -9,9 +9,9 @@ import httpx
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
 from models.items import Item
 
-from .bank import nearest_bank
+from models.bank import nearest_bank
 from .character_data import CharacterData
-from .enums import Layer
+from models.enums import Layer
 
 
 def request_action(func):

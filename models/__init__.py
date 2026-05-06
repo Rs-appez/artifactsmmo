@@ -1,5 +1,4 @@
-from .character import Character
-from .character_data import CharacterData
+from .character import Character, CharacterData
 from .items import Item
 from .gameManager import GameManager
 

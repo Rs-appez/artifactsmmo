@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from .enums import Layer
+from models.enums import Layer
 from datetime import datetime, timezone
 
 
