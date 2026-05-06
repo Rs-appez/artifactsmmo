@@ -69,12 +69,12 @@ class GameManager:
 
                 for item_data in items_data["data"]:
                     item = Item.from_dict(item_data)
-                    self.items[item.code] = item
+                    GameManager.items[item.code] = item
 
                 page += 1
                 max_pages = items_data["pages"]
 
-        self.__items_loaded = True
+        GameManager.__items_loaded = True
 
     def __assign_default_tasks(self):
         for char_name, character in self.characters.items():
@@ -88,7 +88,7 @@ class GameManager:
     def start(self) -> Sequence[Coroutine]:
 
         tasks = [char.work() for char in self.characters.values()]
-        if not self.__items_loaded:
+        if not GameManager.__items_loaded:
             tasks.append(self.__load_items())
         return tasks
 
