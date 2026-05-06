@@ -1,5 +1,8 @@
 import asyncio
-import sys
+
+from prompt_toolkit import PromptSession
+from prompt_toolkit.completion import NestedCompleter
+from prompt_toolkit.patch_stdout import patch_stdout
 
 from models import GameManager
 from . import cli_action
@@ -22,61 +25,70 @@ dict_routines_all = {
 
 async def cli(game_manager: GameManager):
     characters = game_manager.characters
-    loop = asyncio.get_event_loop()
-    queue: asyncio.Queue[str] = asyncio.Queue()
+    character_names = {name: None for name in characters.keys()}
 
-    def on_stdin():
-        line = sys.stdin.readline()
-        if line:
-            queue.put_nowait(line)
-        else:
-            _ = loop.remove_reader(sys.stdin.fileno())
+    completer = NestedCompleter.from_nested_dict(
+        {
+            **{cmd: character_names for cmd in dict_routines},
+            **{
+                cmd: {name: {"<item_code>": None} for name in characters.keys()}
+                for cmd in dict_actions
+            },
+            **{cmd: None for cmd in dict_routines_all},
+        }
+    )
 
-    loop.add_reader(sys.stdin.fileno(), on_stdin)
-    while True:
-        command = await queue.get()
-        parts = command.strip().lower().split()
-        if not parts:
-            continue
-        action, *args = parts
+    session: PromptSession = PromptSession("> ", completer=completer)
 
-        if action in dict_routines_all:
-            dict_routines_all[action](list(characters.values()))
-            continue
-        if len(args) < 1:
-            print(f"Usage: {action} <name>")
-            continue
-
-        name, *rests = args
-        if not name:
-            print("Usage: stop <name>")
-            continue
-
-        character = characters.get(name)
-        if not character:
-            print(f"❌ Unknown character: {name}")
-            continue
-
-        if len(rests) > 0:
-            item, *quantity = rests
-            if not quantity:
-                quantity = 1
-            else:
-                quantity = int(quantity[0])
-
+    with patch_stdout():
+        while True:
             try:
-                itemObject = await GameManager.get_item_by_code(item)
-            except Exception as e:
-                print(f"❌ {e}")
+                command = await session.prompt_async()
+            except EOFError, KeyboardInterrupt:
+                break
+
+            parts = command.strip().lower().split()
+            if not parts:
+                continue
+            action, *args = parts
+
+            if action in dict_routines_all:
+                dict_routines_all[action](list(characters.values()))
+                continue
+            if len(args) < 1:
+                print(f"Usage: {action} <name>")
                 continue
 
-            dict_actions.get(
-                action, lambda char, it, qty: print(f"❌ Unknown command: {action}")
-            )(character, itemObject, quantity)
+            name, *rests = args
+            if not name:
+                print("Usage: stop <name>")
+                continue
 
-        else:
-            result = dict_routines.get(
-                action, lambda char: print(f"❌ Unknown command: {action}")
-            )(character)
-            if asyncio.iscoroutine(result):
-                await result
+            character = characters.get(name)
+            if not character:
+                print(f"❌ Unknown character: {name}")
+                continue
+
+            if len(rests) > 0:
+                item, *quantity = rests
+                if not quantity:
+                    quantity = 1
+                else:
+                    quantity = int(quantity[0])
+
+                try:
+                    itemObject = await GameManager.get_item_by_code(item)
+                except Exception as e:
+                    print(f"❌ {e}")
+                    continue
+
+                dict_actions.get(
+                    action, lambda char, it, qty: print(f"❌ Unknown command: {action}")
+                )(character, itemObject, quantity)
+
+            else:
+                result = dict_routines.get(
+                    action, lambda char: print(f"❌ Unknown command: {action}")
+                )(character)
+                if asyncio.iscoroutine(result):
+                    await result

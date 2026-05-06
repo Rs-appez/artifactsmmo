@@ -11,6 +11,9 @@ dependencies = [
 ]
 
 [dependency-groups]
+cli = [
+    "prompt-toolkit>=3.0.52",
+]
 dev = [
     "python-decouple-stubs>=3.8.0.4",
 ]
