@@ -12,16 +12,20 @@ class BankMixin(Protocol):
             if not await self.deposit_gold_in_bank(self.gold, comeback=comeback):
                 print("❌ Failed to deposit gold in bank")
                 return
-        if not await self.deposit_item_in_bank(
-            [  # pyright: ignore[reportArgumentType]
-                {"code": code, "quantity": quantity}
-                for code, quantity in self.inventory.items()
-                if code
-            ],
-            comeback=comeback,
-        ):
-            print("❌ Failed to deposit items in bank")
-            return
+
+        all_items: list[dict[str, int | str]] = [
+            {"code": str(code), "quantity": int(quantity)}
+            for code, quantity in self.inventory.items()
+            if code
+        ]
+
+        if all_items:
+            if not await self.deposit_item_in_bank(
+                comeback=comeback,
+                items=all_items,
+            ):
+                print("❌ Failed to deposit items in bank")
+                return
 
     @need_bank
     @request_action
@@ -59,7 +63,7 @@ class BankMixin(Protocol):
     @request_action
     @refresh_after
     async def deposit_item_in_bank(
-        self: "Character", items: list[dict[str, int]], comeback: bool = True
+        self: "Character", items: list[dict[str, int | str]], comeback: bool = True
     ) -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
