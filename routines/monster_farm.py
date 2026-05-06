@@ -22,5 +22,13 @@ async def yellow_slime_farm(character: Character):
     await __mob_farm(character, (4, -1), 85)
 
 
+async def blue_slime_farm(character: Character):
+    await __mob_farm(character, (2, -1), 100)
+
+
+async def red_slime_farm(character: Character):
+    await __mob_farm(character, (1, -1), 100)
+
+
 async def mushroom_farm(character: Character):
     await __mob_farm(character, (5, 3), 100)
