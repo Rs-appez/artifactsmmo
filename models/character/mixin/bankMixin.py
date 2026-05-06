@@ -1,4 +1,4 @@
-from .decorators import need_bank, refresh_after, request_action
+from ..decorators import need_bank, refresh_after, request_action
 from typing import TYPE_CHECKING, Protocol
 from config import HEADERS
 

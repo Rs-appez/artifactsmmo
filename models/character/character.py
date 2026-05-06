@@ -6,14 +6,16 @@ import httpx
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
 from models.enums import Layer
 
-from .bankMixin import BankMixin
 from .character_data import CharacterData
 from .decorators import refresh_after
-from .fightMixin import FightMixin
-from .gatherMixin import GatherMixin
-from .moveMixin import MoveMixin
-from .workMixin import WorkMixin
-from .craftMixin import CraftMixin
+from .mixin import (
+    BankMixin,
+    CraftMixin,
+    FightMixin,
+    GatherMixin,
+    MoveMixin,
+    WorkMixin,
+)
 
 
 class Character(

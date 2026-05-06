@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Protocol
 
 from config import HEADERS
 
-from .decorators import refresh_after, request_action
+from ..decorators import refresh_after, request_action
 
 if TYPE_CHECKING:
     from models.character import Character
