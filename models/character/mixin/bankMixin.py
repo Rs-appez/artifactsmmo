@@ -104,7 +104,7 @@ class BankMixin(Protocol):
             character_data = data["data"]["character"]
 
             print(
-                f"📤 {self.surname} Withdrew {', '.join([f'{item[0]}x {item[0]}' for item in items])} from bank"
+                f"📤 {self.surname} Withdrew {', '.join([f'{item[1]}x {item[0]}' for item in items])} from bank"
             )
             return True, character_data
         except Exception as e:
