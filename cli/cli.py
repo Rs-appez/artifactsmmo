@@ -45,7 +45,7 @@ async def cli(game_manager: GameManager):
             try:
                 command = await session.prompt_async()
             except EOFError, KeyboardInterrupt:
-                break
+                raise asyncio.CancelledError()
 
             parts = command.strip().lower().split()
             if not parts:
