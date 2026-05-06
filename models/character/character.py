@@ -123,7 +123,10 @@ class Character(
 
     @property
     def is_inventory_full(self) -> bool:
-        return sum(self.__inventory.values()) >= self.__inventory_max_items - 5
+        return (
+            sum(self.__inventory.values()) >= self.__inventory_max_items - 5
+            or len(self.__inventory) >= 17
+        )
 
     def get_job_level(self, job_name: str) -> int:
         return self.__jobs.get(job_name, 0)
