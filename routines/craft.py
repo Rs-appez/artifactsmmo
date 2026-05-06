@@ -1,5 +1,6 @@
 from models import Character, Item
 from utils.find_nearest import find_nerest_workshop
+from math import ceil
 
 
 def __get_trips_info(
@@ -13,7 +14,7 @@ def __get_trips_info(
         for ingredient in craft_ingredients
     ]
     nb_ingredients = sum(nb[1] for nb in ingredients)
-    nb_trips = max((nb_ingredients * quantity) // inventory_max_items, 1)
+    nb_trips = ceil((nb_ingredients * quantity) / inventory_max_items)
     nb_craft_per_trip = quantity // nb_trips
 
     ingredients_for_trip = [
