@@ -4,6 +4,6 @@ workshop_locations = {
     "cooking": [(1, 1)],
     "weaponcrafting": [(2, 1)],
     "gearcrafting": [(3, 1)],
-    "jewelcrafting": [(1, 3)],
+    "jewelrycrafting": [(1, 3)],
     "alchemy": [(2, 3)],
 }
