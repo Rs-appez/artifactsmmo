@@ -13,7 +13,7 @@ class GameManager:
         "bob": routines.copper_farm,
         "alice": routines.spruce_farm,
         "john": routines.iron_farm,
-        "jane": routines.shrimp_farm,
+        "jane": routines.chicken_farm,
         "charlie": routines.yellow_slime_farm,
     }
 
