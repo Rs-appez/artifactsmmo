@@ -2,7 +2,6 @@ import asyncio
 
 from models import Character, Item
 import routines
-from utils import find_craft_routine
 
 
 def stop(character: Character):
@@ -22,12 +21,10 @@ def go_bank(character: Character):
 
 
 def craft(character: Character, item: Item, quantity: int = 1):
-    if routine := find_craft_routine(item):
-        character.do_one_time_task(lambda character: routine(character, item, quantity))
-        print(f"⚒️ {character.surname} will craft {quantity}x {item.name}")
-
-    else:
-        print(f"❌ No crafting routine found for {item.name}")
+    character.do_one_time_task(
+        lambda character: routines.craft_cooking(character, item, quantity)
+    )
+    print(f"⚒️ {character.surname} will craft {quantity}x {item.name}")
 
 
 def stop_all(characters: list[Character]):
