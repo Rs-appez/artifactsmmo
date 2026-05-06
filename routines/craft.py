@@ -3,9 +3,15 @@ from utils.find_nearest import find_nerest_workshop
 
 
 def __get_trips_info(
-    ingredients, quantity: int, inventory_max_items: int
+    craft_ingredients: list[dict[str, str | int]],
+    quantity: int,
+    inventory_max_items: int,
 ) -> tuple[int, int, list[tuple[str, int]]]:
 
+    ingredients = [
+        (str(ingredient["code"]), int(ingredient["quantity"]))
+        for ingredient in craft_ingredients
+    ]
     nb_ingredients = sum(nb[1] for nb in ingredients)
     nb_trips = max((nb_ingredients * quantity) // inventory_max_items, 1)
     nb_craft_per_trip = quantity // nb_trips
