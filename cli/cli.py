@@ -2,7 +2,7 @@ import asyncio
 import sys
 
 from models import GameManager
-from utils import cli_action
+import cli_action
 
 dict_routines = {
     "stop": cli_action.stop,

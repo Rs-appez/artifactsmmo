@@ -4,7 +4,7 @@ import signal
 import sys
 
 from models import GameManager
-from utils.cli import cli
+from cli import cli
 
 
 async def main():
