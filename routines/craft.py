@@ -113,14 +113,13 @@ async def craft(character: Character, item: Item, quantity: int):
             item,
             nb_craft_per_trip,
         )
-    else:
-        await __make_trip(
-            character,
-            nearest_workshop,
-            ingredients_for_last_trip,
-            item,
-            nb_craft_last_trip,
-        )
+    await __make_trip(
+        character,
+        nearest_workshop,
+        ingredients_for_last_trip,
+        item,
+        nb_craft_last_trip,
+    )
 
     _ = await character.deposit_all_in_bank(comeback=False)
 
