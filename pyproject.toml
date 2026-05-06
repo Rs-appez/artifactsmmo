@@ -5,15 +5,18 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "httpx>=0.28.1",
-    "python-decouple>=3.8",
-    "requests>=2.33.1",
+  "httpx>=0.28.1",
+  "python-decouple>=3.8",
+  "requests>=2.33.1",
 ]
 
 [dependency-groups]
-cli = [
-    "prompt-toolkit>=3.0.52",
-]
 dev = [
-    "python-decouple-stubs>=3.8.0.4",
+  "python-decouple-stubs>=3.8.0.4",
+  { include-group = "cli" },
+]
+cli = [
+  "fuzzywuzzy>=0.18.0",
+  "prompt-toolkit>=3.0.52",
+  "python-levenshtein>=0.27.3",
 ]
