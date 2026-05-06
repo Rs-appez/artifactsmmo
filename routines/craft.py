@@ -1,5 +1,5 @@
 from models import Character, Item
-from utils.find_nearest import find_nerest_workshop
+from utils.find_nearest import find_nearest_workshop
 from math import ceil
 
 
@@ -81,7 +81,7 @@ async def craft(character: Character, item: Item, quantity: int):
         )
         return
 
-    nearest_workshop = find_nerest_workshop(item.job, character.location)
+    nearest_workshop = find_nearest_workshop(item.job, character.location)
 
     if nearest_workshop is None:
         print(f"❌ No workshop found for job {item.job}")

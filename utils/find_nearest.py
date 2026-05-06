@@ -5,7 +5,9 @@ def __manhattan_distance(pos1: tuple[int, int], pos2: tuple[int, int]) -> int:
     return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
 
 
-def find_nerest_workshop(job: str, location: tuple[int, int]) -> tuple[int, int] | None:
+def find_nearest_workshop(
+    job: str, location: tuple[int, int]
+) -> tuple[int, int] | None:
     if job not in workshop_locations:
         raise ValueError(f"No workshops found for job {job}")
     return min(
