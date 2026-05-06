@@ -27,18 +27,30 @@ async def cli(game_manager: GameManager):
     characters = game_manager.characters
     character_names = {name: None for name in characters.keys()}
 
-    completer = NestedCompleter.from_nested_dict(
-        {
-            **{cmd: character_names for cmd in dict_routines},
-            **{
-                cmd: {name: {"<item_code>": None} for name in characters.keys()}
-                for cmd in dict_actions
-            },
-            **{cmd: None for cmd in dict_routines_all},
-        }
-    )
+    # Initial completer without items
+    completer_dict = {
+        **{cmd: character_names for cmd in dict_routines},
+        **{cmd: {name: {} for name in characters.keys()} for cmd in dict_actions},
+        **{cmd: None for cmd in dict_routines_all},
+    }
 
+    completer = NestedCompleter.from_nested_dict(completer_dict)
     session: PromptSession = PromptSession("> ", completer=completer)
+
+    # Load items in background
+    async def load_items():
+        await GameManager.wait_item()
+        updated_actions = {
+            cmd: {
+                name: {item_code: None for item_code in GameManager.items}
+                for name in characters.keys()
+            }
+            for cmd in dict_actions
+        }
+        completer_dict.update(updated_actions)
+        session.completer = NestedCompleter.from_nested_dict(completer_dict)
+
+    _ = asyncio.create_task(load_items())
 
     with patch_stdout():
         while True:
