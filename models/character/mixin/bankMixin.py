@@ -110,3 +110,32 @@ class BankMixin(Protocol):
         except Exception as e:
             print(f"❌ {e}")
             return False, None
+
+    @need_bank
+    @request_action
+    @refresh_after
+    async def withdraw_gold_from_bank(
+        self: "Character", quantity: int, comeback: bool = False
+    ) -> tuple[bool, dict | None]:
+        if quantity <= 0:
+            print(f"❌ Cannot withdraw non-positive quantity of gold: {quantity}")
+            return False, None
+        try:
+            response = await self.client.post(
+                f"{self.url}/action/bank/withdraw/gold",
+                headers=HEADERS,
+                json={"quantity": quantity},
+            )
+            data = response.json()
+
+            if "error" in data:
+                print("data : ", data)
+                raise Exception(data["error"]["message"])
+
+            character_data = data["data"]["character"]
+
+            print(f"💰 {self.surname} Withdrew {quantity} gold from bank")
+            return True, character_data
+        except Exception as e:
+            print(f"❌ {e}")
+            return False, None
