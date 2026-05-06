@@ -15,11 +15,15 @@ async def chicken_farm(character: Character):
 
 
 async def sheep_farm(character: Character):
-    await __mob_farm(character, (5, 12), 60)
+    await __mob_farm(character, (5, 12), 100)
 
 
 async def yellow_slime_farm(character: Character):
-    await __mob_farm(character, (4, -1), 85)
+    await __mob_farm(character, (4, -1), 70)
+
+
+async def green_slime_farm(character: Character):
+    await __mob_farm(character, (3, -2), 85)
 
 
 async def blue_slime_farm(character: Character):
@@ -27,7 +31,7 @@ async def blue_slime_farm(character: Character):
 
 
 async def red_slime_farm(character: Character):
-    await __mob_farm(character, (1, -1), 100)
+    await __mob_farm(character, (1, -1), 105)
 
 
 async def mushroom_farm(character: Character):

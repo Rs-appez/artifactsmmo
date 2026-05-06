@@ -5,6 +5,7 @@ from .monster_farm import (
     yellow_slime_farm,
     blue_slime_farm,
     red_slime_farm,
+    green_slime_farm,
 )
 from .ore_farm import copper_farm, iron_farm
 from .wood_farm import ash_farm, spruce_farm
@@ -26,6 +27,7 @@ __all__ = [
     "craft",
     "sunflower_farm",
     "yellow_slime_farm",
+    "green_slime_farm",
     "blue_slime_farm",
     "red_slime_farm",
     "mushroom_farm",
