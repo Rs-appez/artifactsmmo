@@ -125,6 +125,9 @@ class Character(
     def is_inventory_full(self) -> bool:
         return sum(self.__inventory.values()) >= self.__inventory_max_items - 5
 
+    def get_job_level(self, job_name: str) -> int:
+        return self.__jobs.get(job_name, 0)
+
     def has_job(self: "Character", job_name: str, level=1) -> bool:
         return self.__jobs.get(job_name, 0) >= level
 
