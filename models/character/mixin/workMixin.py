@@ -87,9 +87,8 @@ class WorkMixin(Protocol):
         if self._previous_routine is None:
             print("❌ No previous routine to resume")
             return
-        if await self.refresh():
-            self._routine = self._previous_routine
-            self._interrupt_routine()
+        self._routine = self._previous_routine
+        self._interrupt_routine()
 
     def _interrupt_routine(self: "Character"):
         if self._work_task is not None:
