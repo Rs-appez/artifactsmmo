@@ -32,6 +32,4 @@ def stop_all(characters: list[Character]):
 
 def status(characters: list[Character]):
     for char in characters:
-        print(
-            f"{char.surname}: working={char.is_working} - task={char.work_on} - interrupted={char.is_interrupted} - position={char.location}"
-        )
+        print(char)

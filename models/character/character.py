@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+from typing import override
 
 import httpx
 
@@ -167,3 +168,7 @@ class Character(
         self.__inventory = data.inventory
         self.__inventory_max_items = data.inventory_max_items
         self.__jobs = data.jobs
+
+    @override
+    def __str__(self):
+        return f"{self.surname:6}: working={self.is_working} - task={self.work_on:20} - position={self.location}"
