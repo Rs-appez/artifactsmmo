@@ -87,7 +87,7 @@ class GameManager:
 
     def start(self) -> Sequence[Coroutine]:
 
-        tasks = [char.work() for char in self.characters.values()]
+        tasks = [char.start() for char in self.characters.values()]
         if not GameManager.__items_loaded:
             tasks.append(self.__load_items())
         return tasks

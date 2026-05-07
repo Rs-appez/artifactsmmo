@@ -10,8 +10,7 @@ def stop(character: Character):
 
 
 async def start(character: Character):
-    await character.refresh()
-    _ = asyncio.create_task(character.work())
+    await character.resume()
     print(f"▶️ Started {character.surname}")
 
 
