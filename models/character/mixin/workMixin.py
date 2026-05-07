@@ -21,7 +21,7 @@ class WorkMixin(Protocol):
 
     @property
     def is_working(self) -> bool:
-        return self._routine.__name__ != seeking_the_meaning_of_life.__name__
+        return self.work_on != seeking_the_meaning_of_life.__name__
 
     @property
     def work_on(self) -> str | None:
@@ -38,7 +38,7 @@ class WorkMixin(Protocol):
             print("❌ Character is already started")
             return
         self._work_task = asyncio.current_task()
-        print(f"🚀 {self.name} started working on routine {self._routine.__name__}")
+        print(f"🚀 {self.name} started working on routine {self.work_on}")
         try:
             while True:
                 try:
@@ -66,7 +66,7 @@ class WorkMixin(Protocol):
         self._interrupt_routine()
 
     async def resume(self: "Character"):
-        if self._routine.__name__ != seeking_the_meaning_of_life.__name__:
+        if self.is_working:
             print("❌ Character is already working on a routine")
             return
         if self._previous_routine is None:
