@@ -1,4 +1,4 @@
-from .items import Item
+from .dataclass.items import Item
 from .character import CharacterData, Character
 from .gameManager import GameManager
 
