@@ -18,7 +18,7 @@ class WorkMixin(Protocol):
     _work_task: asyncio.Task | None = None
     _interrupted: bool = False
     _is_on_routine: bool = False
-    _priority_task: deque[Callable] = deque()
+    _priority_tasks: deque[Callable] = deque()
     _check_work_lock: asyncio.Lock = asyncio.Lock()
 
     @property
@@ -45,9 +45,9 @@ class WorkMixin(Protocol):
         try:
             while True:
                 try:
-                    if self._priority_task:
+                    if self._priority_tasks:
                         self._is_on_routine = False
-                        priority = self._priority_task.popleft()
+                        priority = self._priority_tasks.popleft()
                         await priority(self)
                     else:
                         self._is_on_routine = True
@@ -62,7 +62,7 @@ class WorkMixin(Protocol):
             self._work_task = None
 
     def do_one_time_task(self: "Character", task: Callable):
-        self._priority_task.append(task)
+        self._priority_tasks.append(task)
         if self._is_on_routine:
             self._interrupt_routine()
 
@@ -76,7 +76,7 @@ class WorkMixin(Protocol):
             print("❌ Character is already working on a routine")
             return
         if not self._is_on_routine:
-            self._priority_task.clear()
+            self._priority_tasks.clear()
             self._interrupt_routine()
             return
 
