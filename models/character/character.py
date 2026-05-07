@@ -49,6 +49,8 @@ class Character(
 
         self.__jobs = data.jobs
 
+        self.__init_work_mixin__()
+
     @property
     def name(self):
         return self.__name

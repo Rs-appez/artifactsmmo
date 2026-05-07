@@ -18,8 +18,12 @@ class WorkMixin(Protocol):
     _work_task: asyncio.Task | None = None
     _interrupted: bool = False
     _is_on_routine: bool = False
-    _priority_tasks: deque[Callable] = deque()
-    _check_work_lock: asyncio.Lock = asyncio.Lock()
+    _priority_tasks: deque[Callable]
+    _character_lock: asyncio.Lock
+
+    def __init_work_mixin__(self: "Character"):
+        self._priority_tasks = deque()
+        self._character_lock = asyncio.Lock()
 
     @property
     def is_working(self) -> bool:
@@ -36,7 +40,7 @@ class WorkMixin(Protocol):
         return self._interrupted
 
     async def start(self: "Character"):
-        async with self._check_work_lock:
+        async with self._character_lock:
             if self._work_task is not None:
                 print("❌ Character is already started")
                 return
