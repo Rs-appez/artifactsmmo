@@ -1,7 +1,5 @@
-import asyncio
-
-from models import Character, Item
 import routines
+from models import Character, Item
 
 
 def stop(character: Character):
