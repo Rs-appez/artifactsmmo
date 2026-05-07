@@ -3,6 +3,7 @@ from collections.abc import Coroutine, Sequence
 
 import httpx
 
+from models.dataclass import Effect
 import routines
 from config import ARTIFACTSMMO_URL, HEADERS
 from models import Character, CharacterData, Item
@@ -24,6 +25,9 @@ class GameManager:
     items: dict[str, Item] = {}
     __items_loaded = False
 
+    effects: dict[str, Effect] = {}
+    __effects_loaded = False
+
     def __init__(self):
         self.characters: dict[str, Character] = {}
 
@@ -33,6 +37,11 @@ class GameManager:
     @classmethod
     async def wait_item(cls) -> None:
         while not cls.__items_loaded:
+            _ = await asyncio.sleep(1)
+
+    @classmethod
+    async def wait_effect(cls) -> None:
+        while not cls.__effects_loaded:
             _ = await asyncio.sleep(1)
 
     def __load_characters(self):
@@ -101,3 +110,13 @@ class GameManager:
             raise ValueError(f"Item with code '{code}' not found.")
 
         return item
+
+    @staticmethod
+    async def get_effect_by_code(code: str) -> Effect:
+        await GameManager.wait_effect()
+
+        effect = GameManager.effects.get(code)
+        if not effect:
+            raise ValueError(f"Effect with code '{code}' not found.")
+
+        return effect
