@@ -1,6 +1,6 @@
 import asyncio
-from collections.abc import Sequence
-from typing import Coroutine
+from collections.abc import Coroutine, Sequence
+
 import httpx
 
 import routines
