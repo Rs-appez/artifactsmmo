@@ -17,15 +17,11 @@ def need_bank(func):
     async def wrapper(self, *args, **kwargs):
         bank_location = find_nearest_bank(self.location)
         current_location = self.location
-        if current_location != bank_location and not await self.move(bank_location):
+        if not await self.move(bank_location):
             print("❌ Failed to move to bank")
             return
         result = await func(self, *args, **kwargs)
-        if (
-            "comeback" in kwargs
-            and kwargs["comeback"]
-            and current_location != bank_location
-        ):
+        if "comeback" in kwargs and kwargs["comeback"]:
             if not await self.move(current_location):
                 print("❌ Failed to move back to original location")
 
