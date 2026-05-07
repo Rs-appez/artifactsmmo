@@ -1,7 +1,7 @@
 from typing import Protocol, TYPE_CHECKING
 
 from config import HEADERS
-from models import Item
+from models.dataclass import Item
 from models.character.decorators import refresh_after, request_action
 
 if TYPE_CHECKING:

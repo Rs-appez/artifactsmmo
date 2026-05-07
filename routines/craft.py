@@ -1,4 +1,5 @@
-from models import Character, Item
+from models import Character
+from models.dataclass import Item
 from utils.find_nearest import find_nearest_workshop
 from math import ceil
 

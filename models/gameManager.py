@@ -3,10 +3,10 @@ from collections.abc import Coroutine, Sequence
 
 import httpx
 
-from models.dataclass import Effect
 import routines
 from config import ARTIFACTSMMO_URL, HEADERS
-from models import Character, CharacterData, Item
+from models import Character, CharacterData
+from models.dataclass import Effect, Item
 
 
 class GameManager:

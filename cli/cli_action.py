@@ -1,5 +1,6 @@
 import routines
-from models import Character, Item
+from models import Character
+from models.dataclass import Item
 
 
 def check_freshness(function):
