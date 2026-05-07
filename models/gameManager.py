@@ -14,7 +14,7 @@ class GameManager:
         "alice": routines.ash_farm,
         "john": routines.copper_farm,
         "jane": routines.copper_farm,
-        "charlie": routines.sheep_farm,
+        "charlie": routines.nettle_farm,
     }
 
     jobs = {
