@@ -7,19 +7,16 @@ import routines
 from config import ARTIFACTSMMO_URL, HEADERS
 from models import Character, CharacterData
 from models.dataclass import Effect, Item, Monster
+from .mixins import JobMixin
 
 
-class GameManager:
+class GameManager(JobMixin):
     default_tasks = {
         "bob": routines.cow_farm,
         "alice": routines.birch_farm,
         "john": routines.coal_farm,
         "jane": routines.trout_farm,
         "charlie": routines.nettle_farm,
-    }
-
-    jobs = {
-        "fishing": "jane",
     }
 
     items: dict[str, Item] = {}
