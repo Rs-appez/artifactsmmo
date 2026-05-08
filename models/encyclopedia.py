@@ -20,8 +20,8 @@ class Encyclopedia:
     async def initialize(cls):
         _ = await asyncio.gather(
             cls.load_items(),
-            # cls.load_effects(),
-            # cls.load_monsters(),
+            cls.load_effects(),
+            cls.load_monsters(),
         )
 
     # ITEMS
@@ -46,10 +46,10 @@ class Encyclopedia:
         if cls.__items_loaded:
             print("Items already loaded, skipping fetch.")
             return
-        page = 1
-        max_pages = 2
-        while page <= max_pages:
-            async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient() as client:
+            page = 1
+            max_pages = 2
+            while page <= max_pages:
                 response = await client.get(
                     f"{ARTIFACTSMMO_URL}/items",
                     headers=HEADERS,
@@ -72,6 +72,7 @@ class Encyclopedia:
                 max_pages = items_data["pages"]
 
         Encyclopedia.__items_loaded = True
+        print(f"Loaded {len(Encyclopedia.items)} items.")
 
     # EFFECTS
 
@@ -90,9 +91,79 @@ class Encyclopedia:
 
         return effect
 
+    @classmethod
+    async def load_effects(cls):
+        if cls.__effects_loaded:
+            print("Effects already loaded, skipping fetch.")
+            return
+
+        async with httpx.AsyncClient() as client:
+            page = 1
+            max_pages = 2
+            while page <= max_pages:
+                response = await client.get(
+                    f"{ARTIFACTSMMO_URL}/effects", headers=HEADERS, params={"size": 100}
+                )
+                if response.status_code != 200:
+                    raise Exception(
+                        f"Failed to fetch effects: {response.status_code} - {response.text}"
+                    )
+
+                effects_data = response.json()
+                for effect_data in effects_data["data"]:
+                    effect = Effect.from_dict(effect_data)
+                    Encyclopedia.effects[effect.code] = effect
+
+                page += 1
+                max_pages = effects_data["pages"]
+
+        Encyclopedia.__effects_loaded = True
+        print(f"Loaded {len(Encyclopedia.effects)} effects.")
+
     # MONSTERS
 
     @classmethod
     async def wait_monster(cls) -> None:
         while not cls.__monsters_loaded:
             _ = await asyncio.sleep(1)
+
+    @staticmethod
+    async def get_monster_by_code(code: str) -> Monster:
+        await Encyclopedia.wait_monster()
+
+        monster = Encyclopedia.monsters.get(code)
+        if not monster:
+            raise ValueError(f"Monster with code '{code}' not found.")
+
+        return monster
+
+    @classmethod
+    async def load_monsters(cls):
+        if cls.__monsters_loaded:
+            print("Monsters already loaded, skipping fetch.")
+            return
+
+        async with httpx.AsyncClient() as client:
+            page = 1
+            max_pages = 2
+            while page <= max_pages:
+                response = await client.get(
+                    f"{ARTIFACTSMMO_URL}/monsters",
+                    headers=HEADERS,
+                    params={"size": 100, "page": page},
+                )
+                if response.status_code != 200:
+                    raise Exception(
+                        f"Failed to fetch monsters: {response.status_code} - {response.text}"
+                    )
+
+                monsters_data = response.json()
+                for monster_data in monsters_data["data"]:
+                    monster = await Monster.from_dict(monster_data)
+                    Encyclopedia.monsters[monster.code] = monster
+
+                page += 1
+                max_pages = monsters_data["pages"]
+
+        Encyclopedia.__monsters_loaded = True
+        print(f"Loaded {len(Encyclopedia.monsters)} monsters.")

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import override
 
 
 @dataclass(frozen=True)
@@ -42,3 +43,7 @@ class Item:
             craft_quantity=craft_data.get("quantity", 0),
             tradeable=data["tradeable"] == "true",
         )
+
+    @override
+    def __hash__(self):
+        return hash(self.code)

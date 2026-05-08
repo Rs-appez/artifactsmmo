@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 
 if TYPE_CHECKING:
-    from models import Encyclopedia
     from models.dataclass import Effect, Item
 
 
@@ -25,13 +24,15 @@ class Monster:
     res_air: int
     critical_strike: int
     initiative: int
-    # effects: list[tuple[Effect, int]]
+    effects: list[tuple[Effect, int]]
     min_gold: int
     max_gold: int
     drops: list[dict[Item, dict[str, str | int]]]
 
     @classmethod
-    def from_dict(cls, data):
+    async def from_dict(cls, data):
+        from models import Encyclopedia
+
         return cls(
             name=data["name"],
             code=data["code"],
@@ -48,22 +49,37 @@ class Monster:
             res_air=data["res_air"],
             critical_strike=data["critical_strike"],
             initiative=data["initiative"],
-            # effects=[
-            #     (
-            #         GameManager.get_effect_by_code(effect_data["code"]),
-            #         effect_data["value"],
-            #     )
-            #     for effect_data in data.get("effects", [])
-            # ],
+            effects=[
+                (
+                    await Encyclopedia.get_effect_by_code(effect_data["code"]),
+                    effect_data["value"],
+                )
+                for effect_data in data.get("effects", [])
+            ],
             min_gold=data["min_gold"],
             max_gold=data["max_gold"],
             drops=[
                 {
-                    Encyclopedia.items[drop_data["item_code"]]: {  # noqa: F821
-                        "chance": drop_data["chance"],
-                        "quantity": drop_data.get("quantity", 1),
+                    await Encyclopedia.get_item_by_code(drop_data["code"]): {
+                        "rate": drop_data["rate"],
+                        "min_quantity": drop_data["min_quantity"],
+                        "max_quantity": drop_data["max_quantity"],
                     }
                 }
                 for drop_data in data.get("drops", [])
             ],
         )
+
+    @override
+    def __hash__(self):
+        return hash(self.code)
+
+    @property
+    def average_gold(self) -> float:
+        return (self.min_gold + self.max_gold) / 2
+
+    def drop_rate(self, item: "Item") -> float:
+        for drop in self.drops:
+            if item in drop:
+                return 1 / int(drop[item]["rate"])
+        return 0.0
