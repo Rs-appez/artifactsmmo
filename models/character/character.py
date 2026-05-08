@@ -16,16 +16,12 @@ from .mixin import (
     GatherMixin,
     MoveMixin,
     WorkMixin,
+    TaskMixin,
 )
 
 
 class Character(
-    BankMixin,
-    WorkMixin,
-    MoveMixin,
-    FightMixin,
-    GatherMixin,
-    CraftMixin,
+    BankMixin, WorkMixin, MoveMixin, FightMixin, GatherMixin, CraftMixin, TaskMixin
 ):
     def __init__(self, data: CharacterData):
         self.__name = data.name
