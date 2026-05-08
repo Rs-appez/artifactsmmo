@@ -19,6 +19,7 @@ from .utils import empty_farm
 __all__ = [
     "chicken_farm",
     "sheep_farm",
+    "cow_farm",
     "copper_farm",
     "iron_farm",
     "ash_farm",
