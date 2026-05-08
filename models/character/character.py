@@ -150,13 +150,20 @@ class Character(
 
     @override
     def __str__(self):
+        return f"{self.cooldown}"
         return f"{self.surname:8}: position={self.location:8} - working={self.is_working} - task={self.work_on}"
+
+    def update_from_dict(self, data: dict) -> None:
+        for key, value in self._parse_dict(data).items():
+            setattr(self, key, value)
 
     @classmethod
     def from_dict(cls, data: dict) -> "Character":
-        jobs = cls.__get_jobs(data)
+        return cls(**cls._parse_dict(data))
 
-        return cls(
+    @staticmethod
+    def _parse_dict(data: dict) -> dict:
+        return dict(
             _name=data["name"],
             _surname=data["name"][3:],
             _location=(data["x"], data["y"]),
@@ -177,11 +184,8 @@ class Character(
                 if item["code"]
             },
             _inventory_max_items=data["inventory_max_items"],
-            _jobs=jobs,
+            _jobs=Character.__get_jobs(data),
         )
-        # cooldown=datetime.fromisoformat(
-        #     data["cooldown_expiration"].replace("Z", "+00:00")
-        # ),
 
     @classmethod
     def __get_jobs(cls, data: dict) -> dict[str, int]:

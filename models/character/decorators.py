@@ -40,7 +40,7 @@ def refresh_after(
         if character_data is not None:
             character_class = args[0]
             if hasattr(character_class, "refresh_data"):
-                character_class.from_dict(character_data)
+                character_class.update_from_dict(character_data)
         return result
 
     return wrapper
