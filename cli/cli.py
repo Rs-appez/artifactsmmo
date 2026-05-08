@@ -5,7 +5,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import NestedCompleter, FuzzyCompleter
 from prompt_toolkit.patch_stdout import patch_stdout
 
-from models import GameManager
+from models import Encyclopedia, GameManager
 from . import cli_action
 
 dict_routines = {
@@ -26,12 +26,12 @@ dict_routines_all = {
 
 async def fuzzy_find_item(item_code: str, threshold: int = 80):
     """Fuzzy search for item by code. Returns best match or raises Exception."""
-    if item_code in GameManager.items:
-        return await GameManager.get_item_by_code(item_code)
+    if item_code in Encyclopedia.items:
+        return await Encyclopedia.get_item_by_code(item_code)
 
-    matches = process.extract(item_code, GameManager.items.keys(), limit=1)
+    matches = process.extract(item_code, Encyclopedia.items.keys(), limit=1)
     if matches and matches[0][1] >= threshold:
-        return await GameManager.get_item_by_code(matches[0][0])
+        return await Encyclopedia.get_item_by_code(matches[0][0])
 
     raise Exception(f"Item '{item_code}' not found (no close matches)")
 
@@ -52,10 +52,10 @@ async def cli(game_manager: GameManager):
 
     # Load items in background
     async def load_items():
-        await GameManager.wait_item()
+        await Encyclopedia.wait_item()
         updated_actions = {
             cmd: {
-                name: {item_code: None for item_code in GameManager.items}
+                name: {item_code: None for item_code in Encyclopedia.items}
                 for name in characters.keys()
             }
             for cmd in dict_actions

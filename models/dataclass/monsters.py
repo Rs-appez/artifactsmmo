@@ -2,8 +2,9 @@ from dataclasses import dataclass
 
 from typing import TYPE_CHECKING
 
+
 if TYPE_CHECKING:
-    from gameManager import GameManager
+    from models import Encyclopedia
     from models.dataclass import Effect, Item
 
 
@@ -58,7 +59,7 @@ class Monster:
             max_gold=data["max_gold"],
             drops=[
                 {
-                    GameManager.items[drop_data["item_code"]]: {  # noqa: F821
+                    Encyclopedia.items[drop_data["item_code"]]: {  # noqa: F821
                         "chance": drop_data["chance"],
                         "quantity": drop_data.get("quantity", 1),
                     }
