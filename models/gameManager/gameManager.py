@@ -5,7 +5,7 @@ import httpx
 
 import routines
 from config import ARTIFACTSMMO_URL, HEADERS
-from models import Character, CharacterData, Encyclopedia
+from models import Character, Encyclopedia
 from .mixins import JobMixin
 
 
@@ -36,7 +36,7 @@ class GameManager(JobMixin):
 
             characters_data = response.json()["data"]
             for char_data in characters_data:
-                character = Character(CharacterData.from_dict(char_data))
+                character = Character.from_dict(char_data)
                 self.characters[character.surname] = character
 
     def __assign_default_tasks(self):

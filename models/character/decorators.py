@@ -2,7 +2,6 @@ from collections.abc import Awaitable, Callable
 from typing import ParamSpec
 
 from utils.find_nearest import find_nearest_bank
-from models.character import CharacterData
 
 
 def request_action(func):
@@ -41,7 +40,7 @@ def refresh_after(
         if character_data is not None:
             character_class = args[0]
             if hasattr(character_class, "refresh_data"):
-                character_class.refresh_data(CharacterData.from_dict(character_data))
+                character_class.from_dict(character_data)
         return result
 
     return wrapper
