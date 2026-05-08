@@ -1,6 +1,7 @@
 from .monster_farm import (
     chicken_farm,
     sheep_farm,
+    cow_farm,
     mushroom_farm,
     yellow_slime_farm,
     blue_slime_farm,
