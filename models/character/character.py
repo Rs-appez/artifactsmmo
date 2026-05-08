@@ -150,7 +150,7 @@ class Character(
 
     @override
     def __str__(self):
-        return f"{self.surname:8}: position={self.location} - working={self.is_working} - task={self.work_on}"
+        return f"{self.surname:8}: position={str(self.location):<9} - working={self.is_working} - task={self.work_on}"
 
     def update_from_dict(self, data: dict) -> None:
         for key, value in self._parse_dict(data).items():
