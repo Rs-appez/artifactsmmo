@@ -64,15 +64,15 @@ class Character(
 
     @property
     def location(self) -> tuple[int, int]:
-        return self.__current_location
+        return self._location
 
     @property
     def layer(self) -> Layer:
-        return self.__current_layer
+        return self._layer
 
     @property
     def map(self) -> int:
-        return self.__current_map_id
+        return self._map
 
     @property
     def cooldown(self) -> float:
