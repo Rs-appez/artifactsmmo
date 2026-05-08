@@ -169,9 +169,9 @@ class Character(
             _location=(data["x"], data["y"]),
             _layer=Layer(data["layer"]),
             _map=data["map_id"],
-            _cooldown=datetime.strptime(
-                data["cooldown_expiration"], "%Y-%m-%dT%H:%M:%S.%fZ"
-            ).replace(tzinfo=timezone.utc),
+            _cooldown=datetime.fromisoformat(
+                data["cooldown_expiration"].replace("Z", "+00:00")
+            ),
             _hp=data["hp"],
             _max_hp=data["max_hp"],
             _xp=data["xp"],
