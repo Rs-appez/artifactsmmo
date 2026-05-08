@@ -8,3 +8,7 @@ async def ash_farm(character: Character):
 
 async def spruce_farm(character: Character):
     await gather(character, (2, 6))
+
+
+async def birch_farm(character: Character):
+    await gather(character, (3, 5))

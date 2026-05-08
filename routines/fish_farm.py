@@ -8,3 +8,7 @@ async def gudgeon_farm(character: Character):
 
 async def shrimp_farm(character: Character):
     await gather(character, (5, 2))
+
+
+async def trout_farm(character: Character):
+    await gather(character, (7, 12))

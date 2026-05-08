@@ -8,3 +8,7 @@ async def copper_farm(character: Character):
 
 async def iron_farm(character: Character):
     await gather(character, (1, 7))
+
+
+async def coal_farm(character: Character):
+    await gather(character, (1, 6))

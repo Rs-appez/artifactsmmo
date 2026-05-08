@@ -8,9 +8,9 @@ from .monster_farm import (
     red_slime_farm,
     green_slime_farm,
 )
-from .ore_farm import copper_farm, iron_farm
-from .wood_farm import ash_farm, spruce_farm
-from .fish_farm import gudgeon_farm, shrimp_farm
+from .ore_farm import copper_farm, iron_farm, coal_farm
+from .wood_farm import ash_farm, spruce_farm, birch_farm
+from .fish_farm import gudgeon_farm, shrimp_farm, trout_farm
 from .craft import craft
 from .alchemy_farm import sunflower_farm, nettle_farm
 from .utils import empty_farm
@@ -22,10 +22,13 @@ __all__ = [
     "cow_farm",
     "copper_farm",
     "iron_farm",
+    "coal_farm",
     "ash_farm",
     "spruce_farm",
+    "birch_farm",
     "gudgeon_farm",
     "shrimp_farm",
+    "trout_farm",
     "craft",
     "sunflower_farm",
     "nettle_farm",
