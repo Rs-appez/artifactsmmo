@@ -1,7 +1,7 @@
 from typing import Protocol, TYPE_CHECKING
 
 from config import HEADERS
-from models import Item
+from models.dataclass import Item, Monster
 from models.character.decorators import refresh_after, request_action
 
 if TYPE_CHECKING:
@@ -9,7 +9,8 @@ if TYPE_CHECKING:
 
 
 class TaskMixin(Protocol):
-    _task_resource: Item | None
+    _tastk_objectif: Item | Monster | None = None
+    _task_quantity: int | None = None
 
     @request_action
     @refresh_after
