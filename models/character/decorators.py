@@ -39,7 +39,7 @@ def refresh_after(
         result, character_data = await func(*args, **kwargs)
         if character_data is not None:
             character_class = args[0]
-            if hasattr(character_class, "refresh_data"):
+            if hasattr(character_class, "update_from_dict"):
                 character_class.update_from_dict(character_data)
         return result
 
