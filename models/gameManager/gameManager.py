@@ -6,7 +6,7 @@ import httpx
 import routines
 from config import ARTIFACTSMMO_URL, HEADERS
 from models import Character, CharacterData
-from models.dataclass import Effect, Item
+from models.dataclass import Effect, Item, Monster
 
 
 class GameManager:
@@ -28,6 +28,9 @@ class GameManager:
     effects: dict[str, Effect] = {}
     __effects_loaded = False
 
+    monsters: dict[str, Monster] = {}
+    __monsters_loaded = False
+
     def __init__(self):
         self.characters: dict[str, Character] = {}
 
@@ -42,6 +45,11 @@ class GameManager:
     @classmethod
     async def wait_effect(cls) -> None:
         while not cls.__effects_loaded:
+            _ = await asyncio.sleep(1)
+
+    @classmethod
+    async def wait_monster(cls) -> None:
+        while not cls.__monsters_loaded:
             _ = await asyncio.sleep(1)
 
     def __load_characters(self):
