@@ -10,7 +10,7 @@ from . import cli_action
 
 dict_routines = {
     "stop": cli_action.stop,
-    "start": cli_action.start,
+    "resume": cli_action.resume,
     "gobank": cli_action.go_bank,
 }
 

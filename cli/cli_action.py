@@ -29,7 +29,7 @@ def stop(character: Character):
 
 
 @_check_freshness
-async def start(character: Character):
+async def resume(character: Character):
     await character.resume()
     print(f"▶️ Started {character.surname}")
 
