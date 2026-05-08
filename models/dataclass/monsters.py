@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 
-from models import GameManager
-from models.dataclass import Effect, Item
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from gameManager import GameManager
+    from models.dataclass import Effect, Item
 
 
 @dataclass(frozen=True)
