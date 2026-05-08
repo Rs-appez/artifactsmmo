@@ -80,7 +80,9 @@ async def cli(game_manager: GameManager):
             action, *args = parts
 
             if action in dict_routines_all:
-                _ = dict_routines_all[action](list(characters.values()))
+                cmd = dict_routines_all[action](list(characters.values()))
+                if asyncio.iscoroutine(cmd):
+                    await cmd
                 continue
             if len(args) < 1:
                 print(f"Usage: {action} <name>")
