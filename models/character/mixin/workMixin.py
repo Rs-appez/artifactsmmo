@@ -45,7 +45,6 @@ class WorkMixin(Protocol):
                 print("❌ Character is already started")
                 return
             self._work_task = asyncio.current_task()
-        print(f"🚀 {self.name} started working on routine {self.work_on}")
         try:
             while True:
                 try:
@@ -95,5 +94,5 @@ class WorkMixin(Protocol):
             self._interrupted = True
             _ = self._work_task.cancel()
 
-    def assign_routine(self: "Character", task: Callable):
-        self._routine = task
+    def assign_routine(self: "Character", task: Callable, *args, **kwargs):
+        self._routine = lambda char: task(*args, **kwargs)

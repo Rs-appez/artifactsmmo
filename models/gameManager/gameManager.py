@@ -11,11 +11,11 @@ from .mixins import JobMixin
 
 class GameManager(JobMixin):
     default_tasks = {
-        "bob": routines.cow_farm,
-        "alice": routines.birch_farm,
-        "john": routines.coal_farm,
-        "jane": routines.trout_farm,
-        "charlie": routines.nettle_farm,
+        "bob": (routines.mob_farm, ["cow"]),
+        "alice": (routines.birch_farm, []),
+        "john": (routines.coal_farm, []),
+        "jane": (routines.trout_farm, []),
+        "charlie": (routines.nettle_farm, []),
     }
 
     def __init__(self):
@@ -42,7 +42,12 @@ class GameManager(JobMixin):
     def __assign_default_tasks(self):
         for char_name, character in self.characters.items():
             if char_name in self.default_tasks:
-                character.assign_routine(self.default_tasks[char_name])
+                character.assign_routine(
+                    self.default_tasks[char_name][0], *self.default_tasks[char_name][1]
+                )
+                print(
+                    f"🚀 {character.surname} started working on routine {character.work_on}"
+                )
             else:
                 print(
                     f"No default task found for {char_name}, skipping task assignment."
