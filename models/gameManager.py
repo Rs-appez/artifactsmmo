@@ -11,10 +11,10 @@ from models.dataclass import Effect, Item
 
 class GameManager:
     default_tasks = {
-        "bob": routines.red_slime_farm,
-        "alice": routines.ash_farm,
-        "john": routines.copper_farm,
-        "jane": routines.copper_farm,
+        "bob": routines.cow_farm,
+        "alice": routines.sheep_farm,
+        "john": routines.red_slime_farm,
+        "jane": routines.shrimp_farm,
         "charlie": routines.nettle_farm,
     }
 
