@@ -12,9 +12,9 @@ from models.dataclass import Effect, Item, Monster
 class GameManager:
     default_tasks = {
         "bob": routines.cow_farm,
-        "alice": routines.sheep_farm,
-        "john": routines.red_slime_farm,
-        "jane": routines.shrimp_farm,
+        "alice": routines.birch_farm,
+        "john": routines.coal_farm,
+        "jane": routines.trout_farm,
         "charlie": routines.nettle_farm,
     }
 
