@@ -30,10 +30,15 @@ class WorkMixin(Protocol):
         return self.work_on != seeking_the_meaning_of_life.__name__
 
     @property
-    def work_on(self) -> str | None:
-        if self._routine is None:
-            return None
+    def work_on(self) -> str:
+        routine = self._routine.__name__
+        if self._priority_tasks:
+            routine += " (with priority tasks: " + ", ".join(self.priority_tasks) + ")"
         return self._routine.__name__
+
+    @property
+    def priority_tasks(self) -> list[str]:
+        return [task.__name__ for task in self._priority_tasks]
 
     @property
     def is_interrupted(self) -> bool:
@@ -95,4 +100,8 @@ class WorkMixin(Protocol):
             _ = self._work_task.cancel()
 
     def assign_routine(self: "Character", task: Callable, *args, **kwargs):
-        self._routine = lambda char: task(*args, **kwargs)
+        def routine(char):
+            return task(char, *args, **kwargs)
+
+        routine.__name__ = f"{task.__name__} on {', '.join(map(str, args))}"
+        self._routine = routine

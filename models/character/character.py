@@ -171,4 +171,4 @@ class Character(
 
     @override
     def __str__(self):
-        return f"{self.surname:6}: working={self.is_working} - task={self.work_on:20} - position={self.location}"
+        return f"{self.surname:8}: position={self.location:8} - working={self.is_working} - task={self.work_on}"
