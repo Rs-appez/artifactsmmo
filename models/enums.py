@@ -10,3 +10,10 @@ class Layer(Enum):
 class TaskType(Enum):
     ITEM = "items"
     MONSTER = "monsters"
+
+
+class Element(Enum):
+    EARTH = "earth"
+    FIRE = "fire"
+    WATER = "water"
+    AIR = "air"
