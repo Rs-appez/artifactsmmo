@@ -63,4 +63,4 @@ async def status(characters: list[Character]):
 
 async def complete_task(character: Character):
     character.do_one_time_task(lambda char: routines.complete_task(char, TaskType.ITEM))
-    print(f"✅ {character.surname} will complete a task")
+    print(f"  {character.surname} will complete a task")

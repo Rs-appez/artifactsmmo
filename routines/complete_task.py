@@ -53,7 +53,7 @@ async def __item_task(character: Character) -> None:
             return
 
     if await character.complete_task():
-        print(f"✅ {character.surname} completed the item task")
+        print(f"  {character.surname} completed the item task")
     else:
         print(f"❌ {character.surname} failed to complete the item task")
 
