@@ -45,7 +45,7 @@ class FightMixin(Protocol):
 
             result = True if fight["result"] == "win" else False
             print(
-                f"󰓥 {self.surname} Fought and {'won' if result else 'lost'} against {fight['opponent']}"
+                f"{'󰓥 ' if result else ' '} {self.surname} Fought and {'won' if result else 'lost'} against {fight['opponent']}"
             )
 
             return result, character_data
