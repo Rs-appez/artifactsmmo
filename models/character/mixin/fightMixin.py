@@ -1,6 +1,7 @@
 from typing import Protocol, TYPE_CHECKING
 
 from config import HEADERS
+from exceptions import ImpossibleCombatException
 from models.character.decorators import refresh_after, request_action
 from models.dataclass import Monster
 from utils.math_fight import calc_resistance, damage_on
@@ -20,7 +21,7 @@ class FightMixin(Protocol):
         damage_taken += (damage_taken * 0.5) * (monster.critical_strike / 100)
 
         if damage_taken >= self.max_hp:
-            raise Exception(f"can't win against {monster.name}")
+            raise ImpossibleCombatException(f"can't win against {monster.name}")
 
         return damage_taken < self.hp
 
