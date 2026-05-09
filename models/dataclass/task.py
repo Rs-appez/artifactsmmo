@@ -1,0 +1,26 @@
+from dataclasses import dataclass
+
+
+from models import Encyclopedia
+from models.dataclass import Item, Monster
+
+
+@dataclass
+class TaskQuest:
+    quantity_left: int
+    cible: Item | Monster | None = None
+
+    @classmethod
+    async def from_dict(cls, data: dict) -> "TaskQuest":
+        task_type = data["task_type"]
+        cible = None
+        if task_type == "items":
+            cible = await Encyclopedia.get_item_by_code(data["task"])
+        elif task_type == "monsters":
+            cible = await Encyclopedia.get_monster_by_code(data["task"])
+
+        tast_left = data["task_total"] - data["task_progress"]
+        return cls(
+            quantity_left=tast_left,
+            cible=cible,
+        )
