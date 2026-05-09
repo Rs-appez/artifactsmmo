@@ -1,7 +1,6 @@
 from typing import Protocol, TYPE_CHECKING
 
 from config import HEADERS
-from models.dataclass import Item, Monster
 from models.character.decorators import refresh_after, request_action
 
 if TYPE_CHECKING:
@@ -23,9 +22,9 @@ class TaskMixin(Protocol):
                 print("data : ", data)
                 raise Exception(data["error"]["message"])
 
-            task_data = data["data"]["task"]
+            character_data = data["data"]["character"]
 
-            return True, task_data
+            return True, character_data
         except Exception as e:
             print(f"❌ {e}")
             return False, None
