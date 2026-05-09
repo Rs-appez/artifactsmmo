@@ -2,9 +2,13 @@ from dataclasses import dataclass
 
 from typing import TYPE_CHECKING, override
 
+from models.enums import Element
+from utils.math_fight import calc_attack
+
 
 if TYPE_CHECKING:
     from models.dataclass import Effect, Item
+    from models.character import Character
 
 
 @dataclass(frozen=True)
@@ -14,14 +18,8 @@ class Monster:
     level: int
     type: str
     hp: int
-    attack_fire: int
-    attack_water: int
-    attack_earth: int
-    attack_air: int
-    res_fire: int
-    res_water: int
-    res_earth: int
-    res_air: int
+    attack: dict[Element, int]
+    resistance: dict[Element, int]
     critical_strike: int
     initiative: int
     effects: list[tuple[Effect, int]]
@@ -33,20 +31,27 @@ class Monster:
     async def from_dict(cls, data):
         from models import Encyclopedia
 
+        damage = {
+            Element.FIRE: data["attack_fire"],
+            Element.WATER: data["attack_water"],
+            Element.EARTH: data["attack_earth"],
+            Element.AIR: data["attack_air"],
+        }
+        resistance = {
+            Element.FIRE: data["res_fire"],
+            Element.WATER: data["res_water"],
+            Element.EARTH: data["res_earth"],
+            Element.AIR: data["res_air"],
+        }
+
         return cls(
             name=data["name"],
             code=data["code"],
             level=data["level"],
             type=data["type"],
             hp=data["hp"],
-            attack_fire=data["attack_fire"],
-            attack_water=data["attack_water"],
-            attack_earth=data["attack_earth"],
-            attack_air=data["attack_air"],
-            res_fire=data["res_fire"],
-            res_water=data["res_water"],
-            res_earth=data["res_earth"],
-            res_air=data["res_air"],
+            attack=damage,
+            resistance=resistance,
             critical_strike=data["critical_strike"],
             initiative=data["initiative"],
             effects=[
