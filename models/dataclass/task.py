@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 
-from models import Encyclopedia
 from models.dataclass import Item, Monster
 
 
@@ -12,6 +11,8 @@ class TaskQuest:
 
     @classmethod
     async def from_dict(cls, data: dict) -> "TaskQuest":
+        from models import Encyclopedia
+
         task_type = data["task_type"]
         cible = None
         if task_type == "items":
