@@ -23,8 +23,6 @@ class GameManager(JobMixin):
 
         _ = asyncio.ensure_future(Encyclopedia.initialize())
 
-        self.__assign_default_tasks()
-
     async def __load_characters(self):
         with httpx.Client() as client:
             response = client.get(f"{ARTIFACTSMMO_URL}/my/characters", headers=HEADERS)
@@ -55,5 +53,6 @@ class GameManager(JobMixin):
     async def start(self) -> Sequence[Coroutine]:
 
         await self.__load_characters()
+        self.__assign_default_tasks()
         tasks = [char.start() for char in self.characters.values()]
         return tasks
