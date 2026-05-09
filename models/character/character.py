@@ -7,7 +7,7 @@ import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
 from models.dataclass import TaskQuest
-from models.enums import Layer
+from models.enums import Element, Layer
 
 from .decorators import refresh_after
 from .mixin import (
@@ -27,18 +27,25 @@ class Character(
 ):
     _name: str
     _surname: str
+    _cooldown: datetime
+
     _location: tuple[int, int]
     _layer: Layer
     _map: int
-    _cooldown: datetime
+
     _hp: int
     _max_hp: int
+    _resistance: dict[Element, int]
+    _damage: dict[Element, int]
+
     _xp: int
     _max_xp: int
     _level: int
+
     _gold: int
     _inventory: dict[str, int]
     _inventory_max_items: int
+
     _jobs: dict[str, int]
     _task: TaskQuest | None = None
 
@@ -95,6 +102,12 @@ class Character(
     @property
     def max_hp(self) -> int:
         return self._max_hp
+
+    def get_resistance(self, elem: Element) -> int:
+        return self._resistance.get(elem, 0)
+
+    def get_damage(self, elem: Element) -> int:
+        return self._damage.get(elem, 0)
 
     @property
     def xp(self) -> int:
@@ -176,6 +189,19 @@ class Character(
             "task_progress": data.get("task_progress"),
             "task": data.get("task"),
         }
+        resistance = {
+            Element.AIR: data.get("res_air", 0),
+            Element.EARTH: data.get("res_earth", 0),
+            Element.FIRE: data.get("res_fire", 0),
+            Element.WATER: data.get("res_water", 0),
+        }
+        damage = {
+            Element.AIR: data.get("dmg_air", 0),
+            Element.EARTH: data.get("dmg_earth", 0),
+            Element.FIRE: data.get("dmg_fire", 0),
+            Element.WATER: data.get("dmg_water", 0),
+        }
+
         return dict(
             _name=data["name"],
             _surname=data["name"][3:],
@@ -199,6 +225,8 @@ class Character(
             _inventory_max_items=data["inventory_max_items"],
             _jobs=Character.__get_jobs(data),
             _task=await TaskQuest.from_dict(task_dict) if task_dict["task"] else None,
+            _resistance=resistance,
+            _damage=damage,
         )
 
     @classmethod
