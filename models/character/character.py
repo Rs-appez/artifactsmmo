@@ -127,6 +127,10 @@ class Character(
             or len(self._inventory) >= 17
         )
 
+    @property
+    def task(self) -> TaskQuest | None:
+        return self._task
+
     def get_job_level(self, job_name: str) -> int:
         return self._jobs.get(job_name, 0)
 
@@ -194,7 +198,7 @@ class Character(
             },
             _inventory_max_items=data["inventory_max_items"],
             _jobs=Character.__get_jobs(data),
-            _task=await TaskQuest.from_dict(task_dict),
+            _task=await TaskQuest.from_dict(task_dict) if task_dict["task"] else None,
         )
 
     @classmethod

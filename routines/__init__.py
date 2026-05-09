@@ -15,6 +15,7 @@ from .fish_farm import gudgeon_farm, shrimp_farm, trout_farm
 from .craft import craft
 from .alchemy_farm import sunflower_farm, nettle_farm
 from .utils import empty_farm
+from .complete_task import complete_task
 
 
 __all__ = [
@@ -32,4 +33,5 @@ __all__ = [
     "sunflower_farm",
     "nettle_farm",
     "empty_farm",
+    "complete_task",
 ]

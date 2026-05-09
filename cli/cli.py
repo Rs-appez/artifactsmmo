@@ -12,6 +12,7 @@ dict_routines = {
     "stop": cli_action.stop,
     "resume": cli_action.resume,
     "gobank": cli_action.go_bank,
+    "gotask": cli_action.complete_task,
 }
 
 dict_actions = {

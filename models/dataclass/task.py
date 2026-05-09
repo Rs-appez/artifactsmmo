@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 
 from models.dataclass import Item, Monster
+from models.enums import TaskType
 
 
 @dataclass
@@ -13,11 +14,11 @@ class TaskQuest:
     async def from_dict(cls, data: dict) -> "TaskQuest":
         from models import Encyclopedia
 
-        task_type = data["task_type"]
+        task_type = TaskType(data["task_type"])
         cible = None
-        if task_type == "items":
+        if task_type == TaskType.ITEM:
             cible = await Encyclopedia.get_item_by_code(data["task"])
-        elif task_type == "monsters":
+        elif task_type == TaskType.MONSTER:
             cible = await Encyclopedia.get_monster_by_code(data["task"])
 
         tast_left = data["task_total"] - data["task_progress"]

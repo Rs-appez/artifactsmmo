@@ -1,3 +1,4 @@
+from models.enums import TaskType
 import routines
 from models import Character
 from models.dataclass import Item
@@ -58,3 +59,8 @@ def stop_all(characters: list[Character]):
 async def status(characters: list[Character]):
     for char in characters:
         print(char)
+
+
+async def complete_task(character: Character):
+    character.do_one_time_task(lambda char: routines.complete_task(char, TaskType.ITEM))
+    print(f"✅ {character.surname} will complete a task")
