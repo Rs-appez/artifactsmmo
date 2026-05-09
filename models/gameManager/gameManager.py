@@ -23,10 +23,9 @@ class GameManager(JobMixin):
 
         _ = asyncio.ensure_future(Encyclopedia.initialize())
 
-        self.__load_characters()
         self.__assign_default_tasks()
 
-    def __load_characters(self):
+    async def __load_characters(self):
         with httpx.Client() as client:
             response = client.get(f"{ARTIFACTSMMO_URL}/my/characters", headers=HEADERS)
             if response.status_code != 200:
@@ -36,7 +35,7 @@ class GameManager(JobMixin):
 
             characters_data = response.json()["data"]
             for char_data in characters_data:
-                character = Character.from_dict(char_data)
+                character = await Character.from_dict(char_data)
                 self.characters[character.surname] = character
 
     def __assign_default_tasks(self):
@@ -53,7 +52,8 @@ class GameManager(JobMixin):
                     f"No default task found for {char_name}, skipping task assignment."
                 )
 
-    def start(self) -> Sequence[Coroutine]:
+    async def start(self) -> Sequence[Coroutine]:
 
+        await self.__load_characters()
         tasks = [char.start() for char in self.characters.values()]
         return tasks

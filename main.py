@@ -12,7 +12,7 @@ async def main():
 
     loop = asyncio.get_event_loop()
 
-    character_tasks = manager.start()
+    character_tasks = await manager.start()
     tasks = asyncio.gather(
         *character_tasks,
         cli(manager),

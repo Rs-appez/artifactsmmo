@@ -9,9 +9,6 @@ if TYPE_CHECKING:
 
 
 class TaskMixin(Protocol):
-    _tastk_objectif: Item | Monster | None = None
-    _task_quantity: int | None = None
-
     @request_action
     @refresh_after
     async def accept_task(self: "Character") -> tuple[bool, dict | None]:
