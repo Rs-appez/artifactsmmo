@@ -12,8 +12,8 @@ from .mixins import JobMixin
 class GameManager(JobMixin):
     default_tasks = {
         "bob": (routines.gudgeon_farm, []),
-        "alice": (routines.mob_farm, ["sheep"]),
-        "john": (routines.mob_farm, ["cow"]),
+        "alice": (routines.mob_farm, ["cow"]),
+        "john": (routines.sunflower_farm, []),
         "jane": (routines.ash_farm, []),
         "charlie": (routines.mob_farm, ["red_slime"]),
     }
