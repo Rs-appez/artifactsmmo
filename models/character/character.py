@@ -6,9 +6,8 @@ from typing import override
 import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
-from models.dataclass import Item, Monster
+from models.dataclass import TaskQuest
 from models.enums import Layer
-from models import Encyclopedia
 
 from .decorators import refresh_after
 from .mixin import (
@@ -41,8 +40,7 @@ class Character(
     _inventory: dict[str, int]
     _inventory_max_items: int
     _jobs: dict[str, int]
-    _tastk_objectif: Item | Monster | None = None
-    _task_quantity: int | None = None
+    _task: TaskQuest | None = None
 
     def __post_init__(self):
         self.__url = f"{ARTIFACTSMMO_URL}/my/{self.name}"
@@ -168,6 +166,12 @@ class Character(
 
     @staticmethod
     async def _parse_dict(data: dict) -> dict:
+        task_dict = {
+            "task_type": data.get("task_type"),
+            "task_total": data.get("task_total"),
+            "task_progress": data.get("task_progress"),
+            "task": data.get("task"),
+        }
         return dict(
             _name=data["name"],
             _surname=data["name"][3:],
@@ -190,8 +194,7 @@ class Character(
             },
             _inventory_max_items=data["inventory_max_items"],
             _jobs=Character.__get_jobs(data),
-            _tastk_objectif=await Encyclopedia.get_item_by_code(data["task"]),
-            _task_quantity=data["task_total"] - data["task_progress"],
+            _task=await TaskQuest.from_dict(task_dict),
         )
 
     @classmethod
