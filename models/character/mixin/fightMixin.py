@@ -2,27 +2,32 @@ from typing import Protocol, TYPE_CHECKING
 
 from config import HEADERS
 from models.character.decorators import refresh_after, request_action
+from models.dataclass import Monster
+from utils.math_fight import calc_resistance, damage_on
 
 if TYPE_CHECKING:
     from models.character import Character
 
 
 class FightMixin(Protocol):
-    _last_damage_taken: int = 0
+    def will_win_against(self: "Character", monster: Monster) -> bool:
+        damage = damage_on(self, monster)
+        nb_turns_to_kill = (monster.hp) // damage
+        if monster.initiative >= self.initiative:
+            nb_turns_to_kill += 1
 
-    @property
-    def last_damage_taken(self: "Character") -> int:
-        return self._last_damage_taken
+        damage_taken = damage_on(monster, self) * nb_turns_to_kill
+        damage_taken += (damage_taken * 0.5) * (monster.critical_strike / 100)
 
-    def reset_damage_taken(self: "Character"):
-        self._last_damage_taken = 0
+        if damage_taken >= self.max_hp:
+            raise Exception(f"can't win against {monster.name}")
+
+        return damage_taken < self.hp
 
     @request_action
     @refresh_after
     async def fight(self: "Character") -> tuple[bool, dict | None]:
         try:
-            current_hp = self.hp
-            damage_taken = 0
             response = await self.client.post(
                 f"{self.url}/action/fight",
                 headers=HEADERS,
@@ -35,10 +40,8 @@ class FightMixin(Protocol):
             for character in characters:
                 if character["name"] == self.name:
                     character_data = character
-                    damage_taken = current_hp - character_data["hp"]
                     break
 
-            self._last_damage_taken = damage_taken
             result = True if fight["result"] == "win" else False
             print(
                 f"󰓥 {self.surname} Fought and {'won' if result else 'lost'} against {fight['opponent']}"

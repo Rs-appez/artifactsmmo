@@ -4,9 +4,6 @@ from utils.find_nearest import find_nearest_mob
 from collections import defaultdict
 
 
-threshold_dict = defaultdict(int)
-
-
 async def mob_farm(character: Character, mob: Monster | str):
     try:
         if isinstance(mob, str):
@@ -16,10 +13,11 @@ async def mob_farm(character: Character, mob: Monster | str):
         if character.is_inventory_full:
             _ = await character.deposit_all_in_bank()
         _ = await character.move(mob_position)
-        mob_threshold = threshold_dict[mob]
-        if mob_threshold == 0 or character.hp < mob_threshold:
+        if not character.will_win_against(mob):
+            print(
+                f"󰻝  {character.surname} rests to recover hp before fighting {mob.name}"
+            )
             _ = await character.rest()
         _ = await character.fight()
-        threshold_dict[mob] = max(threshold_dict[mob], character.last_damage_taken)
     except Exception as e:
         print(f"❌ {character.surname} {e}")
