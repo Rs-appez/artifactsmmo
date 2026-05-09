@@ -8,10 +8,21 @@ if TYPE_CHECKING:
 
 
 class FightMixin(Protocol):
+    _last_damage_taken: int = 0
+
+    @property
+    def last_damage_taken(self: "Character") -> int:
+        return self._last_damage_taken
+
+    def reset_damage_taken(self: "Character"):
+        self._last_damage_taken = 0
+
     @request_action
     @refresh_after
     async def fight(self: "Character") -> tuple[bool, dict | None]:
         try:
+            current_hp = self.hp
+            damage_taken = 0
             response = await self.client.post(
                 f"{self.url}/action/fight",
                 headers=HEADERS,
@@ -24,7 +35,10 @@ class FightMixin(Protocol):
             for character in characters:
                 if character["name"] == self.name:
                     character_data = character
+                    damage_taken = current_hp - character_data["hp"]
                     break
+
+            self._last_damage_taken = damage_taken
             result = True if fight["result"] == "win" else False
             print(
                 f"󰓥 {self.surname} Fought and {'won' if result else 'lost'} against {fight['opponent']}"
