@@ -19,7 +19,7 @@ class TaskMixin(Protocol):
     @refresh_after
     async def accept_task(self: "Character") -> tuple[bool, dict | None]:
         try:
-            response = await self.client.get(
+            response = await self.client.post(
                 f"{self.url}/action/task/new",
                 headers=HEADERS,
             )
