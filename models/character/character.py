@@ -1,6 +1,7 @@
 import asyncio
 from dataclasses import dataclass
 from datetime import datetime
+from math import floor
 from typing import override
 
 import httpx
@@ -8,6 +9,7 @@ import httpx
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
 from models.dataclass import TaskQuest
 from models.enums import Element, Layer
+from utils.math_fight import calc_attack
 
 from .decorators import refresh_after
 from .mixin import (
@@ -35,8 +37,10 @@ class Character(
 
     _hp: int
     _max_hp: int
+    _initiative: int
     _resistance: dict[Element, int]
-    _damage: dict[Element, int]
+    _attack: dict[Element, int]
+    _critical_strike: int
 
     _xp: int
     _max_xp: int
@@ -103,11 +107,21 @@ class Character(
     def max_hp(self) -> int:
         return self._max_hp
 
-    def get_resistance(self, elem: Element) -> int:
-        return self._resistance.get(elem, 0)
+    @property
+    def resistance(self) -> dict[Element, int]:
+        return self._resistance.copy()
 
-    def get_damage(self, elem: Element) -> int:
-        return self._damage.get(elem, 0)
+    @property
+    def attack(self) -> dict[Element, int]:
+        return self._attack.copy()
+
+    @property
+    def critical_strike(self) -> int:
+        return self._critical_strike
+
+    @property
+    def initiative(self) -> int:
+        return self._initiative
 
     @property
     def xp(self) -> int:
@@ -195,11 +209,21 @@ class Character(
             Element.FIRE: data.get("res_fire", 0),
             Element.WATER: data.get("res_water", 0),
         }
-        damage = {
-            Element.AIR: data.get("dmg_air", 0),
-            Element.EARTH: data.get("dmg_earth", 0),
-            Element.FIRE: data.get("dmg_fire", 0),
-            Element.WATER: data.get("dmg_water", 0),
+        dmg_boost = data.get("dmg", 0)
+
+        attack = {
+            Element.AIR: calc_attack(
+                data.get("attack_air", 0), data.get("dmg_air", 0) + dmg_boost
+            ),
+            Element.EARTH: calc_attack(
+                data.get("attack_earth", 0), data.get("dmg_earth", 0) + dmg_boost
+            ),
+            Element.FIRE: calc_attack(
+                data.get("attack_fire", 0), data.get("dmg_fire", 0) + dmg_boost
+            ),
+            Element.WATER: calc_attack(
+                data.get("attack_water", 0), data.get("dmg_water", 0) + dmg_boost
+            ),
         }
 
         return dict(
@@ -226,7 +250,9 @@ class Character(
             _jobs=Character.__get_jobs(data),
             _task=await TaskQuest.from_dict(task_dict) if task_dict["task"] else None,
             _resistance=resistance,
-            _damage=damage,
+            _attack=attack,
+            _critical_strike=data.get("critical_strike", 0),
+            _initiative=data.get("initiative", 0),
         )
 
     @classmethod
