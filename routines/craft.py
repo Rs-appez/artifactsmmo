@@ -1,14 +1,14 @@
-from models import Character
+from models import Character, Encyclopedia
 from models.dataclass import Item
 from utils.find_nearest import find_nearest_workshop
 from math import ceil
 
 
-def __get_trips_info(
+async def __get_trips_info(
     craft_ingredients: list[dict[str, str | int]],
     quantity: int,
     inventory_max_items: int,
-) -> tuple[int, tuple[int, list[tuple[str, int]]], tuple[int, list[tuple[str, int]]]]:
+) -> tuple[int, tuple[int, list[tuple[Item, int]]], tuple[int, list[tuple[Item, int]]]]:
     """
     Calculate the number of trips needed to craft the desired quantity of items, based on the ingredients required and the character's inventory capacity.
     Args:
@@ -25,7 +25,10 @@ def __get_trips_info(
     """
 
     ingredients = [
-        (str(ingredient["code"]), int(ingredient["quantity"]))
+        (
+            await Encyclopedia.get_item_by_code(str(ingredient["code"])),
+            int(ingredient["quantity"]),
+        )
         for ingredient in craft_ingredients
     ]
     nb_ingredients = sum(nb[1] for nb in ingredients)
@@ -38,10 +41,10 @@ def __get_trips_info(
     nb_craft_last_trip = quantity - (nb_trips - 1) * nb_craft_per_trip
 
     ingredients_per_trip = [
-        (code, nb_craft_per_trip * qty) for code, qty in ingredients
+        (item, nb_craft_per_trip * qty) for item, qty in ingredients
     ]
     ingredients_last_trip = [
-        (code, nb_craft_last_trip * qty) for code, qty in ingredients
+        (item, nb_craft_last_trip * qty) for item, qty in ingredients
     ]
 
     return (
@@ -54,7 +57,7 @@ def __get_trips_info(
 async def __make_trip(
     character: Character,
     workshop_location: tuple[int, int],
-    ingredients: list[tuple[str, int]],
+    ingredients: list[tuple[Item, int]],
     item: Item,
     quantity: int,
 ):
@@ -96,7 +99,7 @@ async def craft(character: Character, item: Item, quantity: int):
                 nb_craft_last_trip,
                 ingredients_for_last_trip,
             ),
-        ) = __get_trips_info(
+        ) = await __get_trips_info(
             item.craft_ingredients, quantity, character.inventory_max_items
         )
     except Exception as e:

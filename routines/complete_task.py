@@ -46,7 +46,7 @@ async def __item_task(character: Character) -> None:
             character.task_resources_left, character.inventory_max_items
         )
         if not await character.withdraw_item_from_bank(
-            [(item.code, nb_resources_for_the_trip)]
+            [(item, nb_resources_for_the_trip)]
         ):
             return
         if not await character.move(item_task_master):
