@@ -4,7 +4,7 @@ from config import HEADERS
 from exceptions import ImpossibleCombatException
 from models.character.decorators import refresh_after, request_action
 from models.dataclass import Monster
-from utils.math_fight import calc_resistance, damage_on
+from utils.math_fight import damage_on
 
 if TYPE_CHECKING:
     from models.character import Character
