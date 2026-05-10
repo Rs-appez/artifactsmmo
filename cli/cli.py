@@ -1,6 +1,5 @@
 import asyncio
 
-from fuzzywuzzy import process  # pyright: ignore[reportMissingTypeStubs]
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import NestedCompleter, FuzzyCompleter
 from prompt_toolkit.patch_stdout import patch_stdout
@@ -8,7 +7,7 @@ from prompt_toolkit.patch_stdout import patch_stdout
 from models import Encyclopedia, GameManager
 from . import cli_action
 
-dict_routines = {
+dict_single = {
     "stop": cli_action.stop,
     "resume": cli_action.resume,
     "gobank": cli_action.go_bank,
@@ -17,24 +16,13 @@ dict_routines = {
 
 dict_actions = {
     "craft": cli_action.craft,
+    "gotask": cli_action.complete_task,
 }
 
-dict_routines_all = {
+dict_all = {
     "stopall": cli_action.stop_all,
     "status": cli_action.status,
 }
-
-
-async def fuzzy_find_item(item_code: str, threshold: int = 80):
-    """Fuzzy search for item by code. Returns best match or raises Exception."""
-    if item_code in Encyclopedia.items:
-        return await Encyclopedia.get_item_by_code(item_code)
-
-    matches = process.extract(item_code, Encyclopedia.items.keys(), limit=1)
-    if matches and matches[0][1] >= threshold:
-        return await Encyclopedia.get_item_by_code(matches[0][0])
-
-    raise Exception(f"Item '{item_code}' not found (no close matches)")
 
 
 async def cli(game_manager: GameManager):
@@ -43,9 +31,15 @@ async def cli(game_manager: GameManager):
 
     # Initial completer without items
     completer_dict = {
-        **{cmd: character_names for cmd in dict_routines},
-        **{cmd: {name: {} for name in characters.keys()} for cmd in dict_actions},
-        **{cmd: None for cmd in dict_routines_all},
+        **{cmd: character_names for cmd in dict_single},
+        **{"craft": {name: {} for name in characters.keys()}},
+        **{
+            "gotask": {
+                name: {task: None for task in ["items", "monsters"]}
+                for name in characters.keys()
+            }
+        },
+        **{cmd: None for cmd in dict_all},
     }
 
     completer = FuzzyCompleter(NestedCompleter.from_nested_dict(completer_dict))
@@ -55,11 +49,10 @@ async def cli(game_manager: GameManager):
     async def load_items():
         await Encyclopedia.wait_item()
         updated_actions = {
-            cmd: {
+            "craft": {
                 name: {item_code: None for item_code in Encyclopedia.items}
                 for name in characters.keys()
             }
-            for cmd in dict_actions
         }
         completer_dict.update(updated_actions)
         session.completer = FuzzyCompleter(
@@ -69,59 +62,51 @@ async def cli(game_manager: GameManager):
     _ = asyncio.create_task(load_items())
 
     with patch_stdout():
-        while True:
-            try:
-                command = await session.prompt_async()
-            except EOFError, KeyboardInterrupt:
-                raise asyncio.CancelledError()
-
-            parts = command.strip().lower().split()
-            if not parts:
-                continue
-            action, *args = parts
-
-            if action in dict_routines_all:
-                cmd = dict_routines_all[action](list(characters.values()))
-                if asyncio.iscoroutine(cmd):
-                    await cmd
-                continue
-            if len(args) < 1:
-                print(f"Usage: {action} <name>")
-                continue
-
-            name, *rests = args
-            if not name:
-                print("Usage: stop <name>")
-                continue
-
-            character = characters.get(name)
-            if not character:
-                print(f"❌ Unknown character: {name}")
-                continue
-
-            if len(rests) > 0:
-                item, *quantity = rests
-                if not quantity:
-                    quantity = 1
-                else:
-                    quantity = int(quantity[0])
-
+        try:
+            while True:
                 try:
-                    itemObject = await fuzzy_find_item(item)
-                except Exception as e:
-                    print(f"❌ {e}")
+                    command = await session.prompt_async()
+                except EOFError, KeyboardInterrupt:
+                    raise asyncio.CancelledError()
+
+                parts = command.strip().lower().split()
+                if not parts:
+                    continue
+                action, *args = parts
+
+                if action in dict_all:
+                    cmd = dict_all[action](list(characters.values()))
+                    if asyncio.iscoroutine(cmd):
+                        await cmd
+                    continue
+                if len(args) < 1:
+                    print(f"Usage: {action}")
                     continue
 
-                result = dict_actions.get(
-                    action, lambda char, it, qty: print(f"❌ Unknown command: {action}")
-                )(character, itemObject, quantity)
+                name, *rests = args
+                if not name:
+                    print("Usage: action <name>")
+                    continue
 
-                if asyncio.iscoroutine(result):
-                    await result
+                character = characters.get(name)
+                if not character:
+                    print(f"❌ Unknown character: {name}")
+                    continue
 
-            else:
-                result = dict_routines.get(
-                    action, lambda char: print(f"❌ Unknown command: {action}")
-                )(character)
-                if asyncio.iscoroutine(result):
-                    await result
+                if len(rests) > 0:
+                    result = dict_actions.get(
+                        action,
+                        lambda char, *args: print(f"❌ Unknown command: {action}"),
+                    )(character, *rests)
+
+                    if asyncio.iscoroutine(result):
+                        await result
+
+                else:
+                    result = dict_single.get(
+                        action, lambda char: print(f"❌ Unknown command: {action}")
+                    )(character)
+                    if asyncio.iscoroutine(result):
+                        await result
+        except Exception as e:
+            print(f"❌ {e}")

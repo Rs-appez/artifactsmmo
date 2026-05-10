@@ -26,12 +26,10 @@ dependencies = [
 
 [package.dev-dependencies]
 cli = [
-    { name = "fuzzywuzzy" },
     { name = "prompt-toolkit" },
     { name = "python-levenshtein" },
 ]
 dev = [
-    { name = "fuzzywuzzy" },
     { name = "prompt-toolkit" },
     { name = "python-decouple-stubs" },
     { name = "python-levenshtein" },
@@ -46,12 +44,10 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 cli = [
-    { name = "fuzzywuzzy", specifier = ">=0.18.0" },
     { name = "prompt-toolkit", specifier = ">=3.0.52" },
     { name = "python-levenshtein", specifier = ">=0.27.3" },
 ]
 dev = [
-    { name = "fuzzywuzzy", specifier = ">=0.18.0" },
     { name = "prompt-toolkit", specifier = ">=3.0.52" },
     { name = "python-decouple-stubs", specifier = ">=3.8.0.4" },
     { name = "python-levenshtein", specifier = ">=0.27.3" },
@@ -105,15 +101,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/7a/1d/29d32e0fb40864b1f878c7f5a0b343ae676c6e2b271a2d55cc3a152391da/charset_normalizer-3.4.7-cp314-cp314t-win_amd64.whl", hash = "sha256:03853ed82eeebbce3c2abfdbc98c96dc205f32a79627688ac9a27370ea61a49c", size = 174168, upload-time = "2026-04-02T09:27:49.795Z" },
     { url = "https://files.pythonhosted.org/packages/de/32/d92444ad05c7a6e41fb2036749777c163baf7a0301a040cb672d6b2b1ae9/charset_normalizer-3.4.7-cp314-cp314t-win_arm64.whl", hash = "sha256:c35abb8bfff0185efac5878da64c45dafd2b37fb0383add1be155a763c1f083d", size = 153018, upload-time = "2026-04-02T09:27:51.116Z" },
     { url = "https://files.pythonhosted.org/packages/db/8f/61959034484a4a7c527811f4721e75d02d653a35afb0b6054474d8185d4c/charset_normalizer-3.4.7-py3-none-any.whl", hash = "sha256:3dce51d0f5e7951f8bb4900c257dad282f49190fdbebecd4ba99bcc41fef404d", size = 61958, upload-time = "2026-04-02T09:28:37.794Z" },
-]
-
-[[package]]
-name = "fuzzywuzzy"
-version = "0.18.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/11/4b/0a002eea91be6048a2b5d53c5f1b4dafd57ba2e36eea961d05086d7c28ce/fuzzywuzzy-0.18.0.tar.gz", hash = "sha256:45016e92264780e58972dca1b3d939ac864b78437422beecebb3095f8efd00e8", size = 28888, upload-time = "2020-02-13T21:06:27.054Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/43/ff/74f23998ad2f93b945c0309f825be92e04e0348e062026998b5eefef4c33/fuzzywuzzy-0.18.0-py2.py3-none-any.whl", hash = "sha256:928244b28db720d1e0ee7587acf660ea49d7e4c632569cad4f1cd7e68a5f0993", size = 18272, upload-time = "2020-02-13T21:06:25.209Z" },
 ]
 
 [[package]]

@@ -16,7 +16,6 @@ dev = [
   { include-group = "cli" },
 ]
 cli = [
-  "fuzzywuzzy>=0.18.0",
   "prompt-toolkit>=3.0.52",
   "python-levenshtein>=0.27.3",
 ]

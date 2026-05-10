@@ -1,6 +1,6 @@
 from models.enums import TaskType
 import routines
-from models import Character
+from models import Character, Encyclopedia
 from models.dataclass import Item
 
 
@@ -42,9 +42,10 @@ async def go_bank(character: Character):
 
 
 @_check_freshness
-async def craft(character: Character, item: Item, quantity: int = 1):
+async def craft(character: Character, item_code: str, quantity: str = "1"):
+    item = await Encyclopedia.get_item_by_code(item_code)
     character.do_one_time_task(
-        lambda character: routines.craft(character, item, quantity)
+        lambda character: routines.craft(character, item, int(quantity))
     )
     print(f"⚒️ {character.surname} will craft {quantity}x {item.name}")
 
@@ -61,6 +62,7 @@ async def status(characters: list[Character]):
         print(char)
 
 
-async def complete_task(character: Character):
-    character.do_one_time_task(lambda char: routines.complete_task(char, TaskType.ITEM))
+async def complete_task(character: Character, task_type_str: str = "items"):
+    task_type = TaskType(task_type_str)
+    character.do_one_time_task(lambda char: routines.complete_task(char, task_type))
     print(f"  {character.surname} will complete a task")
