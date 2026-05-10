@@ -1,7 +1,12 @@
 from asyncio import Lock
+import asyncio
 from dataclasses import dataclass
 
+from httpx import AsyncClient
+
+from config import ARTIFACTSMMO_URL, HEADERS
 from models.dataclass import Item
+from models.encyclopedia import Encyclopedia
 
 
 def lock_bank(func):
@@ -15,6 +20,8 @@ def lock_bank(func):
 @dataclass
 class Bank:
     __bankelock = Lock()
+    __url = f"{ARTIFACTSMMO_URL}/my/bank"
+
     _gold: int
     _slots: int
     _expansions: int
@@ -25,11 +32,66 @@ class Bank:
     def locked(cls) -> Lock:
         return cls.__bankelock
 
-    async def check_bank(self) -> dict:
-        return {
-            "gold": self._gold,
-            "slots": self._slots,
-            "expansions": self._expansions,
-            "expansion_cost": self._expansion_cost,
-            "items": self._items.copy(),
-        }
+    @classmethod
+    async def check_bank(cls) -> "Bank":
+
+        load = asyncio.gather(
+            cls.__get_details(),
+            cls.__get_items(),
+        )
+
+        details, items = await load
+
+        return cls(
+            _gold=details["gold"],
+            _slots=details["slots"],
+            _expansions=details["expansions"],
+            _expansion_cost=details["next_expansion_cost"],
+            _items=items,
+        )
+
+    @classmethod
+    async def __get_details(cls) -> dict:
+        try:
+            async with AsyncClient() as client:
+                response = await client.get(cls.__url, headers=HEADERS)
+                data = response.json()
+                if "error" in data:
+                    raise Exception(data["error"]["message"])
+                return data["data"]
+        except Exception as e:
+            print(f"❌ Failed to get bank details: {e}")
+            return {}
+
+    @classmethod
+    async def __get_items(cls) -> dict[Item, int]:
+        try:
+            async with AsyncClient() as client:
+                page = 1
+                max_pages = 2
+                list_items = {}
+                while page <= max_pages:
+                    response = await client.get(
+                        f"{cls.__url}/items",
+                        headers=HEADERS,
+                        params={"size": 100, "page": page},
+                    )
+                    data = response.json()
+                    if "error" in data:
+                        raise Exception(data["error"]["message"])
+                    items_data = data["data"]
+                    list_items.update(
+                        {
+                            await Encyclopedia.get_item_by_code(item["code"]): item[
+                                "quantity"
+                            ]
+                            for item in items_data
+                        }
+                    )
+                    page += 1
+                    max_pages = data["pages"]
+                return list_items
+
+        except Exception as e:
+            print(f"❌ Failed to get bank items: {e}")
+            return {}
