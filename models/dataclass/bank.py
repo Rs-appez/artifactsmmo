@@ -68,11 +68,14 @@ class Bank:
 
     @classmethod
     @lock_bank
-    async def reserve_items(cls, items: list[tuple[Item, int]]):
-        bank = await cls.check_bank()
-        have_enough, missing_item = bank.have_items(items)
-        if not have_enough and missing_item is not None:
-            raise Exception(f"Not enough {missing_item.name} in bank")
+    async def reserve_items(
+        cls, items: list[tuple[Item, int]], imediately_needed: bool = True
+    ):
+        if imediately_needed:
+            bank = await cls.check_bank()
+            have_enough, missing_item = bank.have_items(items)
+            if not have_enough and missing_item is not None:
+                raise Exception(f"Not enough {missing_item.name} in bank")
         for item, quantity in items:
             cls.__reserved_items[item] += quantity
 
