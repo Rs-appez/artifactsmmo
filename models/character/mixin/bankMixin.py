@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, Protocol
 
 from config import HEADERS
 from models.dataclass import Item
+from models.dataclass.bank import lock_bank
 
 from ..decorators import need_bank, refresh_after, request_action
 
@@ -27,6 +28,7 @@ class BankMixin(Protocol):
     @need_bank
     @request_action
     @refresh_after
+    @lock_bank
     async def deposit_gold_in_bank(
         self: "Character", quantity: int, comeback: bool = False
     ) -> tuple[bool, dict | None]:
@@ -59,6 +61,7 @@ class BankMixin(Protocol):
     @need_bank
     @request_action
     @refresh_after
+    @lock_bank
     async def deposit_item_in_bank(
         self: "Character", items: dict[Item, int], comeback: bool = False
     ) -> tuple[bool, dict | None]:
@@ -90,6 +93,7 @@ class BankMixin(Protocol):
     @need_bank
     @request_action
     @refresh_after
+    @lock_bank
     async def withdraw_item_from_bank(
         self: "Character", items: list[tuple[str, int]], comeback: bool = False
     ) -> tuple[bool, dict | None]:
@@ -118,6 +122,7 @@ class BankMixin(Protocol):
     @need_bank
     @request_action
     @refresh_after
+    @lock_bank
     async def withdraw_gold_from_bank(
         self: "Character", quantity: int, comeback: bool = False
     ) -> tuple[bool, dict | None]:
