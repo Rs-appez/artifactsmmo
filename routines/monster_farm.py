@@ -1,8 +1,6 @@
-from exceptions import ImpossibleCombatException
 from models import Character, Encyclopedia
 from models.dataclass import Monster
 from utils.find_nearest import find_nearest_mob
-from collections import defaultdict
 
 
 async def mob_farm(character: Character, mob: Monster | str):
@@ -25,3 +23,5 @@ async def mob_farm(character: Character, mob: Monster | str):
         print(f"❌ {character.surname} {e}")
         if character.work_on == "mob_farm":
             character.stop()
+        else:
+            raise e

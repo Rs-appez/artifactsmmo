@@ -1,7 +1,8 @@
 from locations import monster_task_master, item_task_master
 from models import Character
-from models.dataclass import Item
+from models.dataclass import Item, Monster
 from models.enums import TaskType
+from routines import mob_farm
 
 
 async def complete_task(character: Character, type: TaskType) -> None:
@@ -20,11 +21,14 @@ async def complete_task(character: Character, type: TaskType) -> None:
             print("Failed to accept task")
             return
 
-    match type:
-        case TaskType.MONSTER:
-            await __monster_task()
-        case TaskType.ITEM:
-            await __item_task(character)
+    if character.task is None:
+        print("❌ No task accepted")
+        return
+
+    if isinstance(character.task.cible, Monster):
+        await __monster_task(character)
+    elif isinstance(character.task.cible, Item):
+        await __item_task(character)
 
 
 async def __item_task(character: Character) -> None:
@@ -58,5 +62,24 @@ async def __item_task(character: Character) -> None:
         print(f"❌ {character.surname} failed to complete the item task")
 
 
-async def __monster_task() -> None:
-    pass
+async def __monster_task(character: Character) -> None:
+    if character.task is None:
+        print("❌ No task accepted")
+        return
+    if isinstance(character.task.cible, Monster):
+        monster: Monster = character.task.cible
+    else:
+        print("❌ Task cible is not a monster")
+        return
+
+    try:
+        while character.task_resources_left > 0:
+            await mob_farm(character, monster)
+    except Exception as e:
+        print(f"❌ {character.surname} failed to complete the monster task : {e}")
+        return
+
+    if await character.complete_task():
+        print(f"  {character.surname} completed the monster task")
+    else:
+        print(f"❌ {character.surname} failed to complete the monster task")
