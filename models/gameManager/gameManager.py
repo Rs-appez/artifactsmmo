@@ -13,9 +13,9 @@ class GameManager(JobMixin):
     default_tasks = {
         "bob": (routines.shrimp_farm, []),
         "alice": (routines.mob_farm, ["chicken"]),
-        "john": (routines.mob_farm, ["cow"]),
+        "john": (routines.coal_farm, []),
         "jane": (routines.mob_farm, ["cow"]),
-        "charlie": (routines.copper_farm, []),
+        "charlie": (routines.iron_farm, []),
     }
 
     def __init__(self):
