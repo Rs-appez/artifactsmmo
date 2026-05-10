@@ -63,6 +63,7 @@ class WorkMixin(Protocol):
                 except asyncio.CancelledError:
                     if not self._interrupted:
                         raise
+                    _ = await self.refresh()
                     self._interrupted = False
         except asyncio.CancelledError:
             pass
