@@ -8,6 +8,7 @@ async def mob_farm(character: Character, mob: Monster | str):
         if isinstance(mob, str):
             mob = await Encyclopedia.get_monster_by_code(mob)
 
+        await character.weaponize()
         mob_position = find_nearest_mob(character.location, mob)
         if character.is_inventory_full:
             _ = await character.deposit_all_in_bank()

@@ -58,6 +58,10 @@ class Item:
             tradeable=data["tradeable"] == "true",
         )
 
+    @property
+    def is_weapon(self) -> bool:
+        return self.type == "weapon" and self.subtype == ""
+
     @override
     def __hash__(self):
         return hash(self.code)
