@@ -13,7 +13,7 @@ async def seeking_the_meaning_of_life(character: "Character"):
 
 
 class WorkMixin(Protocol):
-    _routine: Callable = seeking_the_meaning_of_life
+    _routine: Callable
     _previous_routine: Callable | None = None
     _work_task: asyncio.Task | None = None
     _interrupted: bool = False
@@ -22,6 +22,7 @@ class WorkMixin(Protocol):
     _character_lock: asyncio.Lock
 
     def __init_work_mixin__(self: "Character"):
+        self._routine: Callable = seeking_the_meaning_of_life
         self._priority_tasks = deque()
         self._character_lock = asyncio.Lock()
 
