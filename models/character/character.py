@@ -11,7 +11,7 @@ from models.dataclass import Item, TaskQuest
 from models.enums import Element, Layer
 from utils.math_fight import calc_attack
 
-from .decorators import refresh_after
+from .decorators import refresh_after, request_action
 from .mixin import (
     BankMixin,
     CraftMixin,
@@ -188,6 +188,29 @@ class Character(
             print(f"❌ {e}")
             return False, None
 
+    @request_action
+    @refresh_after
+    async def equip(self, item: Item, quantity: int = 1) -> tuple[bool, dict | None]:
+        try:
+            response = await self.__client.post(
+                f"{ARTIFACTSMMO_URL}/action/equip",
+                headers=HEADERS,
+                json={"code": item.code, "quantity": quantity, "slot": item.type},
+            )
+            data = response.json()
+
+            if "error" in data:
+                print("data : ", data)
+                raise Exception(data["error"]["message"])
+
+            character_data = data["data"]["character"]
+
+            print(f"⚔️  {self.surname} equipped {item.name}")
+            return True, character_data
+        except Exception as e:
+            print(f"❌ {e}")
+            return False, None
+
     @override
     def __str__(self):
         return f"{self.surname:8}: position={str(self.location):<9} - working={self.is_working} - task={self.work_on}"
@@ -249,7 +272,7 @@ class Character(
             _level=data["level"],
             _gold=data["gold"],
             _inventory={
-                Encyclopedia.get_item_by_code(item["code"]): item["quantity"]
+                await Encyclopedia.get_item_by_code(item["code"]): item["quantity"]
                 for item in data["inventory"]
                 if item["code"]
             },
