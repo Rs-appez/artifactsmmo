@@ -105,4 +105,5 @@ class WorkMixin(Protocol):
             return task(char, *args, **kwargs)
 
         routine.__name__ = f"{task.__name__} on {', '.join(map(str, args))}"
+        routine.__name__ = f"{task.__name__}"
         self._routine = routine

@@ -92,6 +92,4 @@ class FightMixin(Protocol):
             if not await self.equip(
                 await Encyclopedia.get_item_by_code("sticky_sword")
             ):
-                print(
-                    f"❌ {self.surname} failed to equip sticky sword to fight the monster task"
-                )
+                print(f"❌ {self.surname} failed to equip sticky sword")
