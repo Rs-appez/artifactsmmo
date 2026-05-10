@@ -96,13 +96,6 @@ class BankMixin(Protocol):
         self: "Character", items: list[tuple[Item, int]], comeback: bool = False
     ) -> tuple[bool, dict | None]:
         try:
-            bank = await Bank.check_bank()
-            have_all, missing_item = bank.have_items(items)
-            if not have_all and missing_item is not None:
-                print(
-                    f"❌ Cannot withdraw items not enough quantity available. Missing: {missing_item.name}"
-                )
-                return False, None
             response = await self.client.post(
                 "/bank/withdraw/item",
                 json=[
