@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import override
 
 from models.dataclass import Effect
+from models.enums import JobType
 
 
 @dataclass(frozen=True)
@@ -61,6 +62,20 @@ class Item:
     @property
     def is_weapon(self) -> bool:
         return self.type == "weapon" and self.subtype == ""
+
+    @property
+    def is_tool(self) -> bool:
+        return self.type == "weapon" and self.subtype == "tool"
+
+    def is_for_job(self, job: JobType) -> bool:
+        if not self.is_tool:
+            return False
+
+        for effect in self.effects:
+            if effect.code == job.value:
+                return True
+
+        return False
 
     @override
     def __hash__(self):
