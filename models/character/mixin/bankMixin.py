@@ -28,7 +28,7 @@ class BankMixin(Protocol):
     @request_action
     @refresh_after
     async def deposit_gold_in_bank(
-        self: "Character", quantity: int, comeback: bool = True
+        self: "Character", quantity: int, comeback: bool = False
     ) -> tuple[bool, dict | None]:
         if quantity > self.gold:
             print(f"❌ Cannot deposit {quantity} gold, only {self.gold} available")
@@ -60,7 +60,7 @@ class BankMixin(Protocol):
     @request_action
     @refresh_after
     async def deposit_item_in_bank(
-        self: "Character", items: dict[Item, int], comeback: bool = True
+        self: "Character", items: dict[Item, int], comeback: bool = False
     ) -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
