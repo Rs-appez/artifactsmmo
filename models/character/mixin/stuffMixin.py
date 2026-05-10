@@ -95,7 +95,7 @@ class StuffMixin(Protocol):
             better_items = [
                 item
                 for item in bank.items
-                if item.is_for_job(job) and (item.level > self.level)
+                if item.is_for_job(job) and (item.level <= self.level)
             ]
             return (
                 max(better_items, key=lambda item: item.level) if better_items else None
