@@ -1,6 +1,7 @@
 from asyncio import Lock
 import asyncio
 from dataclasses import dataclass
+import inspect
 
 from httpx import AsyncClient
 
@@ -13,7 +14,10 @@ from models.encyclopedia import Encyclopedia
 def lock_bank(func):
     async def wrapper(self, *args, **kwargs):
         async with Bank.locked():
-            return await func(self, *args, **kwargs)
+            if inspect.iscoroutinefunction(func):
+                return await func(self, *args, **kwargs)
+            else:
+                return func(self, *args, **kwargs)
 
     return wrapper
 
