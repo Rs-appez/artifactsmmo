@@ -7,6 +7,6 @@ monster_locations = {
     "green_slime": [(3, -2)],
     "blue_slime": [(2, -1)],
     "red_slime": [(1, -1), (2, -2)],
-    "mushroom": [(5, 3), (6, 4)],
+    "mushmush": [(5, 3), (6, 4)],
     "flying_snake": [(5, 4), (7, 4)],
 }
