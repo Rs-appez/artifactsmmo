@@ -1,10 +1,12 @@
 import asyncio
+import inspect
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.completion import NestedCompleter, FuzzyCompleter
 from prompt_toolkit.patch_stdout import patch_stdout
 
 from models import Encyclopedia, GameManager
+import routines
 from . import cli_action
 
 dict_single = {
@@ -17,6 +19,7 @@ dict_single = {
 dict_actions = {
     "craft": cli_action.craft,
     "gotask": cli_action.complete_task,
+    "goroutine": cli_action.asign_routine,
 }
 
 dict_all = {
@@ -29,6 +32,11 @@ async def cli(game_manager: GameManager):
     characters = game_manager.characters
     character_names = {name: None for name in characters.keys()}
 
+    routine_names = [
+        name
+        for name, obj in inspect.getmembers(routines)
+        if inspect.isfunction(obj) and not name.startswith("_")
+    ]
     # Initial completer without items
     completer_dict = {
         **{cmd: character_names for cmd in dict_single},
@@ -36,6 +44,12 @@ async def cli(game_manager: GameManager):
         **{
             "gotask": {
                 name: {task: None for task in ["items", "monsters"]}
+                for name in characters.keys()
+            }
+        },
+        **{
+            "goroutine": {
+                name: {routine: None for routine in routine_names}
                 for name in characters.keys()
             }
         },

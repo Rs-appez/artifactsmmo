@@ -62,7 +62,18 @@ async def status(characters: list[Character]):
         print(char)
 
 
+@_check_freshness
 async def complete_task(character: Character, task_type_str: str = "items"):
     task_type = TaskType(task_type_str)
     character.do_one_time_task(lambda char: routines.complete_task(char, task_type))
     print(f"  {character.surname} will complete a task")
+
+
+@_check_freshness
+async def asign_routine(character: Character, routine_name: str, *args):
+    routine_func = getattr(routines, routine_name, None)
+    if not routine_func:
+        print(f"❌ Unknown routine: {routine_name}")
+        return
+    character.assign_routine(routine_func)
+    print(f"🚀 {character.surname} started working on routine {routine_name}")
