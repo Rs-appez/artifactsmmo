@@ -17,3 +17,14 @@ class Element(Enum):
     FIRE = "fire"
     WATER = "water"
     AIR = "air"
+
+
+class JobType(Enum):
+    MINING = "mining"
+    WOODCUTTING = "woodcutting"
+    FISHING = "fishing"
+    WEAPONCRAFTING = "weaponcrafting"
+    GEARCRAFTING = "gearcrafting"
+    JEWELRYCRAFTING = "jewelrycrafting"
+    COOKING = "cooking"
+    ALCHEMY = "alchemy"
