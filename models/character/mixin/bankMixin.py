@@ -1,6 +1,9 @@
-from ..decorators import need_bank, refresh_after, request_action
 from typing import TYPE_CHECKING, Protocol
+
 from config import HEADERS
+from models.dataclass import Item
+
+from ..decorators import need_bank, refresh_after, request_action
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -13,15 +16,10 @@ class BankMixin(Protocol):
                 print("❌ Failed to deposit gold in bank")
                 return
 
-        all_items: list[dict[str, int | str]] = [
-            {"code": str(code), "quantity": int(quantity)}
-            for code, quantity in self.inventory.items()
-        ]
-
-        if all_items:
+        if self.inventory:
             if not await self.deposit_item_in_bank(
                 comeback=comeback,
-                items=all_items,
+                items=self.inventory,
             ):
                 print("❌ Failed to deposit items in bank")
                 return
@@ -62,13 +60,16 @@ class BankMixin(Protocol):
     @request_action
     @refresh_after
     async def deposit_item_in_bank(
-        self: "Character", items: list[dict[str, int | str]], comeback: bool = True
+        self: "Character", items: dict[Item, int], comeback: bool = True
     ) -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
                 f"{self.url}/action/bank/deposit/item",
                 headers=HEADERS,
-                json=items,
+                json=[
+                    {"code": item.code, "quantity": int(quantity)}
+                    for item, quantity in items.items()
+                ],
             )
             data = response.json()
 
@@ -79,7 +80,7 @@ class BankMixin(Protocol):
             character_data = data["data"]["character"]
 
             print(
-                f"📥 {self.surname} Deposited {', '.join([f'{item["quantity"]}x {item["code"]}' for item in items])} in bank"
+                f"📥 {self.surname} Deposited {', '.join([f'{quantity}x {item.name}' for item, quantity in items.items()])} in bank"
             )
             return True, character_data
         except Exception as e:

@@ -1,13 +1,13 @@
 import asyncio
 from dataclasses import dataclass
 from datetime import datetime
-from math import floor
 from typing import override
 
 import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
-from models.dataclass import TaskQuest
+from models import Encyclopedia
+from models.dataclass import Item, TaskQuest
 from models.enums import Element, Layer
 from utils.math_fight import calc_attack
 
@@ -47,10 +47,13 @@ class Character(
     _level: int
 
     _gold: int
-    _inventory: dict[str, int]
+    _inventory: dict[Item, int]
     _inventory_max_items: int
 
     _jobs: dict[str, int]
+
+    _weapon: Item | None = None
+
     _task: TaskQuest | None = None
 
     def __post_init__(self):
@@ -140,7 +143,7 @@ class Character(
         return self._gold
 
     @property
-    def inventory(self) -> dict[str, int]:
+    def inventory(self) -> dict[Item, int]:
         return self._inventory.copy()
 
     @property
@@ -153,6 +156,10 @@ class Character(
             sum(self._inventory.values()) >= self._inventory_max_items - 5
             or len(self._inventory) >= 17
         )
+
+    @property
+    def weapon(self) -> Item | None:
+        return self._weapon
 
     @property
     def task(self) -> TaskQuest | None:
@@ -242,7 +249,7 @@ class Character(
             _level=data["level"],
             _gold=data["gold"],
             _inventory={
-                item["code"]: item["quantity"]
+                Encyclopedia.get_item_by_code(item["code"]): item["quantity"]
                 for item in data["inventory"]
                 if item["code"]
             },
@@ -253,6 +260,9 @@ class Character(
             _attack=attack,
             _critical_strike=data.get("critical_strike", 0),
             _initiative=data.get("initiative", 0),
+            _weapon=await Encyclopedia.get_item_by_code(data["weapon_slot"])
+            if data.get("weapon_slot")
+            else None,
         )
 
     @classmethod
