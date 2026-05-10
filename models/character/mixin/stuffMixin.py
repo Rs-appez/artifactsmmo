@@ -3,7 +3,9 @@ from typing import TYPE_CHECKING, Protocol
 from config import HEADERS
 from models import Encyclopedia
 from models.character.decorators import refresh_after, request_action
-from models.dataclass import Item
+from models.dataclass import Item, Monster
+from models.dataclass.bank import Bank
+from models.enums import JobType
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -47,9 +49,54 @@ class StuffMixin(Protocol):
                 return
 
         # temporary need refactor
-        _ = await self.deposit_all_in_bank()
-        if await self.withdraw_item_from_bank([("sticky_sword", 1)]):
-            if not await self.equip(
-                await Encyclopedia.get_item_by_code("sticky_sword")
-            ):
-                print(f"❌ {self.surname} failed to equip sticky sword")
+        better_weapon = await Encyclopedia.get_item_by_code("sticky_sword")
+        await Bank.reserve_items([(better_weapon, 1)])
+        try:
+            _ = await self.deposit_all_in_bank()
+            if await self.withdraw_item_from_bank([(better_weapon, 1)]):
+                if not await self.equip(better_weapon):
+                    print(f"❌ {self.surname} failed to equip sticky sword")
+        finally:
+            Bank.unreserve_items([(better_weapon, 1)])
+
+    async def toolize(self: "Character", job: JobType) -> None:
+        if self.weapon is not None and self.weapon.is_for_job(job):
+            return
+
+        for item in self.inventory:
+            if item.is_for_job(job):
+                if not await self.equip(item):
+                    print(f"❌ {self.surname} failed to equip {item.name} to gather")
+                print(f"🛠️  {self.surname} equipped {item.name} to gather")
+                return
+
+        # temporary need refactor
+        best_tool = await self.get_better_tool(job)
+        if best_tool is None:
+            print(f"❌ {self.surname} has no better tool to equip for {job.value}")
+            return
+        await Bank.reserve_items([(best_tool, 1)])
+        try:
+            _ = await self.deposit_all_in_bank()
+            if await self.withdraw_item_from_bank([(best_tool, 1)]):
+                if not await self.equip(
+                    await Encyclopedia.get_item_by_code(f"{job.value}_tool")
+                ):
+                    print(f"❌ {self.surname} failed to equip {job.value}_tool")
+        finally:
+            Bank.unreserve_items([(best_tool, 1)])
+
+    async def get_better_weapon(self: "Character", mob: Monster) -> Item:  # pyright: ignore[reportReturnType]
+        pass
+
+    async def get_better_tool(self: "Character", job: JobType) -> Item | None:
+        async with Bank.locked():
+            bank = await Bank.check_bank()
+            better_items = [
+                item
+                for item in bank.items
+                if item.is_for_job(job) and (item.level > self.level)
+            ]
+            return (
+                max(better_items, key=lambda item: item.level) if better_items else None
+            )
