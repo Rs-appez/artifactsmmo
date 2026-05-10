@@ -21,6 +21,7 @@ from .mixin import (
     TaskMixin,
     WorkMixin,
     StuffMixin,
+    SaveMixin,
 )
 
 
@@ -34,6 +35,7 @@ class Character(
     CraftMixin,
     TaskMixin,
     StuffMixin,
+    SaveMixin,
 ):
     _name: str
     _surname: str

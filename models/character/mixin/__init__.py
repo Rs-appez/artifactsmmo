@@ -6,6 +6,7 @@ from .workMixin import WorkMixin
 from .craftMixin import CraftMixin
 from .taskMixin import TaskMixin
 from .stuffMixin import StuffMixin
+from .saveMixin import SaveMixin
 
 __all__ = [
     "BankMixin",
@@ -16,4 +17,5 @@ __all__ = [
     "CraftMixin",
     "TaskMixin",
     "StuffMixin",
+    "SaveMixin",
 ]
