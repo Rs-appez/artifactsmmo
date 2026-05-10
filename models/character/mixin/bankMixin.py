@@ -40,8 +40,7 @@ class BankMixin(Protocol):
             return False, None
         try:
             response = await self.client.post(
-                f"{self.url}/action/bank/deposit/gold",
-                headers=HEADERS,
+                "bank/deposit/gold",
                 json={"quantity": quantity},
             )
             data = response.json()
@@ -67,8 +66,7 @@ class BankMixin(Protocol):
     ) -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
-                f"{self.url}/action/bank/deposit/item",
-                headers=HEADERS,
+                "/bank/deposit/item",
                 json=[
                     {"code": item.code, "quantity": int(quantity)}
                     for item, quantity in items.items()
@@ -106,8 +104,7 @@ class BankMixin(Protocol):
                 )
                 return False, None
             response = await self.client.post(
-                f"{self.url}/action/bank/withdraw/item",
-                headers=HEADERS,
+                "/bank/withdraw/item",
                 json=[
                     {"code": item.code, "quantity": quantity}
                     for item, quantity in items
@@ -141,8 +138,7 @@ class BankMixin(Protocol):
             return False, None
         try:
             response = await self.client.post(
-                f"{self.url}/action/bank/withdraw/gold",
-                headers=HEADERS,
+                "/bank/withdraw/gold",
                 json={"quantity": quantity},
             )
             data = response.json()

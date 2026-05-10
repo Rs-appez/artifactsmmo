@@ -65,8 +65,12 @@ class Character(
     _task: TaskQuest | None = None
 
     def __post_init__(self):
-        self.__url = f"{ARTIFACTSMMO_URL}/my/{self.name}"
-        self.__client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
+        self.__client = httpx.AsyncClient(
+            timeout=30.0,
+            follow_redirects=True,
+            headers=HEADERS,
+            base_url=f"{ARTIFACTSMMO_URL}/my/{self.name}/action",
+        )
 
         self.__init_work_mixin__()
 
@@ -77,10 +81,6 @@ class Character(
     @property
     def surname(self):
         return self._surname
-
-    @property
-    def url(self):
-        return self.__url
 
     @property
     def client(self):

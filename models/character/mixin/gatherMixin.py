@@ -13,8 +13,7 @@ class GatherMixin(Protocol):
     async def gather(self: "Character") -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
-                f"{self.url}/action/gathering",
-                headers=HEADERS,
+                "/gathering",
             )
             data = response.json()
 

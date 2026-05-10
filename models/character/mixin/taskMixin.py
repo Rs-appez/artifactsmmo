@@ -20,8 +20,7 @@ class TaskMixin(Protocol):
     async def accept_task(self: "Character") -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
-                f"{self.url}/action/task/new",
-                headers=HEADERS,
+                "/task/new",
             )
             data = response.json()
 
@@ -41,8 +40,7 @@ class TaskMixin(Protocol):
     async def complete_task(self: "Character") -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
-                f"{self.url}/action/task/complete",
-                headers=HEADERS,
+                "/task/complete",
             )
             data = response.json()
 
@@ -64,8 +62,7 @@ class TaskMixin(Protocol):
     ) -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
-                f"{self.url}/action/task/trade",
-                headers=HEADERS,
+                "/task/trade",
                 json={"quantity": quantity, "code": item.code},
             )
             data = response.json()

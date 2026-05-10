@@ -19,8 +19,7 @@ class StuffMixin(Protocol):
     ) -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
-                f"{self.url}/action/equip",
-                headers=HEADERS,
+                "/equip",
                 json={"code": item.code, "slot": item.type, "quantity": quantity},
             )
             data = response.json()

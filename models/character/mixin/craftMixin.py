@@ -25,8 +25,7 @@ class CraftMixin(Protocol):
 
         try:
             response = await self.client.post(
-                f"{self.url}/action/crafting",
-                headers=HEADERS,
+                "/crafting",
                 json={"code": item.code, "quantity": quantity},
             )
             data = response.json()

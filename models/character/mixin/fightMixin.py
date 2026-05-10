@@ -31,8 +31,7 @@ class FightMixin(Protocol):
     async def fight(self: "Character") -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
-                f"{self.url}/action/fight",
-                headers=HEADERS,
+                "/fight",
             )
             data = response.json()["data"]
 
@@ -59,8 +58,7 @@ class FightMixin(Protocol):
     async def rest(self: "Character") -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
-                f"{self.url}/action/rest",
-                headers=HEADERS,
+                "/rest",
             )
             data = response.json()
 

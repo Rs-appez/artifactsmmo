@@ -18,9 +18,8 @@ class MoveMixin(Protocol):
             return True, None
         try:
             response = await self.client.post(
-                f"{self.url}/action/move",
+                "/move",
                 json={"x": position[0], "y": position[1]},
-                headers=HEADERS,
             )
             data = response.json()
 
