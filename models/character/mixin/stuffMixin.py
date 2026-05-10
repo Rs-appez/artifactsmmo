@@ -79,9 +79,7 @@ class StuffMixin(Protocol):
         try:
             _ = await self.deposit_all_in_bank()
             if await self.withdraw_item_from_bank([(best_tool, 1)]):
-                if not await self.equip(
-                    await Encyclopedia.get_item_by_code(f"{job.value}_tool")
-                ):
+                if not await self.equip(best_tool):
                     print(f"❌ {self.surname} failed to equip {job.value}_tool")
         finally:
             Bank.unreserve_items([(best_tool, 1)])
