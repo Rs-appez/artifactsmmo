@@ -56,7 +56,7 @@ class StuffMixin(Protocol):
                 if not await self.equip(better_weapon):
                     print(f"❌ {self.surname} failed to equip sticky sword")
         finally:
-            Bank.unreserve_items([(better_weapon, 1)])
+            await Bank.unreserve_items([(better_weapon, 1)])
 
     async def toolize(self: "Character", job: JobType) -> None:
         if self.weapon is not None and self.weapon.is_for_job(job):
@@ -81,7 +81,7 @@ class StuffMixin(Protocol):
                 if not await self.equip(best_tool):
                     print(f"❌ {self.surname} failed to equip {job.value}_tool")
         finally:
-            Bank.unreserve_items([(best_tool, 1)])
+            await Bank.unreserve_items([(best_tool, 1)])
 
     async def get_better_weapon(self: "Character", mob: Monster) -> Item:  # pyright: ignore[reportReturnType]
         pass

@@ -1,7 +1,6 @@
 from asyncio import Lock
 import asyncio
 from dataclasses import dataclass
-import inspect
 
 from httpx import AsyncClient
 
@@ -14,10 +13,7 @@ from models.encyclopedia import Encyclopedia
 def lock_bank(func):
     async def wrapper(self, *args, **kwargs):
         async with Bank.locked():
-            if inspect.iscoroutinefunction(func):
-                return await func(self, *args, **kwargs)
-            else:
-                return func(self, *args, **kwargs)
+            return await func(self, *args, **kwargs)
 
     return wrapper
 
@@ -31,7 +27,7 @@ def reserve_items(func):
             return await func(self, *args, **kwargs)
         finally:
             if items:
-                Bank.unreserve_items(items)
+                await Bank.unreserve_items(items)
 
     return wrapper
 
@@ -93,7 +89,7 @@ class Bank:
 
     @classmethod
     @lock_bank
-    def unreserve_items(cls, items: list[tuple[Item, int]]):
+    async def unreserve_items(cls, items: list[tuple[Item, int]]):
         for item, quantity in items:
             cls.__reserved_items[item] -= quantity
 

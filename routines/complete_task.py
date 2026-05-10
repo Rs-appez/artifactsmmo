@@ -67,7 +67,7 @@ async def __item_task(character: Character) -> None:
                 print("Failed to complete task")
                 return
         finally:
-            Bank.unreserve_items(trip_resources)
+            await Bank.unreserve_items(trip_resources)
 
     if await character.complete_task():
         print(f"  {character.surname} completed the item task")

@@ -140,4 +140,4 @@ async def craft(character: Character, item: Item, quantity: int):
         return
 
     finally:
-        Bank.unreserve_items(reserved_ingredients)
+        await Bank.unreserve_items(reserved_ingredients)
