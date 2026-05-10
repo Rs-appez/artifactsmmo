@@ -193,7 +193,7 @@ class Character(
     async def equip(self, item: Item, quantity: int = 1) -> tuple[bool, dict | None]:
         try:
             response = await self.__client.post(
-                f"{self.__url}/action/equip/",
+                f"{self.url}/action/equip/",
                 headers=HEADERS,
                 json={"code": item.code, "slot": item.type, "quantity": quantity},
             )
