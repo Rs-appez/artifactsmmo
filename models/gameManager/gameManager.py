@@ -11,11 +11,11 @@ from .mixins import JobMixin
 
 class GameManager(JobMixin):
     default_tasks = {
-        "bob": (routines.gudgeon_farm, []),
-        "alice": (routines.mob_farm, ["cow"]),
-        "john": (routines.sunflower_farm, []),
-        "jane": (routines.ash_farm, []),
-        "charlie": (routines.mob_farm, ["red_slime"]),
+        "bob": (routines.shrimp_farm, []),
+        "alice": (routines.mob_farm, ["chicken"]),
+        "john": (routines.mob_farm, ["cow"]),
+        "jane": (routines.mob_farm, ["cow"]),
+        "charlie": (routines.copper_farm, []),
     }
 
     def __init__(self):
