@@ -8,7 +8,7 @@ import httpx
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
 from models import Encyclopedia
 from models.dataclass import Item, TaskQuest
-from models.enums import Element, Layer
+from models.enums import Element, JobType, Layer
 from utils.math_fight import calc_attack
 
 from .decorators import refresh_after
@@ -58,7 +58,7 @@ class Character(
     _inventory: dict[Item, int]
     _inventory_max_items: int
 
-    _jobs: dict[str, int]
+    _jobs: dict[JobType, int]
 
     _weapon: Item | None = None
 
@@ -176,8 +176,9 @@ class Character(
     def get_job_level(self, job_name: str) -> int:
         return self._jobs.get(job_name, 0)
 
-    def has_job(self: "Character", job_name: str, level=1) -> bool:
-        return self._jobs.get(job_name, 0) >= level
+    def has_job(self: "Character", job_name: str | JobType, level=1) -> bool:
+        job = JobType(job_name) if isinstance(job_name, str) else job_name
+        return self._jobs.get(job, 0) >= level
 
     @refresh_after
     async def refresh(self) -> tuple[bool, dict | None]:
@@ -276,12 +277,12 @@ class Character(
     @classmethod
     def __get_jobs(cls, data: dict) -> dict[str, int]:
         jobs = {}
-        jobs["mining"] = data.get("mining_level", 0)
-        jobs["woodcutting"] = data.get("woodcutting_level", 0)
-        jobs["fishing"] = data.get("fishing_level", 0)
-        jobs["weaponcrafting"] = data.get("weaponcrafting_level", 0)
-        jobs["gearcrafting"] = data.get("gearcrafting_level", 0)
-        jobs["jewelrycrafting"] = data.get("jewelrycrafting_level", 0)
-        jobs["cooking"] = data.get("cooking_level", 0)
-        jobs["alchemy"] = data.get("alchemy_level", 0)
+        jobs[JobType.MINING] = data.get("mining_level", 0)
+        jobs[JobType.WOODCUTTING] = data.get("woodcutting_level", 0)
+        jobs[JobType.FISHING] = data.get("fishing_level", 0)
+        jobs[JobType.WEAPONCRAFTING] = data.get("weaponcrafting_level", 0)
+        jobs[JobType.GEARCRAFTING] = data.get("gearcrafting_level", 0)
+        jobs[JobType.JEWELRYCRAFTING] = data.get("jewelrycrafting_level", 0)
+        jobs[JobType.COOKING] = data.get("cooking_level", 0)
+        jobs[JobType.ALCHEMY] = data.get("alchemy_level", 0)
         return jobs
