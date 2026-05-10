@@ -14,7 +14,7 @@ class GameManager(JobMixin):
         "bob": (routines.shrimp_farm, []),
         "alice": (routines.mob_farm, ["chicken"]),
         "john": (routines.coal_farm, []),
-        "jane": (routines.mob_farm, ["cow"]),
+        "jane": (routines.ash_farm, []),
         "charlie": (routines.iron_farm, []),
     }
 
