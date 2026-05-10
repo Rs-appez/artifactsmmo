@@ -11,7 +11,7 @@ from models.dataclass import Item, TaskQuest
 from models.enums import Element, Layer
 from utils.math_fight import calc_attack
 
-from .decorators import refresh_after, request_action
+from .decorators import refresh_after
 from .mixin import (
     BankMixin,
     CraftMixin,
@@ -20,12 +20,20 @@ from .mixin import (
     MoveMixin,
     TaskMixin,
     WorkMixin,
+    StuffMixin,
 )
 
 
 @dataclass
 class Character(
-    BankMixin, WorkMixin, MoveMixin, FightMixin, GatherMixin, CraftMixin, TaskMixin
+    BankMixin,
+    WorkMixin,
+    MoveMixin,
+    FightMixin,
+    GatherMixin,
+    CraftMixin,
+    TaskMixin,
+    StuffMixin,
 ):
     _name: str
     _surname: str
@@ -184,29 +192,6 @@ class Character(
             character_data = data["data"]
             return True, character_data
 
-        except Exception as e:
-            print(f"❌ {e}")
-            return False, None
-
-    @request_action
-    @refresh_after
-    async def equip(self, item: Item, quantity: int = 1) -> tuple[bool, dict | None]:
-        try:
-            response = await self.__client.post(
-                f"{self.url}/action/equip/",
-                headers=HEADERS,
-                json={"code": item.code, "slot": item.type, "quantity": quantity},
-            )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
-            print(f"⚔️  {self.surname} equipped {item.name}")
-            return True, character_data
         except Exception as e:
             print(f"❌ {e}")
             return False, None

@@ -1,8 +1,7 @@
-from typing import Protocol, TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from config import HEADERS
 from exceptions import ImpossibleCombatException
-from models import Encyclopedia
 from models.character.decorators import refresh_after, request_action
 from models.dataclass import Monster
 from utils.math_fight import damage_on
@@ -74,22 +73,3 @@ class FightMixin(Protocol):
         except Exception as e:
             print(f"❌ {e}")
             return False, None
-
-    async def weaponize(self: "Character") -> None:
-        if self.weapon is not None and self.weapon.is_weapon:
-            return
-
-        for item in self.inventory:
-            if item.is_weapon:
-                if not await self.equip(item):
-                    print(f"❌ {self.surname} failed to equip {item.name} to fight")
-                print(f"⚔️  {self.surname} equipped {item.name} to fight")
-                return
-
-        # temporary need refactor
-        _ = await self.deposit_all_in_bank()
-        if await self.withdraw_item_from_bank([("sticky_sword", 1)]):
-            if not await self.equip(
-                await Encyclopedia.get_item_by_code("sticky_sword")
-            ):
-                print(f"❌ {self.surname} failed to equip sticky sword")
