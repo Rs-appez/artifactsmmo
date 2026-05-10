@@ -75,5 +75,5 @@ async def asign_routine(character: Character, routine_name: str, *args):
     if not routine_func:
         print(f"❌ Unknown routine: {routine_name}")
         return
-    character.assign_routine(routine_func)
+    character.assign_routine(routine_func, *args)
     print(f"🚀 {character.surname} started working on routine {routine_name}")
