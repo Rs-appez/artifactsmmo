@@ -1,6 +1,7 @@
 from locations import monster_task_master, item_task_master
 from models import Character
 from models.dataclass import Item, Monster
+from models.dataclass.bank import Bank
 from models.enums import TaskType
 from routines import mob_farm
 
@@ -25,10 +26,14 @@ async def complete_task(character: Character, type: TaskType) -> None:
         print("❌ No task accepted")
         return
 
-    if isinstance(character.task.cible, Monster):
-        await __monster_task(character)
-    elif isinstance(character.task.cible, Item):
-        await __item_task(character)
+    try:
+        if isinstance(character.task.cible, Monster):
+            await __monster_task(character)
+        elif isinstance(character.task.cible, Item):
+            await __item_task(character)
+    except Exception as e:
+        print(f"❌ {character.surname} failed to complete the task : {e}")
+        return
 
 
 async def __item_task(character: Character) -> None:
@@ -41,20 +46,28 @@ async def __item_task(character: Character) -> None:
         print("❌ Task cible is not an item")
         return
     while character.task_resources_left > 0:
-        await character.deposit_all_in_bank(comeback=False)
         nb_resources_for_the_trip = min(
             character.task_resources_left, character.inventory_max_items
         )
-        if not await character.withdraw_item_from_bank(
-            [(item, nb_resources_for_the_trip)]
-        ):
-            return
-        if not await character.move(item_task_master):
-            print("Failed to move to task master")
-            return
-        if not await character.trade_with_task_master(item, nb_resources_for_the_trip):
-            print("Failed to complete task")
-            return
+
+        trip_resources = [(item, nb_resources_for_the_trip)]
+
+        await Bank.reserve_items(trip_resources)
+
+        try:
+            await character.deposit_all_in_bank(comeback=False)
+            if not await character.withdraw_item_from_bank(trip_resources):
+                return
+            if not await character.move(item_task_master):
+                print("Failed to move to task master")
+                return
+            if not await character.trade_with_task_master(
+                item, nb_resources_for_the_trip
+            ):
+                print("Failed to complete task")
+                return
+        finally:
+            Bank.unreserve_items(trip_resources)
 
     if await character.complete_task():
         print(f"  {character.surname} completed the item task")

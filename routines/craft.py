@@ -1,5 +1,6 @@
 from models import Character, Encyclopedia
 from models.dataclass import Item
+from models.dataclass.bank import Bank
 from utils.find_nearest import find_nearest_workshop
 from math import ceil
 
@@ -31,6 +32,9 @@ async def __get_trips_info(
         )
         for ingredient in craft_ingredients
     ]
+    await Bank.reserve_items(
+        [(ingredient, qty * quantity) for ingredient, qty in ingredients]
+    )
     nb_ingredients = sum(nb[1] for nb in ingredients)
     nb_craft_per_trip = inventory_max_items // nb_ingredients
     if nb_craft_per_trip == 0:
