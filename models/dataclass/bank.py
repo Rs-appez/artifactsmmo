@@ -95,3 +95,9 @@ class Bank:
         except Exception as e:
             print(f"❌ Failed to get bank items: {e}")
             return {}
+
+    def have_items(self, items: list[tuple[Item, int]]) -> tuple[bool, Item | None]:
+        for item, quantity in items:
+            if self._items.get(item, 0) < quantity:
+                return False, item
+        return True, None
