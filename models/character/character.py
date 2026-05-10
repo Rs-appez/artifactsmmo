@@ -173,8 +173,9 @@ class Character(
     def task(self) -> TaskQuest | None:
         return self._task
 
-    def get_job_level(self, job_name: str) -> int:
-        return self._jobs.get(job_name, 0)
+    def get_job_level(self, job_name: str | JobType) -> int:
+        job = JobType(job_name) if isinstance(job_name, str) else job_name
+        return self._jobs.get(job, 0)
 
     def has_job(self: "Character", job_name: str | JobType, level=1) -> bool:
         job = JobType(job_name) if isinstance(job_name, str) else job_name
