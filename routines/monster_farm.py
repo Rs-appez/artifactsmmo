@@ -12,12 +12,12 @@ async def mob_farm(character: Character, mob: Monster | str):
         mob_position = find_nearest_mob(character.location, mob)
         if character.is_inventory_full:
             _ = await character.deposit_all_in_bank()
-        _ = await character.move(mob_position)
         if not character.will_win_against(mob):
             print(
                 f"󰻝  {character.surname} rests to recover hp before fighting {mob.name}"
             )
             _ = await character.rest()
+        _ = await character.move(mob_position)
         _ = await character.fight()
 
     except Exception as e:
