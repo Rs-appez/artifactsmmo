@@ -3,7 +3,7 @@ import asyncio
 import signal
 import sys
 
-from models import Encyclopedia, GameManager
+from models import GameManager
 from cli import cli
 
 
