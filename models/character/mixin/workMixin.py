@@ -107,4 +107,6 @@ class WorkMixin(Protocol):
 
         routine.__name__ = f"{task.__name__} on {', '.join(map(str, args))}"
         routine.__name__ = f"{task.__name__}"
+
+        self._interrupt_routine()
         self._routine = routine
