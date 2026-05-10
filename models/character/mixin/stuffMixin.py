@@ -31,7 +31,6 @@ class StuffMixin(Protocol):
 
             character_data = data["data"]["character"]
 
-            print(f"⚔️  {self.surname} equipped {item.name}")
             return True, character_data
         except Exception as e:
             print(f"❌ {e}")
