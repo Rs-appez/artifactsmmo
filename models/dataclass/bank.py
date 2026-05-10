@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from httpx import AsyncClient
 
+from collections import defaultdict
 from config import ARTIFACTSMMO_URL, HEADERS
 from models.dataclass import Item
 from models.encyclopedia import Encyclopedia
@@ -17,10 +18,25 @@ def lock_bank(func):
     return wrapper
 
 
+def reserve_items(func):
+    async def wrapper(self, *args, **kwargs):
+        items = kwargs.get("items", [])
+        if items:
+            await Bank.reserve_items(items)
+        try:
+            return await func(self, *args, **kwargs)
+        finally:
+            if items:
+                Bank.unreserve_items(items)
+
+    return wrapper
+
+
 @dataclass
 class Bank:
     __bankelock = Lock()
     __url = f"{ARTIFACTSMMO_URL}/my/bank"
+    __reserved_items = defaultdict(int)
 
     _gold: int
     _slots: int
@@ -49,6 +65,22 @@ class Bank:
             _expansion_cost=details["next_expansion_cost"],
             _items=items,
         )
+
+    @classmethod
+    @lock_bank
+    async def reserve_items(cls, items: list[tuple[Item, int]]):
+        bank = await cls.check_bank()
+        have_enough, missing_item = bank.have_items(items)
+        if not have_enough and missing_item is not None:
+            raise Exception(f"Not enough {missing_item.name} in bank")
+        for item, quantity in items:
+            cls.__reserved_items[item] += quantity
+
+    @classmethod
+    @lock_bank
+    def unreserve_items(cls, items: list[tuple[Item, int]]):
+        for item, quantity in items:
+            cls.__reserved_items[item] -= quantity
 
     @classmethod
     async def __get_details(cls) -> dict:
@@ -98,6 +130,6 @@ class Bank:
 
     def have_items(self, items: list[tuple[Item, int]]) -> tuple[bool, Item | None]:
         for item, quantity in items:
-            if self._items.get(item, 0) < quantity:
+            if self._items.get(item, 0) - self.__reserved_items[item] < quantity:
                 return False, item
         return True, None
