@@ -48,6 +48,14 @@ class Bank:
     def locked(cls) -> Lock:
         return cls.__bankelock
 
+    @property
+    def gold(self) -> int:
+        return self._gold
+
+    @property
+    def items(self) -> dict[Item, int]:
+        return self._items.copy()
+
     @classmethod
     async def check_bank(cls) -> "Bank":
 
