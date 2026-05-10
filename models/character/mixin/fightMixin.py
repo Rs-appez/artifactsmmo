@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 class FightMixin(Protocol):
     def will_win_against(self: "Character", monster: Monster) -> bool:
         damage = damage_on(self, monster)
+        damage += (damage * 0.5) * (self.critical_strike / 100)
         nb_turns_to_kill = (monster.hp) // damage
         if monster.initiative >= self.initiative:
             nb_turns_to_kill += 1
