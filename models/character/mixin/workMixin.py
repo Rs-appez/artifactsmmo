@@ -22,7 +22,10 @@ class WorkMixin(Protocol):
     _character_lock: asyncio.Lock
 
     def __init_work_mixin__(self: "Character"):
-        self._routine: Callable = seeking_the_meaning_of_life
+        try:
+            self._routine = self.load_routine()
+        except Exception:
+            self._routine: Callable = seeking_the_meaning_of_life
         self._priority_tasks = deque()
         self._character_lock = asyncio.Lock()
 
@@ -52,6 +55,7 @@ class WorkMixin(Protocol):
                 return
             self._work_task = asyncio.current_task()
         try:
+            print(f"🚀 {self.surname} started working on routine {self.work_on}")
             while True:
                 try:
                     if self._priority_tasks:

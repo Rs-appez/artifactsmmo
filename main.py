@@ -28,6 +28,8 @@ async def main():
     try:
         await tasks
     except asyncio.CancelledError:
+        for character in manager.characters.values():
+            character.save_routine()
         raise
 
 
