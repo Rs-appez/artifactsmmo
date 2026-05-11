@@ -52,11 +52,10 @@ async def __item_task(character: Character) -> None:
 
         trip_resources = [(item, nb_resources_for_the_trip)]
 
-        await Bank.reserve_items(trip_resources)
-
+        bank_token = await Bank.reserve_items(trip_resources)
         try:
             await character.deposit_all_in_bank(comeback=False)
-            if not await character.withdraw_item_from_bank(trip_resources):
+            if not await character.withdraw_item_from_bank(bank_token):
                 return
             if not await character.move(item_task_master):
                 print("Failed to move to task master")
@@ -67,7 +66,7 @@ async def __item_task(character: Character) -> None:
                 print("Failed to complete task")
                 return
         finally:
-            await Bank.unreserve_items(trip_resources)
+            await Bank.unreserve_items(bank_token)
 
     if await character.complete_task():
         print(f"  {character.surname} completed the item task")

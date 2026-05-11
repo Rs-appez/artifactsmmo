@@ -1,3 +1,4 @@
+import uuid
 from models import Character, Encyclopedia
 from models.dataclass import Item
 from models.dataclass.bank import Bank
@@ -51,12 +52,12 @@ async def __get_trips_info(
 async def __make_trip(
     character: Character,
     workshop_location: tuple[int, int],
-    ingredients: list[tuple[Item, int]],
+    bank_token: uuid.UUID,
     item: Item,
     quantity: int,
 ):
     _ = await character.deposit_all_in_bank(comeback=False)
-    if not await character.withdraw_item_from_bank(ingredients):
+    if not await character.withdraw_item_from_bank(bank_token):
         print(
             f"❌ {character.surname} failed to withdraw ingredients from bank for crafting {item.name}"
         )
@@ -96,7 +97,7 @@ async def craft(character: Character, item: Item, quantity: int):
         (ingredient, qty * quantity) for ingredient, qty in ingredients
     ]
     try:
-        await Bank.reserve_items(reserved_ingredients)
+        bank_token = await Bank.reserve_items(reserved_ingredients)
     except Exception as e:
         print(
             f"❌ {character.surname} failed to reserve ingredients in bank for crafting {item.name} : {e}"
@@ -117,17 +118,23 @@ async def craft(character: Character, item: Item, quantity: int):
         )
 
         for _ in range(nb_trips - 1):
+            trip_token = Bank.get_reserved_items_partial(
+                bank_token, ingredients_for_trip
+            )
             await __make_trip(
                 character,
                 nearest_workshop,
-                ingredients_for_trip,
+                trip_token,
                 item,
                 nb_craft_per_trip,
             )
+        last_trip_token = Bank.get_reserved_items_partial(
+            bank_token, ingredients_for_last_trip
+        )
         await __make_trip(
             character,
             nearest_workshop,
-            ingredients_for_last_trip,
+            last_trip_token,
             item,
             nb_craft_last_trip,
         )
@@ -138,6 +145,5 @@ async def craft(character: Character, item: Item, quantity: int):
     except Exception as e:
         print(f"❌ {e}")
         return
-
     finally:
-        await Bank.unreserve_items(reserved_ingredients)
+        await Bank.unreserve_items(bank_token)

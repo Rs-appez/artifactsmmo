@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING, Protocol
+import uuid
 
 from config import HEADERS
 from models.dataclass import Item
@@ -93,9 +94,12 @@ class BankMixin(Protocol):
     @refresh_after
     @lock_bank
     async def withdraw_item_from_bank(
-        self: "Character", items: list[tuple[Item, int]], comeback: bool = False
+        self: "Character",
+        bank_token: uuid.UUID,
+        comeback: bool = False,
     ) -> tuple[bool, dict | None]:
         try:
+            items = Bank.get_reserved_items(bank_token)
             response = await self.client.post(
                 "/bank/withdraw/item",
                 json=[
@@ -118,6 +122,8 @@ class BankMixin(Protocol):
         except Exception as e:
             print(f"❌ {e}")
             return False, None
+        finally:
+            await Bank.unreserve_items(bank_token)
 
     @need_bank
     @request_action

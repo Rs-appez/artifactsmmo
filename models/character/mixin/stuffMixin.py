@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING, Protocol
+import uuid
 
 from config import HEADERS
 from models import Encyclopedia
@@ -71,14 +72,14 @@ class StuffMixin(Protocol):
 
         # temporary need refactor
         better_weapon = await Encyclopedia.get_item_by_code("sticky_sword")
-        await Bank.reserve_items([(better_weapon, 1)])
+        bank_token = await Bank.reserve_items([(better_weapon, 1)])
         try:
             _ = await self.deposit_all_in_bank()
-            if await self.withdraw_item_from_bank([(better_weapon, 1)]):
+            if await self.withdraw_item_from_bank(bank_token):
                 if not await self.equip(better_weapon):
                     print(f"❌ {self.surname} failed to equip sticky sword")
         finally:
-            await Bank.unreserve_items([(better_weapon, 1)])
+            await Bank.unreserve_items(bank_token)
 
     async def toolize(self: "Character", job: JobType) -> None:
         if self.weapon is not None and self.weapon.is_for_job(job):
@@ -92,22 +93,25 @@ class StuffMixin(Protocol):
                 return
 
         # temporary need refactor
-        best_tool = await self._get_better_tool(job)
-        if best_tool is None:
+        bank_token, best_tool = await self._get_better_tool(job)
+        if best_tool is None or bank_token is None:
             print(f"❌ {self.surname} has no better tool to equip for {job.value}")
             return
+
         try:
             _ = await self.deposit_all_in_bank()
-            if await self.withdraw_item_from_bank([(best_tool, 1)]):
+            if await self.withdraw_item_from_bank(bank_token):
                 if not await self.equip(best_tool):
                     print(f"❌ {self.surname} failed to equip {job.value}_tool")
         finally:
-            await Bank.unreserve_items([(best_tool, 1)])
+            await Bank.unreserve_items(bank_token)
 
     async def _get_better_weapon(self: "Character", mob: Monster) -> Item:  # pyright: ignore[reportReturnType]
         pass
 
-    async def _get_better_tool(self: "Character", job: JobType) -> Item | None:
+    async def _get_better_tool(
+        self: "Character", job: JobType
+    ) -> tuple[uuid.UUID | None, Item | None]:
         async with Bank.locked():
             bank = await Bank.check_bank()
             better_items = [
@@ -119,5 +123,7 @@ class StuffMixin(Protocol):
                 max(better_items, key=lambda item: item.level) if better_items else None
             )
             if best_tool is not None:
-                await Bank.reserve_items([(best_tool, 1)])
-            return best_tool
+                bank_token = await Bank.reserve_items([(best_tool, 1)])
+                return bank_token, best_tool
+
+            return None, None
