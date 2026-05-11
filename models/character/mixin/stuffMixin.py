@@ -92,12 +92,9 @@ class StuffMixin(Protocol):
                 return
 
         # temporary need refactor
-        bank_token, best_tool = await self._get_better_tool(job)
-        if best_tool is None or bank_token is None:
-            print(f"❌ {self.surname} has no better tool to equip for {job.value}")
-            return
-
+        bank_token = None
         try:
+            bank_token, best_tool = await Bank.get_tool(self, job)
             if not self.is_inventory_full and self.weapon is not None:
                 _ = await self.unequip("weapon")
             _ = await self.deposit_all_in_bank()
@@ -108,26 +105,8 @@ class StuffMixin(Protocol):
                 _ = await self.deposit_all_in_bank()
 
         finally:
-            await Bank.unreserve_items(bank_token)
+            if bank_token is not None:
+                await Bank.unreserve_items(bank_token)
 
     async def _get_better_weapon(self: "Character", mob: Monster) -> Item:  # pyright: ignore[reportReturnType]
         pass
-
-    async def _get_better_tool(
-        self: "Character", job: JobType
-    ) -> tuple[uuid.UUID | None, Item | None]:
-        async with Bank.locked():
-            bank = await Bank.__check_bank()
-            better_items = [
-                item
-                for item in bank.items
-                if item.is_for_job(job) and (item.level <= self.level)
-            ]
-            best_tool = (
-                max(better_items, key=lambda item: item.level) if better_items else None
-            )
-            if best_tool is not None:
-                bank_token = await Bank._reserve_items([(best_tool, 1)])  # pyright: ignore[reportPrivateUsage]
-                return bank_token, best_tool
-
-            return None, None

@@ -7,8 +7,10 @@ from httpx import AsyncClient
 
 from collections import defaultdict
 from config import ARTIFACTSMMO_URL, HEADERS
+from models.character.character import Character
 from models.dataclass import Item
 from models.encyclopedia import Encyclopedia
+from models.enums import JobType
 
 
 def lock_bank(func):
@@ -133,7 +135,7 @@ class Bank:
 
     @classmethod
     @lock_bank
-    async def get_food(cls, quantity: int) -> uuid.UUID:
+    async def get_food(cls, character: Character, quantity: int) -> uuid.UUID:
         bank = await cls.__check_bank()
         food_items = {
             item: quantity for item, quantity in bank.items.items() if item.is_food
@@ -149,6 +151,23 @@ class Bank:
             quantity -= use_quantity
 
         return await cls._reserve_items(packed_food, bank=bank)
+
+    @classmethod
+    @lock_bank
+    async def get_tool(
+        cls, character: Character, job: JobType
+    ) -> tuple[uuid.UUID, Item]:
+        bank = await cls.__check_bank()
+        tool_items = {
+            item
+            for item in bank.items
+            if item.is_for_job(job) and item.level <= character.level
+        }
+        if not tool_items:
+            raise Exception(f"No tool found for job {job.value} in bank")
+
+        best_tool = max(tool_items, key=lambda item: item.level)
+        return (await cls._reserve_items({best_tool: 1}, bank=bank), best_tool)
 
     @classmethod
     async def __get_details(cls) -> dict:
