@@ -10,4 +10,5 @@ monster_locations = {
     "mushmush": [(5, 3), (6, 4)],
     "flying_snake": [(5, 4), (7, 4)],
     "wolf": [(-2, 1)],
+    "highwayman": [(2, 8)],
 }
