@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Protocol
 from config import HEADERS
 from exceptions import ImpossibleCombatException
 from models.character.decorators import refresh_after, request_action
-from models.dataclass import Monster
+from models.dataclass import Item, Monster
 from utils.math_fight import damage_on
 
 if TYPE_CHECKING:
@@ -59,6 +59,31 @@ class FightMixin(Protocol):
         try:
             response = await self.client.post(
                 "/rest",
+            )
+            data = response.json()
+
+            if "error" in data:
+                print("data : ", data)
+                raise Exception(data["error"]["message"])
+
+            character_data = data["data"]["character"]
+
+            return True, character_data
+        except Exception as e:
+            print(f"❌ {e}")
+            return False, None
+
+    @request_action
+    @refresh_after
+    async def eat(
+        self: "Character", item: Item, quantity: int
+    ) -> tuple[bool, dict | None]:
+        try:
+            if item.type != "consumable":
+                raise Exception(f"{item.name} is not a consumable item")
+            response = await self.client.post(
+                "/use",
+                json={"quantity": quantity, "code": item.code},
             )
             data = response.json()
 
