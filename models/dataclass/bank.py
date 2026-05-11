@@ -18,20 +18,6 @@ def lock_bank(func):
     return wrapper
 
 
-def reserve_items(func):
-    async def wrapper(self, *args, **kwargs):
-        items = kwargs.get("items", [])
-        if items:
-            await Bank.reserve_items(items)
-        try:
-            return await func(self, *args, **kwargs)
-        finally:
-            if items:
-                await Bank.unreserve_items(items)
-
-    return wrapper
-
-
 @dataclass
 class Bank:
     __bankelock = Lock()
