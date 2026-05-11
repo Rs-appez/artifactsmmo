@@ -107,6 +107,3 @@ class StuffMixin(Protocol):
         finally:
             if bank_token is not None:
                 await Bank.unreserve_items(bank_token)
-
-    async def _get_better_weapon(self: "Character", mob: Monster) -> Item:  # pyright: ignore[reportReturnType]
-        pass
