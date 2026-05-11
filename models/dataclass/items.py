@@ -60,6 +60,10 @@ class Item:
         )
 
     @property
+    def is_food(self) -> bool:
+        return self.type == "consomable" and self.subtype == "food"
+
+    @property
     def is_weapon(self) -> bool:
         return self.type == "weapon" and self.subtype == ""
 
