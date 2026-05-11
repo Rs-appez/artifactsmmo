@@ -35,6 +35,29 @@ class StuffMixin(Protocol):
             print(f"❌ {e}")
             return False, None
 
+    @request_action
+    @refresh_after
+    async def unequip(
+        self: "Character", slot: str, quantity: int = 1
+    ) -> tuple[bool, dict | None]:
+        try:
+            response = await self.client.post(
+                "/unequip",
+                json={"slot": slot, "quantity": quantity},
+            )
+            data = response.json()
+
+            if "error" in data:
+                print("data : ", data)
+                raise Exception(data["error"]["message"])
+
+            character_data = data["data"]["character"]
+
+            return True, character_data
+        except Exception as e:
+            print(f"❌ {e}")
+            return False, None
+
     async def weaponize(self: "Character") -> None:
         if self.weapon is not None and self.weapon.is_weapon:
             return
