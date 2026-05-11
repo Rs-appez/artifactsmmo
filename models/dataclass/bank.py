@@ -45,6 +45,30 @@ class Bank:
         return self._items.copy()
 
     @classmethod
+    async def check_bank(cls) -> "Bank":
+
+        load = asyncio.gather(
+            cls.__get_details(),
+            cls.__get_items(),
+        )
+
+        details, items = await load
+
+        return cls(
+            _gold=details["gold"],
+            _slots=details["slots"],
+            _expansions=details["expansions"],
+            _expansion_cost=details["next_expansion_cost"],
+            _items=items,
+        )
+
+    def have_items(self, items: list[tuple[Item, int]]) -> tuple[bool, Item | None]:
+        for item, quantity in items:
+            if self._items.get(item, 0) - self.__reserved_items[item] < quantity:
+                return False, item
+        return True, None
+
+    @classmethod
     def get_reserved_items(cls, token: uuid.UUID) -> dict[Item, int]:
         return cls.__tokens.get(token, {}).copy()
 
@@ -63,24 +87,6 @@ class Bank:
         new_token = uuid.uuid4()
         cls.__tokens[new_token] = {item: quantity for item, quantity in items}
         return new_token
-
-    @classmethod
-    async def check_bank(cls) -> "Bank":
-
-        load = asyncio.gather(
-            cls.__get_details(),
-            cls.__get_items(),
-        )
-
-        details, items = await load
-
-        return cls(
-            _gold=details["gold"],
-            _slots=details["slots"],
-            _expansions=details["expansions"],
-            _expansion_cost=details["next_expansion_cost"],
-            _items=items,
-        )
 
     @classmethod
     @lock_bank
@@ -166,9 +172,3 @@ class Bank:
         except Exception as e:
             print(f"❌ Failed to get bank items: {e}")
             return {}
-
-    def have_items(self, items: list[tuple[Item, int]]) -> tuple[bool, Item | None]:
-        for item, quantity in items:
-            if self._items.get(item, 0) - self.__reserved_items[item] < quantity:
-                return False, item
-        return True, None
