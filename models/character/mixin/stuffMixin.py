@@ -127,7 +127,7 @@ class StuffMixin(Protocol):
                 max(better_items, key=lambda item: item.level) if better_items else None
             )
             if best_tool is not None:
-                bank_token = await Bank.reserve_items([(best_tool, 1)])
+                bank_token = await Bank._reserve_items([(best_tool, 1)])  # pyright: ignore[reportPrivateUsage]
                 return bank_token, best_tool
 
             return None, None
