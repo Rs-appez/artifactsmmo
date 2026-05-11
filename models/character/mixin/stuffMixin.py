@@ -73,7 +73,6 @@ class StuffMixin(Protocol):
         if best_tool is None:
             print(f"❌ {self.surname} has no better tool to equip for {job.value}")
             return
-        await Bank.reserve_items([(best_tool, 1)])
         try:
             _ = await self.deposit_all_in_bank()
             if await self.withdraw_item_from_bank([(best_tool, 1)]):
@@ -93,6 +92,9 @@ class StuffMixin(Protocol):
                 for item in bank.items
                 if item.is_for_job(job) and (item.level <= self.level)
             ]
-            return (
+            best_tool = (
                 max(better_items, key=lambda item: item.level) if better_items else None
             )
+            if best_tool is not None:
+                await Bank.reserve_items([(best_tool, 1)])
+            return best_tool
