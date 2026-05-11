@@ -122,7 +122,7 @@ class BankMixin(Protocol):
             print(f"❌ {e}")
             return False, None
         finally:
-            await Bank.unreserve_items(bank_token)
+            Bank._unreserve_items(bank_token)  # pyright: ignore[reportPrivateUsage]
 
     @need_bank
     @request_action

@@ -102,6 +102,13 @@ class Bank:
     @classmethod
     @lock_bank
     async def unreserve_items(cls, token: uuid.UUID):
+        cls._unreserve_items(token)
+
+    @classmethod
+    def _unreserve_items(cls, token: uuid.UUID):
+        """
+        Unreserve items without locking, should only be used internally when we are sure to already have the lock
+        """
         if token not in cls.__tokens:
             return
         items = cls.__tokens.pop(token)
