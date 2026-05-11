@@ -87,6 +87,12 @@ class Bank:
     async def reserve_items(
         cls, items: list[tuple[Item, int]], imediately_needed: bool = True
     ) -> uuid.UUID:
+        return await cls._reserve_items(items, imediately_needed)
+
+    @classmethod
+    async def _reserve_items(
+        cls, items: list[tuple[Item, int]], imediately_needed: bool = True
+    ) -> uuid.UUID:
         if imediately_needed:
             bank = await cls.check_bank()
             have_enough, missing_item = bank.have_items(items)
