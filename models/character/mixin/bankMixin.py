@@ -104,7 +104,7 @@ class BankMixin(Protocol):
                 "/bank/withdraw/item",
                 json=[
                     {"code": item.code, "quantity": quantity}
-                    for item, quantity in items
+                    for item, quantity in items.items()
                 ],
             )
             data = response.json()
@@ -116,7 +116,7 @@ class BankMixin(Protocol):
             character_data = data["data"]["character"]
 
             print(
-                f"📤 {self.surname} Withdrew {', '.join([f'{item[1]}x {item[0].code}' for item in items])} from bank"
+                f"📤 {self.surname} Withdrew {', '.join([f'{item[1]}x {item[0].code}' for item in items.items()])} from bank"
             )
             return True, character_data
         except Exception as e:
