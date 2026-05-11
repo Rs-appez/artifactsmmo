@@ -49,7 +49,7 @@ async def cli(game_manager: GameManager):
         },
         **{
             "goroutine": {
-                name: {routine: None for routine in routine_names}
+                name: {routine: {} for routine in routine_names}
                 for name in characters.keys()
             }
         },
@@ -73,7 +73,27 @@ async def cli(game_manager: GameManager):
             NestedCompleter.from_nested_dict(completer_dict)
         )
 
-    _ = asyncio.create_task(load_items())
+    async def load_monsters():
+        await Encyclopedia.wait_monster()
+        updated_actions = {
+            "goroutine": {
+                name: {
+                    routine: (
+                        {monster: None for monster in Encyclopedia.monsters}
+                        if routine == "mob_farm"
+                        else {}
+                    )
+                    for routine in routine_names
+                }
+                for name in characters.keys()
+            }
+        }
+        completer_dict.update(updated_actions)
+        session.completer = FuzzyCompleter(
+            NestedCompleter.from_nested_dict(completer_dict)
+        )
+
+    _ = asyncio.gather(load_items(), load_monsters())
 
     with patch_stdout():
         try:
