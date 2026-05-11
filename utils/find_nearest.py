@@ -26,7 +26,7 @@ def find_nearest_bank(location: tuple[int, int]) -> tuple[int, int]:
 
 def find_nearest_mob(location: tuple[int, int], mob: Monster) -> tuple[int, int]:
     if mob.code not in monster_locations:
-        raise ValueError(f"No locations found for mob {mob}")
+        raise ValueError(f"No locations found for mob {mob.name}")
     return min(
         monster_locations[mob.code],
         key=lambda pos: __manhattan_distance(pos, location),

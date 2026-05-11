@@ -9,4 +9,5 @@ monster_locations = {
     "red_slime": [(1, -1), (2, -2)],
     "mushmush": [(5, 3), (6, 4)],
     "flying_snake": [(5, 4), (7, 4)],
+    "wolf": [(-2, 1)],
 }
