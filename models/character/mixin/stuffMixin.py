@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING, Protocol
 import uuid
 
-from config import HEADERS
 from models import Encyclopedia
 from models.character.decorators import refresh_after, request_action
 from models.dataclass import Item, Monster
