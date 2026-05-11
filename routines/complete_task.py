@@ -94,6 +94,9 @@ async def __monster_task(character: Character) -> None:
         print(f"❌ {character.surname} failed to complete the monster task : {e}")
         return
 
+    if not await character.move(monster_task_master):
+        print("Failed to move to task master")
+        return
     if await character.complete_task():
         print(f"  {character.surname} completed the monster task")
     else:
