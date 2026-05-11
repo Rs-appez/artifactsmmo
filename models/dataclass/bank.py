@@ -1,4 +1,5 @@
 from asyncio import Lock
+import uuid
 import asyncio
 from dataclasses import dataclass
 
@@ -23,6 +24,7 @@ class Bank:
     __bankelock = Lock()
     __url = f"{ARTIFACTSMMO_URL}/my/bank"
     __reserved_items = defaultdict(int)
+    __tokens = defaultdict(dict)
 
     _gold: int
     _slots: int
@@ -41,6 +43,26 @@ class Bank:
     @property
     def items(self) -> dict[Item, int]:
         return self._items.copy()
+
+    @classmethod
+    def get_reserved_items(cls, token: uuid.UUID) -> dict[Item, int]:
+        return cls.__tokens.get(token, {}).copy()
+
+    @classmethod
+    def get_reserved_items_partial(
+        cls, token: uuid.UUID, items: list[tuple[Item, int]]
+    ) -> uuid.UUID:
+        reserved_items = cls.__tokens.get(token, {})
+        for item, quantity in items:
+            if reserved_items.get(item, 0) < quantity:
+                raise Exception(f"Not enough {item.name} reserved for token {token}")
+
+        for item, quantity in items:
+            reserved_items[item] -= quantity
+
+        new_token = uuid.uuid4()
+        cls.__tokens[new_token] = {item: quantity for item, quantity in items}
+        return new_token
 
     @classmethod
     async def check_bank(cls) -> "Bank":
@@ -64,7 +86,7 @@ class Bank:
     @lock_bank
     async def reserve_items(
         cls, items: list[tuple[Item, int]], imediately_needed: bool = True
-    ):
+    ) -> uuid.UUID:
         if imediately_needed:
             bank = await cls.check_bank()
             have_enough, missing_item = bank.have_items(items)
@@ -73,10 +95,17 @@ class Bank:
         for item, quantity in items:
             cls.__reserved_items[item] += quantity
 
+        token = uuid.uuid4()
+        cls.__tokens[token] = {item: quantity for item, quantity in items}
+        return token
+
     @classmethod
     @lock_bank
-    async def unreserve_items(cls, items: list[tuple[Item, int]]):
-        for item, quantity in items:
+    async def unreserve_items(cls, token: uuid.UUID):
+        if token not in cls.__tokens:
+            return
+        items = cls.__tokens.pop(token)
+        for item, quantity in items.items():
             cls.__reserved_items[item] -= quantity
 
     @classmethod
