@@ -141,7 +141,9 @@ class Bank:
     async def get_food(cls, character: Character, quantity: int) -> uuid.UUID:
         bank = await cls.__check_bank()
         food_items = {
-            item: quantity for item, quantity in bank.items.items() if item.is_food
+            item: quantity
+            for item, quantity in bank.items.items()
+            if item.is_food and item.can_be_used_by(character)
         }
         packed_food = {}
         for item, available_quantity in sorted(
