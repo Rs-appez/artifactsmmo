@@ -92,7 +92,7 @@ class StuffMixin(Protocol):
                 return
 
         # temporary need refactor
-        best_tool = await self.get_better_tool(job)
+        best_tool = await self._get_better_tool(job)
         if best_tool is None:
             print(f"❌ {self.surname} has no better tool to equip for {job.value}")
             return
@@ -104,10 +104,10 @@ class StuffMixin(Protocol):
         finally:
             await Bank.unreserve_items([(best_tool, 1)])
 
-    async def get_better_weapon(self: "Character", mob: Monster) -> Item:  # pyright: ignore[reportReturnType]
+    async def _get_better_weapon(self: "Character", mob: Monster) -> Item:  # pyright: ignore[reportReturnType]
         pass
 
-    async def get_better_tool(self: "Character", job: JobType) -> Item | None:
+    async def _get_better_tool(self: "Character", job: JobType) -> Item | None:
         async with Bank.locked():
             bank = await Bank.check_bank()
             better_items = [
