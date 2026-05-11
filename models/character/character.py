@@ -156,6 +156,12 @@ class Character(
     def inventory(self) -> dict[Item, int]:
         return self._inventory.copy()
 
+    def has_in_inventory(self, items: list[tuple[Item, int]]) -> bool:
+        for item, quantity in items:
+            if self._inventory.get(item, 0) < quantity:
+                return False
+        return True
+
     @property
     def inventory_max_items(self) -> int:
         return self._inventory_max_items
