@@ -98,10 +98,15 @@ class StuffMixin(Protocol):
             return
 
         try:
+            if not self.is_inventory_full and self.weapon is not None:
+                _ = await self.unequip("weapon")
             _ = await self.deposit_all_in_bank()
             if await self.withdraw_item_from_bank(bank_token):
                 if not await self.equip(best_tool):
                     print(f"❌ {self.surname} failed to equip {job.value}_tool")
+                # redeposit the old weapon if the inventory was full
+                _ = await self.deposit_all_in_bank()
+
         finally:
             await Bank.unreserve_items(bank_token)
 
