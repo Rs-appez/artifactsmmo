@@ -1,16 +1,19 @@
-from asyncio import Lock
-import uuid
 import asyncio
+import uuid
+from asyncio import Lock
+from collections import defaultdict
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from httpx import AsyncClient
 
-from collections import defaultdict
 from config import ARTIFACTSMMO_URL, HEADERS
-from models.character.character import Character
 from models.dataclass import Item
 from models.encyclopedia import Encyclopedia
 from models.enums import JobType
+
+if TYPE_CHECKING:
+    from models.character import Character
 
 
 def lock_bank(func):
