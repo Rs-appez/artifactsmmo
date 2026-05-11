@@ -81,6 +81,44 @@ class Item:
 
         return False
 
+    def can_be_used_by(self, character) -> bool:
+
+        for condition in self.conditions:
+            match condition["code"]:
+                case "level":
+                    return self.__check_conditions(
+                        character.level,
+                        int(condition["value"]),
+                        str(condition["operator"]),
+                    )
+                case "hp":
+                    return self.__check_conditions(
+                        character.hp,
+                        int(condition["value"]),
+                        str(condition["operator"]),
+                    )
+                case _:
+                    raise ValueError(
+                        f"Unknown condition code {condition['code']} in item conditions"
+                    )
+
+        return True
+
+    def __check_conditions(
+        self, character_values: int, condition_values: int, operator: str
+    ) -> bool:
+        match operator:
+            case "eq":
+                return character_values == condition_values
+            case "ne":
+                return character_values != condition_values
+            case "gt":
+                return character_values > condition_values
+            case "lt":
+                return character_values < condition_values
+            case _:
+                raise ValueError(f"Unknown operator {operator} in item conditions")
+
     @override
     def __hash__(self):
         return hash(self.code)
