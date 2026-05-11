@@ -71,7 +71,7 @@ class StuffMixin(Protocol):
 
         # temporary need refactor
         better_weapon = await Encyclopedia.get_item_by_code("sticky_sword")
-        bank_token = await Bank.reserve_items([(better_weapon, 1)])
+        bank_token = await Bank.reserve_items({better_weapon: 1})
         try:
             _ = await self.deposit_all_in_bank()
             if await self.withdraw_item_from_bank(bank_token):
@@ -117,7 +117,7 @@ class StuffMixin(Protocol):
         self: "Character", job: JobType
     ) -> tuple[uuid.UUID | None, Item | None]:
         async with Bank.locked():
-            bank = await Bank.check_bank()
+            bank = await Bank.__check_bank()
             better_items = [
                 item
                 for item in bank.items

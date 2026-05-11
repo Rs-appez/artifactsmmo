@@ -50,7 +50,7 @@ async def __item_task(character: Character) -> None:
             character.task_resources_left, character.inventory_max_items
         )
 
-        trip_resources = [(item, nb_resources_for_the_trip)]
+        trip_resources = {item: nb_resources_for_the_trip}
         bank_token = None
         if not character.has_in_inventory(trip_resources):
             bank_token = await Bank.reserve_items(trip_resources)

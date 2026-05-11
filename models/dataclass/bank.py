@@ -45,7 +45,7 @@ class Bank:
         return self._items.copy()
 
     @classmethod
-    async def check_bank(cls) -> "Bank":
+    async def __check_bank(cls) -> "Bank":
 
         load = asyncio.gather(
             cls.__get_details(),
@@ -62,8 +62,8 @@ class Bank:
             _items=items,
         )
 
-    def have_items(self, items: list[tuple[Item, int]]) -> tuple[bool, Item | None]:
-        for item, quantity in items:
+    def __have_items(self, items: dict[Item, int]) -> tuple[bool, Item | None]:
+        for item, quantity in items.items():
             if self._items.get(item, 0) - self.__reserved_items[item] < quantity:
                 return False, item
         return True, None
@@ -74,41 +74,45 @@ class Bank:
 
     @classmethod
     def get_reserved_items_partial(
-        cls, token: uuid.UUID, items: list[tuple[Item, int]]
+        cls, token: uuid.UUID, items: dict[Item, int]
     ) -> uuid.UUID:
         reserved_items = cls.__tokens.get(token, {})
-        for item, quantity in items:
+        for item, quantity in items.items():
             if reserved_items.get(item, 0) < quantity:
                 raise Exception(f"Not enough {item.name} reserved for token {token}")
 
-        for item, quantity in items:
+        for item, quantity in items.items():
             reserved_items[item] -= quantity
 
         new_token = uuid.uuid4()
-        cls.__tokens[new_token] = {item: quantity for item, quantity in items}
+        cls.__tokens[new_token] = {item: quantity for item, quantity in items.items()}
         return new_token
 
     @classmethod
     @lock_bank
     async def reserve_items(
-        cls, items: list[tuple[Item, int]], imediately_needed: bool = True
+        cls, items: dict[Item, int], imediately_needed: bool = True
     ) -> uuid.UUID:
         return await cls._reserve_items(items, imediately_needed)
 
     @classmethod
     async def _reserve_items(
-        cls, items: list[tuple[Item, int]], imediately_needed: bool = True
+        cls,
+        items: dict[Item, int],
+        imediately_needed: bool = True,
+        bank: "Bank | None" = None,
     ) -> uuid.UUID:
         if imediately_needed:
-            bank = await cls.check_bank()
-            have_enough, missing_item = bank.have_items(items)
+            if bank is None:
+                bank = await cls.__check_bank()
+            have_enough, missing_item = bank.__have_items(items)
             if not have_enough and missing_item is not None:
                 raise Exception(f"Not enough {missing_item.name} in bank")
-        for item, quantity in items:
+        for item, quantity in items.items():
             cls.__reserved_items[item] += quantity
 
         token = uuid.uuid4()
-        cls.__tokens[token] = {item: quantity for item, quantity in items}
+        cls.__tokens[token] = {item: quantity for item, quantity in items.items()}
         return token
 
     @classmethod
@@ -126,6 +130,25 @@ class Bank:
         items = cls.__tokens.pop(token)
         for item, quantity in items.items():
             cls.__reserved_items[item] -= quantity
+
+    @classmethod
+    @lock_bank
+    async def get_food(cls, quantity: int) -> uuid.UUID:
+        bank = await cls.__check_bank()
+        food_items = {
+            item: quantity for item, quantity in bank.items.items() if item.is_food
+        }
+        packed_food = {}
+        for item, available_quantity in sorted(
+            food_items.items(), key=lambda x: x[1], reverse=True
+        ):
+            if quantity <= 0:
+                break
+            use_quantity = min(available_quantity, quantity)
+            packed_food[item] = use_quantity
+            quantity -= use_quantity
+
+        return await cls._reserve_items(packed_food, bank=bank)
 
     @classmethod
     async def __get_details(cls) -> dict:

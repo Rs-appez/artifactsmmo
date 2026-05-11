@@ -7,10 +7,10 @@ from math import ceil
 
 
 async def __get_trips_info(
-    ingredients: list[tuple[Item, int]],
+    ingredients: dict[Item, int],
     quantity: int,
     inventory_max_items: int,
-) -> tuple[int, tuple[int, list[tuple[Item, int]]], tuple[int, list[tuple[Item, int]]]]:
+) -> tuple[int, tuple[int, dict[Item, int]], tuple[int, dict[Item, int]]]:
     """
     Calculate the number of trips needed to craft the desired quantity of items, based on the ingredients required and the character's inventory capacity.
     Args:
@@ -26,7 +26,7 @@ async def __get_trips_info(
         Exception: If the number of ingredients required exceeds the character's inventory capacity, an exception is raised indicating that crafting is not possible.
     """
 
-    nb_ingredients = sum(nb[1] for nb in ingredients)
+    nb_ingredients = sum(nb for nb in ingredients.values())
     nb_craft_per_trip = inventory_max_items // nb_ingredients
     if nb_craft_per_trip == 0:
         raise Exception(
@@ -35,12 +35,12 @@ async def __get_trips_info(
     nb_trips = ceil(quantity / nb_craft_per_trip)
     nb_craft_last_trip = quantity - (nb_trips - 1) * nb_craft_per_trip
 
-    ingredients_per_trip = [
-        (item, nb_craft_per_trip * qty) for item, qty in ingredients
-    ]
-    ingredients_last_trip = [
-        (item, nb_craft_last_trip * qty) for item, qty in ingredients
-    ]
+    ingredients_per_trip = {
+        item: nb_craft_per_trip * qty for item, qty in ingredients.items()
+    }
+    ingredients_last_trip = {
+        item: nb_craft_last_trip * qty for item, qty in ingredients.items()
+    }
 
     return (
         nb_trips,
@@ -86,16 +86,15 @@ async def craft(character: Character, item: Item, quantity: int):
         print(f"❌ No workshop found for job {item.job}")
         return
 
-    ingredients = [
-        (
-            await Encyclopedia.get_item_by_code(str(ingredient["code"])),
-            int(ingredient["quantity"]),
+    ingredients = {
+        await Encyclopedia.get_item_by_code(str(ingredient["code"])): int(
+            ingredient["quantity"]
         )
         for ingredient in item.craft_ingredients
-    ]
-    reserved_ingredients = [
-        (ingredient, qty * quantity) for ingredient, qty in ingredients
-    ]
+    }
+    reserved_ingredients = {
+        ingredient: qty * quantity for ingredient, qty in ingredients.items()
+    }
     try:
         bank_token = await Bank.reserve_items(reserved_ingredients)
     except Exception as e:

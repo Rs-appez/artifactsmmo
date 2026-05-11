@@ -1,6 +1,7 @@
 import asyncio
 from dataclasses import dataclass
 from datetime import datetime
+from re import I
 from typing import override
 
 import httpx
@@ -156,8 +157,8 @@ class Character(
     def inventory(self) -> dict[Item, int]:
         return self._inventory.copy()
 
-    def has_in_inventory(self, items: list[tuple[Item, int]]) -> bool:
-        for item, quantity in items:
+    def has_in_inventory(self, items: dict[Item, int]) -> bool:
+        for item, quantity in items.items():
             if self._inventory.get(item, 0) < quantity:
                 return False
         return True
