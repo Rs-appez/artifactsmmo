@@ -30,6 +30,7 @@ async def main():
     except asyncio.CancelledError:
         for character in manager.characters.values():
             character.save_routine()
+        print("All character routines saved...")
         raise
 
 
