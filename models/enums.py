@@ -20,6 +20,7 @@ class Element(Enum):
 
 
 class JobType(Enum):
+    FIGHTING = ""
     MINING = "mining"
     WOODCUTTING = "woodcutting"
     FISHING = "fishing"
