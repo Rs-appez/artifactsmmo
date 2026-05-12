@@ -95,7 +95,7 @@ class Encyclopedia:
                 page += 1
                 max_pages = items_data["pages"]
 
-        Encyclopedia.__items_loaded = True
+        cls.__items_loaded = True
         print(f"Loaded {len(cls._items)} items.")
 
     # EFFECTS
@@ -141,7 +141,7 @@ class Encyclopedia:
                 page += 1
                 max_pages = effects_data["pages"]
 
-        Encyclopedia.__effects_loaded = True
+        cls.__effects_loaded = True
         print(f"Loaded {len(cls._effects)} effects.")
 
     # MONSTERS
@@ -194,7 +194,7 @@ class Encyclopedia:
                 page += 1
                 max_pages = monsters_data["pages"]
 
-        Encyclopedia.__monsters_loaded = True
+        cls.__monsters_loaded = True
         print(f"Loaded {len(cls._monsters)} monsters.")
 
     # RESOURCES
@@ -242,5 +242,5 @@ class Encyclopedia:
                 page += 1
                 max_pages = resources_data["pages"]
 
-        Encyclopedia.__resources_loaded = True
+        cls.__resources_loaded = True
         print(f"Loaded {len(cls._resources)} resources.")
