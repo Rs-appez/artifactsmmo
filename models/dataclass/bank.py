@@ -168,7 +168,9 @@ class Bank:
         tool_items = {
             item
             for item in bank.items
-            if item.is_for_job(job) and item.level <= character.level
+            if item.is_for_job(job)
+            and item.level <= character.level
+            and item.can_be_used_by(character)
         }
         if not tool_items:
             raise Exception(f"No tool found for job {job.value} in bank")

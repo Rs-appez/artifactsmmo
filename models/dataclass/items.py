@@ -1,8 +1,12 @@
 from dataclasses import dataclass
 from typing import override
+from typing import TYPE_CHECKING
 
 from models.dataclass import Effect
 from models.enums import JobType
+
+if TYPE_CHECKING:
+    from models.character.character import Character
 
 not_to_eat_food = {"apple"}
 
@@ -95,21 +99,29 @@ class Item:
 
         return False
 
-    def can_be_used_by(self, character) -> bool:
+    def can_be_used_by(self, character: Character) -> bool:
 
         for condition in self.conditions:
+            value = int(condition["value"])
+            operator = str(condition["operator"])
             match condition["code"]:
                 case "level":
                     return self.__check_conditions(
                         character.level,
-                        int(condition["value"]),
-                        str(condition["operator"]),
+                        value,
+                        operator,
                     )
                 case "hp":
                     return self.__check_conditions(
                         character.hp,
-                        int(condition["value"]),
-                        str(condition["operator"]),
+                        value,
+                        operator,
+                    )
+                case str(job) if job.endswith("_level"):
+                    return self.__check_conditions(
+                        character.get_job_level(job[:-6]),
+                        value,
+                        operator,
                     )
                 case _:
                     raise ValueError(
