@@ -221,7 +221,7 @@ class Encyclopedia:
 
                 resources_data = response.json()
                 for resource_data in resources_data["data"]:
-                    resource = Resource.from_dict(resource_data)
+                    resource = await Resource.from_dict(resource_data)
                     cls._resources[resource.code] = resource
 
                 page += 1
