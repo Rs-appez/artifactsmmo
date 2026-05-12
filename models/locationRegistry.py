@@ -44,6 +44,17 @@ class LocationRegistry:
         await LocationRegistry.wait_location()
         return {(map.x, map.y) for map in LocationRegistry.__bank_locations}
 
+    @staticmethod
+    async def get_workshop_locations(job: JobType) -> set[tuple[int, int]]:
+        await LocationRegistry.wait_location()
+        maps = LocationRegistry.__workshop_locations.get(job, set())
+        return {(map.x, map.y) for map in maps}
+
+    @staticmethod
+    async def get_grand_exchange_locations() -> set[tuple[int, int]]:
+        await LocationRegistry.wait_location()
+        return {(map.x, map.y) for map in LocationRegistry.__grand_exchange_locations}
+
     @classmethod
     async def __load_locations(cls):
         if cls.__maps_loaded:
