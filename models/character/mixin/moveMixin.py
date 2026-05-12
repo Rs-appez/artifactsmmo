@@ -33,7 +33,7 @@ class MoveMixin(Protocol):
             character_data = data["data"]["character"]
 
             print(
-                f"🏃{self.name} Moved to ({destination['x']}, {destination['y']}) on {destination['name']}"
+                f"🏃{self.surname} Moved to ({destination['x']}, {destination['y']}) on {destination['name']}"
             )
             return True, character_data
         except Exception as e:
