@@ -75,13 +75,13 @@ class Encyclopedia:
 
                 for item_data in items_data["data"]:
                     item = Item.from_dict(item_data)
-                    Encyclopedia._items[item.code] = item
+                    cls._items[item.code] = item
 
                 page += 1
                 max_pages = items_data["pages"]
 
         Encyclopedia.__items_loaded = True
-        print(f"Loaded {len(Encyclopedia._items)} items.")
+        print(f"Loaded {len(cls._items)} items.")
 
     # EFFECTS
 
@@ -121,13 +121,13 @@ class Encyclopedia:
                 effects_data = response.json()
                 for effect_data in effects_data["data"]:
                     effect = Effect.from_dict(effect_data)
-                    Encyclopedia._effects[effect.code] = effect
+                    cls._effects[effect.code] = effect
 
                 page += 1
                 max_pages = effects_data["pages"]
 
         Encyclopedia.__effects_loaded = True
-        print(f"Loaded {len(Encyclopedia._effects)} effects.")
+        print(f"Loaded {len(cls._effects)} effects.")
 
     # MONSTERS
 
@@ -174,13 +174,13 @@ class Encyclopedia:
                 monsters_data = response.json()
                 for monster_data in monsters_data["data"]:
                     monster = await Monster.from_dict(monster_data)
-                    Encyclopedia._monsters[monster.code] = monster
+                    cls._monsters[monster.code] = monster
 
                 page += 1
                 max_pages = monsters_data["pages"]
 
         Encyclopedia.__monsters_loaded = True
-        print(f"Loaded {len(Encyclopedia._monsters)} monsters.")
+        print(f"Loaded {len(cls._monsters)} monsters.")
 
     # RESOURCES
 
@@ -222,10 +222,10 @@ class Encyclopedia:
                 resources_data = response.json()
                 for resource_data in resources_data["data"]:
                     resource = Resource.from_dict(resource_data)
-                    Encyclopedia._resources[resource.code] = resource
+                    cls._resources[resource.code] = resource
 
                 page += 1
                 max_pages = resources_data["pages"]
 
         Encyclopedia.__resources_loaded = True
-        print(f"Loaded {len(Encyclopedia._resources)} resources.")
+        print(f"Loaded {len(cls._resources)} resources.")
