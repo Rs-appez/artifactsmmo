@@ -97,3 +97,22 @@ class FightMixin(Protocol):
         except Exception as e:
             print(f"❌ {e}")
             return False, None
+
+    async def regenerate_hp(self: "Character") -> None:
+        food = self.get_food
+        if not food:
+            print(f"❌ {self.surname} has no food to regenerate hp")
+            return
+        missing_hp = self.missing_hp
+
+        for item, quantity in sorted(
+            self.get_food.items(), key=lambda x: x[0].heal, reverse=True
+        ):
+            qty_to_eat = min(quantity, missing_hp // item.heal)
+            if not await self.eat(item, qty_to_eat):
+                print(f"❌ Failed to eat {item.name} x{qty_to_eat}")
+                continue
+            missing_hp -= item.heal * qty_to_eat
+            print(f"󰻝  {self.surname} eats {quantity} {item.name} to recover hp")
+            if missing_hp <= 0:
+                break

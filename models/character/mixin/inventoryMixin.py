@@ -32,6 +32,21 @@ class InventoryMixin(Protocol):
             or len(self._inventory) >= 17
         )
 
+    @property
+    def has_food(self) -> bool:
+        for item, quantity in self._inventory.items():
+            if item.is_food and quantity > 0:
+                return True
+        return False
+
+    @property
+    def get_food(self) -> dict[Item, int]:
+        food_items = {}
+        for item, quantity in self._inventory.items():
+            if item.is_food and quantity > 0:
+                food_items[item] = quantity
+        return food_items
+
     def has_in_inventory(self: "Character", items: dict[Item, int]) -> bool:
         for item, quantity in items.items():
             if self._inventory.get(item, 0) < quantity:
