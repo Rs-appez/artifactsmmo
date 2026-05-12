@@ -4,6 +4,7 @@ import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS
 from models.dataclass import Effect, Item, Monster, Resource
+from models.enums import JobType
 
 
 class Encyclopedia:
@@ -51,7 +52,7 @@ class Encyclopedia:
                 description="",
                 conditions=[],
                 effects={},
-                job="",
+                job=JobType.NO_JOB,
                 craft_level=0,
                 craft_ingredients=[],
                 craft_quantity=0,

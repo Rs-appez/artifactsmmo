@@ -21,7 +21,7 @@ class Item:
     description: str
     conditions: list[dict[str, str | int]]
     effects: dict[Effect, int]
-    job: str
+    job: JobType
     craft_level: int
     craft_ingredients: list[dict[str, str | int]]
     craft_quantity: int
@@ -54,7 +54,7 @@ class Item:
             description=data["description"],
             conditions=data.get("conditions", []),
             effects=effects,
-            job=craft_data.get("skill", ""),
+            job=JobType(craft_data.get("skill", "no_job")),
             craft_level=craft_data.get("level", 0),
             craft_ingredients=craft_data.get("items", []),
             craft_quantity=craft_data.get("quantity", 0),

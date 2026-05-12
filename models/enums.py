@@ -20,6 +20,7 @@ class Element(Enum):
 
 
 class JobType(Enum):
+    NO_JOB = "no_job"
     FIGHTING = ""
     MINING = "mining"
     WOODCUTTING = "woodcutting"
