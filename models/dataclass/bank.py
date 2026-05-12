@@ -145,6 +145,8 @@ class Bank:
             for item, quantity in bank.items.items()
             if item.is_food and item.can_be_used_by(character)
         }
+        if not food_items:
+            raise Exception("No food found in bank for character")
         packed_food = {}
         for item, available_quantity in sorted(
             food_items.items(), key=lambda x: x[1], reverse=True
