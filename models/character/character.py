@@ -1,5 +1,5 @@
 import asyncio
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from datetime import datetime
 from re import I
 from typing import override
@@ -23,11 +23,13 @@ from .mixin import (
     WorkMixin,
     StuffMixin,
     SaveMixin,
+    InventoryMixin,
 )
 
 
 @dataclass
 class Character(
+    InventoryMixin,
     BankMixin,
     WorkMixin,
     MoveMixin,
@@ -38,6 +40,7 @@ class Character(
     StuffMixin,
     SaveMixin,
 ):
+    _: KW_ONLY
     _name: str
     _surname: str
     _cooldown: datetime
@@ -56,10 +59,6 @@ class Character(
     _xp: int
     _max_xp: int
     _level: int
-
-    _gold: int
-    _inventory: dict[Item, int]
-    _inventory_max_items: int
 
     _jobs: dict[JobType, int]
 
@@ -148,31 +147,6 @@ class Character(
     @property
     def level(self) -> int:
         return self._level
-
-    @property
-    def gold(self) -> int:
-        return self._gold
-
-    @property
-    def inventory(self) -> dict[Item, int]:
-        return self._inventory.copy()
-
-    def has_in_inventory(self, items: dict[Item, int]) -> bool:
-        for item, quantity in items.items():
-            if self._inventory.get(item, 0) < quantity:
-                return False
-        return True
-
-    @property
-    def inventory_max_items(self) -> int:
-        return self._inventory_max_items
-
-    @property
-    def is_inventory_full(self) -> bool:
-        return (
-            sum(self._inventory.values()) >= self._inventory_max_items - 5
-            or len(self._inventory) >= 17
-        )
 
     @property
     def weapon(self) -> Item | None:

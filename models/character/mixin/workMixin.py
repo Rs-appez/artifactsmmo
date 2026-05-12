@@ -13,7 +13,7 @@ async def seeking_the_meaning_of_life(character: "Character"):
 
 
 class WorkMixin(Protocol):
-    _routine: Callable
+    _routine: Callable  # pyright: ignore[reportRedeclaration]
     _previous_routine: Callable | None = None
     _work_task: asyncio.Task | None = None
     _interrupted: bool = False

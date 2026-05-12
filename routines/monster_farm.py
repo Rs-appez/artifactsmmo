@@ -13,10 +13,7 @@ async def mob_farm(character: Character, mob: Monster | str):
         if character.is_inventory_full:
             _ = await character.deposit_all_in_bank()
         if not character.will_win_against(mob):
-            _ = await character.rest()
-            print(
-                f"󰻝  {character.surname} rests to recover hp before fighting {mob.name}"
-            )
+            await __regenerate_hp(character)
         _ = await character.move(mob_position)
         _ = await character.fight()
 
@@ -26,3 +23,8 @@ async def mob_farm(character: Character, mob: Monster | str):
             character.stop()
         else:
             raise e
+
+
+async def __regenerate_hp(character: Character):
+    _ = await character.rest()
+    print(f"󰻝  {character.surname} rests to recover hp before fighting")
