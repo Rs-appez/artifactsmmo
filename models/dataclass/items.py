@@ -4,6 +4,8 @@ from typing import override
 from models.dataclass import Effect
 from models.enums import JobType
 
+not_to_eat_food = {"apple"}
+
 
 @dataclass(frozen=True)
 class Item:
@@ -61,11 +63,23 @@ class Item:
 
     @property
     def is_food(self) -> bool:
-        return self.type == "consomable" and self.subtype == "food"
+        return (
+            self.type == "consomable"
+            and self.subtype == "food"
+            and self.code not in not_to_eat_food
+        )
 
     @property
     def is_weapon(self) -> bool:
         return self.type == "weapon" and self.subtype == ""
+
+    @property
+    def heal(self) -> int:
+        if self.is_food:
+            for effect in self.effects:
+                if effect.code == "heal":
+                    return self.effects[effect]
+        return 0
 
     @property
     def is_tool(self) -> bool:
@@ -82,6 +96,9 @@ class Item:
         return False
 
     def can_be_used_by(self, character) -> bool:
+
+        # TODO fix
+        return True
 
         for condition in self.conditions:
             match condition["code"]:
