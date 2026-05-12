@@ -61,10 +61,12 @@ async def cli(game_manager: GameManager):
 
     # Load items in background
     async def load_items():
-        await Encyclopedia.wait_item()
         updated_actions = {
             "craft": {
-                name: {item_code: None for item_code in Encyclopedia.items}
+                name: {
+                    item_code: None
+                    for item_code in await Encyclopedia.get_all_items_names()
+                }
                 for name in characters.keys()
             }
         }
@@ -74,12 +76,14 @@ async def cli(game_manager: GameManager):
         )
 
     async def load_monsters():
-        await Encyclopedia.wait_monster()
         updated_actions = {
             "goroutine": {
                 name: {
                     routine: (
-                        {monster: None for monster in Encyclopedia.monsters}
+                        {
+                            monster: None
+                            for monster in await Encyclopedia.get_all_monsters_names()
+                        }
                         if routine == "mob_farm"
                         else {}
                     )

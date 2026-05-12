@@ -7,13 +7,13 @@ from models.dataclass import Effect, Item, Monster
 
 
 class Encyclopedia:
-    items: dict[str, Item] = {}
+    _items: dict[str, Item] = {}
     __items_loaded = False
 
-    effects: dict[str, Effect] = {}
+    _effects: dict[str, Effect] = {}
     __effects_loaded = False
 
-    monsters: dict[str, Monster] = {}
+    _monsters: dict[str, Monster] = {}
     __monsters_loaded = False
 
     @classmethod
@@ -35,11 +35,16 @@ class Encyclopedia:
     async def get_item_by_code(code: str) -> Item:
         await Encyclopedia.wait_item()
 
-        item = Encyclopedia.items.get(code)
+        item = Encyclopedia._items.get(code)
         if not item:
             raise ValueError(f"Item with code '{code}' not found.")
 
         return item
+
+    @staticmethod
+    async def get_all_items_names() -> list[str]:
+        await Encyclopedia.wait_item()
+        return list(Encyclopedia._items)
 
     @classmethod
     async def load_items(cls):
@@ -66,13 +71,13 @@ class Encyclopedia:
 
                 for item_data in items_data["data"]:
                     item = Item.from_dict(item_data)
-                    Encyclopedia.items[item.code] = item
+                    Encyclopedia._items[item.code] = item
 
                 page += 1
                 max_pages = items_data["pages"]
 
         Encyclopedia.__items_loaded = True
-        print(f"Loaded {len(Encyclopedia.items)} items.")
+        print(f"Loaded {len(Encyclopedia._items)} items.")
 
     # EFFECTS
 
@@ -85,7 +90,7 @@ class Encyclopedia:
     async def get_effect_by_code(code: str) -> Effect:
         await Encyclopedia.wait_effect()
 
-        effect = Encyclopedia.effects.get(code)
+        effect = Encyclopedia._effects.get(code)
         if not effect:
             raise ValueError(f"Effect with code '{code}' not found.")
 
@@ -112,13 +117,13 @@ class Encyclopedia:
                 effects_data = response.json()
                 for effect_data in effects_data["data"]:
                     effect = Effect.from_dict(effect_data)
-                    Encyclopedia.effects[effect.code] = effect
+                    Encyclopedia._effects[effect.code] = effect
 
                 page += 1
                 max_pages = effects_data["pages"]
 
         Encyclopedia.__effects_loaded = True
-        print(f"Loaded {len(Encyclopedia.effects)} effects.")
+        print(f"Loaded {len(Encyclopedia._effects)} effects.")
 
     # MONSTERS
 
@@ -131,11 +136,16 @@ class Encyclopedia:
     async def get_monster_by_code(code: str) -> Monster:
         await Encyclopedia.wait_monster()
 
-        monster = Encyclopedia.monsters.get(code)
+        monster = Encyclopedia._monsters.get(code)
         if not monster:
             raise ValueError(f"Monster with code '{code}' not found.")
 
         return monster
+
+    @staticmethod
+    async def get_all_monsters_names() -> list[str]:
+        await Encyclopedia.wait_monster()
+        return list(Encyclopedia._monsters)
 
     @classmethod
     async def load_monsters(cls):
@@ -160,10 +170,10 @@ class Encyclopedia:
                 monsters_data = response.json()
                 for monster_data in monsters_data["data"]:
                     monster = await Monster.from_dict(monster_data)
-                    Encyclopedia.monsters[monster.code] = monster
+                    Encyclopedia._monsters[monster.code] = monster
 
                 page += 1
                 max_pages = monsters_data["pages"]
 
         Encyclopedia.__monsters_loaded = True
-        print(f"Loaded {len(Encyclopedia.monsters)} monsters.")
+        print(f"Loaded {len(Encyclopedia._monsters)} monsters.")
