@@ -3,9 +3,8 @@ from collections.abc import Coroutine, Sequence
 
 import httpx
 
-import routines
 from config import ARTIFACTSMMO_URL, HEADERS
-from models import Character, Encyclopedia
+from models import Character, Encyclopedia, LocationRegistry
 from .mixins import JobMixin
 
 
@@ -13,7 +12,10 @@ class GameManager(JobMixin):
     def __init__(self):
         self.characters: dict[str, Character] = {}
 
-        _ = asyncio.ensure_future(Encyclopedia.initialize())
+        _ = asyncio.gather(
+            Encyclopedia.initialize(),
+            LocationRegistry.initialize(),
+        )
 
     async def __load_characters(self):
         with httpx.Client() as client:
