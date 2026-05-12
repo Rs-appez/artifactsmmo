@@ -1,7 +1,6 @@
 import asyncio
 from dataclasses import KW_ONLY, dataclass
 from datetime import datetime
-from re import I
 from typing import override
 
 import httpx
@@ -119,6 +118,10 @@ class Character(
     @property
     def max_hp(self) -> int:
         return self._max_hp
+
+    @property
+    def missing_hp(self) -> int:
+        return self._max_hp - self._hp
 
     @property
     def resistance(self) -> dict[Element, int]:
