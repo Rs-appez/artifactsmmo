@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Protocol
 
 from models.dataclass import Item
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 @dataclass
 class InventoryMixin(Protocol):
     _gold: int = 0
-    _inventory: dict[Item, int] = {}
+    _inventory: dict[Item, int] = field(default_factory=dict)
     _inventory_max_items: int = 0
 
     @property
