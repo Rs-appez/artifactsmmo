@@ -1,10 +1,15 @@
+from collections import defaultdict
 from dataclasses import dataclass
-from models.enums import JobType
+from typing import override
+
 from models.dataclass import Item
+from models.enums import JobType
 
 
 @dataclass(frozen=True)
 class Resource:
+    _drop_item = defaultdict(set)
+
     name: str
     code: str
     level: int
@@ -24,10 +29,22 @@ class Resource:
                 "max_quantity": drop_data["max_quantity"],
             }
 
-        return cls(
+        resource = cls(
             name=data["name"],
             code=data["code"],
             level=data["level"],
             skill=JobType(data["skill"]),
             drops=drops,
         )
+        for item in drops:
+            cls._drop_item[item.code].add(resource)
+
+        return resource
+
+    @override
+    def __hash__(self):
+        return hash(self.code)
+
+    @staticmethod
+    def from_drop_item(item: Item) -> set["Resource"]:
+        return Resource._drop_item[item.code]
