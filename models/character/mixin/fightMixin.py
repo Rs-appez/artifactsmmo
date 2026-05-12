@@ -24,7 +24,7 @@ class FightMixin(Protocol):
         if damage_taken >= self.max_hp:
             raise ImpossibleCombatException(f"can't win against {monster.name}")
 
-        return damage_taken < self.hp
+        return damage_taken * 1.3 < self.hp
 
     @request_action
     @refresh_after
