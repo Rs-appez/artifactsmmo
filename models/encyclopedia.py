@@ -3,7 +3,7 @@ import asyncio
 import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS
-from models.dataclass import Effect, Item, Monster
+from models.dataclass import Effect, Item, Monster, Resource
 
 
 class Encyclopedia:
@@ -16,12 +16,16 @@ class Encyclopedia:
     _monsters: dict[str, Monster] = {}
     __monsters_loaded = False
 
+    _resources: dict[str, Resource] = {}
+    __resources_loaded = False
+
     @classmethod
     async def initialize(cls):
         _ = await asyncio.gather(
             cls.load_items(),
             cls.load_effects(),
             cls.load_monsters(),
+            cls.load_resources(),
         )
 
     # ITEMS
@@ -177,3 +181,51 @@ class Encyclopedia:
 
         Encyclopedia.__monsters_loaded = True
         print(f"Loaded {len(Encyclopedia._monsters)} monsters.")
+
+    # RESOURCES
+
+    @classmethod
+    async def wait_resource(cls) -> None:
+        while not cls.__resources_loaded:
+            _ = await asyncio.sleep(1)
+
+    @staticmethod
+    async def get_resource_by_code(code: str) -> Resource:
+        await Encyclopedia.wait_resource()
+
+        resource = Encyclopedia._resources.get(code)
+        if not resource:
+            raise ValueError(f"Resource with code '{code}' not found.")
+
+        return resource
+
+    @classmethod
+    async def load_resources(cls):
+        if cls.__resources_loaded:
+            print("Resources already loaded, skipping fetch.")
+            return
+
+        async with httpx.AsyncClient() as client:
+            page = 1
+            max_pages = 2
+            while page <= max_pages:
+                response = await client.get(
+                    f"{ARTIFACTSMMO_URL}/resources",
+                    headers=HEADERS,
+                    params={"size": 50, "page": page},
+                )
+                if response.status_code != 200:
+                    raise Exception(
+                        f"Failed to fetch resources: {response.status_code} - {response.text}"
+                    )
+
+                resources_data = response.json()
+                for resource_data in resources_data["data"]:
+                    resource = Resource.from_dict(resource_data)
+                    Encyclopedia._resources[resource.code] = resource
+
+                page += 1
+                max_pages = resources_data["pages"]
+
+        Encyclopedia.__resources_loaded = True
+        print(f"Loaded {len(Encyclopedia._resources)} resources.")
