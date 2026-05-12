@@ -22,10 +22,10 @@ class Encyclopedia:
     @classmethod
     async def initialize(cls):
         _ = await asyncio.gather(
-            cls.load_items(),
-            cls.load_effects(),
-            cls.load_monsters(),
-            cls.load_resources(),
+            cls.__load_items(),
+            cls.__load_effects(),
+            cls.__load_monsters(),
+            cls.__load_resources(),
         )
 
     # ITEMS
@@ -66,7 +66,7 @@ class Encyclopedia:
         return list(Encyclopedia._items)
 
     @classmethod
-    async def load_items(cls):
+    async def __load_items(cls):
         if cls.__items_loaded:
             print("Items already loaded, skipping fetch.")
             return
@@ -116,7 +116,7 @@ class Encyclopedia:
         return effect
 
     @classmethod
-    async def load_effects(cls):
+    async def __load_effects(cls):
         if cls.__effects_loaded:
             print("Effects already loaded, skipping fetch.")
             return
@@ -167,7 +167,7 @@ class Encyclopedia:
         return list(Encyclopedia._monsters)
 
     @classmethod
-    async def load_monsters(cls):
+    async def __load_monsters(cls):
         if cls.__monsters_loaded:
             print("Monsters already loaded, skipping fetch.")
             return
@@ -215,7 +215,7 @@ class Encyclopedia:
         return resource
 
     @classmethod
-    async def load_resources(cls):
+    async def __load_resources(cls):
         if cls.__resources_loaded:
             print("Resources already loaded, skipping fetch.")
             return
