@@ -106,13 +106,13 @@ class FightMixin(Protocol):
         missing_hp = self.missing_hp
 
         for item, quantity in sorted(
-            self.get_food.items(), key=lambda x: x[0].heal, reverse=True
+            food.items(), key=lambda x: x[0].heal, reverse=True
         ):
             qty_to_eat = min(quantity, missing_hp // item.heal)
             if not await self.eat(item, qty_to_eat):
                 print(f"❌ Failed to eat {item.name} x{qty_to_eat}")
                 continue
             missing_hp -= item.heal * qty_to_eat
-            print(f"󰻝  {self.surname} eats {quantity} {item.name} to recover hp")
+            print(f" {self.surname} eats {quantity} {item.name} to recover hp")
             if missing_hp <= 0:
                 break
