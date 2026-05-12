@@ -74,7 +74,7 @@ class Encyclopedia:
                     break  # No more items to fetch
 
                 for item_data in items_data["data"]:
-                    item = Item.from_dict(item_data)
+                    item = await Item.from_dict(item_data)
                     cls._items[item.code] = item
 
                 page += 1

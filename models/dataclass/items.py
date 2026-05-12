@@ -28,7 +28,7 @@ class Item:
     tradeable: bool
 
     @classmethod
-    def from_dict(cls, data):
+    async def from_dict(cls, data):
         from models import Encyclopedia
 
         craft_data = data.get("craft")
@@ -42,7 +42,7 @@ class Item:
         effects = {}
         effects_data = data.get("effects", [])
         for effect_data in effects_data:
-            effect = Encyclopedia.get_effect_by_code(effect_data["code"])
+            effect = await Encyclopedia.get_effect_by_code(effect_data["code"])
             effects[effect] = effect_data["value"]
 
         return cls(
