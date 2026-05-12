@@ -41,7 +41,22 @@ class Encyclopedia:
 
         item = Encyclopedia._items.get(code)
         if not item:
-            raise ValueError(f"Item with code '{code}' not found.")
+            print(f"❌ Item with code '{code}' not found.")
+            return Item(
+                name="Missing Item",
+                code="missing_item",
+                level=0,
+                type="",
+                subtype="",
+                description="",
+                conditions=[],
+                effects={},
+                job="",
+                craft_level=0,
+                craft_ingredients=[],
+                craft_quantity=0,
+                tradeable=False,
+            )
 
         return item
 
