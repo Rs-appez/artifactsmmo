@@ -37,7 +37,6 @@ async def __regenerate_hp(character: Character):
                 print(f"❌ {character.surname} couldn't withdraw food from bank")
                 return
         await character.regenerate_hp()
-    except Exception as e:
-        print(f"❌ {character.surname} {e}")
+    except Exception:
         _ = await character.rest()
         print(f"󰻝  {character.surname} rests to recover hp before fighting")
