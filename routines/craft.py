@@ -80,11 +80,7 @@ async def craft(character: Character, item: Item, quantity: int):
         )
         return
 
-    nearest_workshop = find_nearest_workshop(item.job, character.location)
-
-    if nearest_workshop is None:
-        print(f"❌ No workshop found for job {item.job}")
-        return
+    nearest_workshop = await find_nearest_workshop(character, item.job)
 
     ingredients = {
         await Encyclopedia.get_item_by_code(str(ingredient["code"])): int(
