@@ -17,12 +17,12 @@ class Resource:
     drops: dict[Item, dict[str, int]]
 
     @classmethod
-    def from_dict(cls, data):
+    async def from_dict(cls, data):
         from models import Encyclopedia
 
         drops = {}
         for drop_data in data.get("drops", []):
-            item = Encyclopedia.get_item_by_code(drop_data["code"])
+            item = await Encyclopedia.get_item_by_code(drop_data["code"])
             drops[item] = {
                 "rate": drop_data["rate"],
                 "min_quantity": drop_data["min_quantity"],
@@ -37,7 +37,7 @@ class Resource:
             drops=drops,
         )
         for item in drops:
-            cls._drop_item[item.code].add(resource)
+            cls._drop_item[item].add(resource)
 
         return resource
 
@@ -47,4 +47,4 @@ class Resource:
 
     @staticmethod
     def from_drop_item(item: Item) -> set["Resource"]:
-        return Resource._drop_item[item.code]
+        return Resource._drop_item[item]
