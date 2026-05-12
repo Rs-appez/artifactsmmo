@@ -64,7 +64,7 @@ class Item:
     @property
     def is_food(self) -> bool:
         return (
-            self.type == "consomable"
+            self.type == "consumable"
             and self.subtype == "food"
             and self.code not in not_to_eat_food
         )
@@ -96,9 +96,6 @@ class Item:
         return False
 
     def can_be_used_by(self, character) -> bool:
-
-        # TODO fix
-        return True
 
         for condition in self.conditions:
             match condition["code"]:
