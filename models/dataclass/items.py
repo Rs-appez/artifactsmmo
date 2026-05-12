@@ -42,11 +42,7 @@ class Item:
         effects = {}
         effects_data = data.get("effects", [])
         for effect_data in effects_data:
-            effect = Encyclopedia.effects.get(effect_data["code"])
-            if effect is None:
-                raise ValueError(
-                    f"Effect with code '{effect_data['code']}' not found for item '{data['name']}'"
-                )
+            effect = Encyclopedia.get_effect_by_code(effect_data["code"])
             effects[effect] = effect_data["value"]
 
         return cls(
