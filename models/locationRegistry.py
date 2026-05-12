@@ -39,6 +39,11 @@ class LocationRegistry:
         await LocationRegistry.wait_location()
         return LocationRegistry.__maps[map_id]
 
+    @staticmethod
+    async def get_bank_locations() -> set[tuple[int, int]]:
+        await LocationRegistry.wait_location()
+        return {(map.x, map.y) for map in LocationRegistry.__bank_locations}
+
     @classmethod
     async def __load_locations(cls):
         if cls.__maps_loaded:
