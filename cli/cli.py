@@ -69,7 +69,21 @@ async def cli(game_manager: GameManager):
                     for item_code in await Encyclopedia.get_all_items_names()
                 }
                 for name in characters.keys()
-            }
+            },
+            "goroutine": {
+                name: {
+                    routine: (
+                        {
+                            monster: None
+                            for monster in await Encyclopedia.get_all_items_names()
+                        }
+                        if routine == "gather"
+                        else {}
+                    )
+                    for routine in routine_names
+                }
+                for name in characters.keys()
+            },
         }
         completer_dict.update(updated_actions)
         session.completer = FuzzyCompleter(
