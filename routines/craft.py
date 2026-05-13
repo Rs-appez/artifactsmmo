@@ -95,8 +95,10 @@ async def craft(character: Character, item: Item, quantity: int):
     reserved_ingredients = {
         ingredient: qty * quantity for ingredient, qty in ingredients.items()
     }
+    tokens: list[uuid.UUID] = []
     try:
         bank_token = await Bank.reserve_items(reserved_ingredients)
+        tokens.append(bank_token)
     except Exception as e:
         print(
             f"❌ {character.surname} failed to reserve ingredients in bank for crafting {item.name} : {e}"
@@ -120,6 +122,7 @@ async def craft(character: Character, item: Item, quantity: int):
             trip_token = Bank.get_reserved_items_partial(
                 bank_token, ingredients_for_trip
             )
+            tokens.append(trip_token)
             await __make_trip(
                 character,
                 nearest_workshop,
@@ -130,6 +133,7 @@ async def craft(character: Character, item: Item, quantity: int):
         last_trip_token = Bank.get_reserved_items_partial(
             bank_token, ingredients_for_last_trip
         )
+        tokens.append(last_trip_token)
         await __make_trip(
             character,
             nearest_workshop,
@@ -145,4 +149,5 @@ async def craft(character: Character, item: Item, quantity: int):
         print(f"❌ {e}")
         return
     finally:
-        await Bank.unreserve_items(bank_token)
+        for token in tokens:
+            await Bank.unreserve_items(token)

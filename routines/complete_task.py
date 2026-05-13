@@ -52,9 +52,9 @@ async def __item_task(character: Character) -> None:
 
         trip_resources = {item: nb_resources_for_the_trip}
         bank_token = None
-        if not character.has_in_inventory(trip_resources):
-            bank_token = await Bank.reserve_items(trip_resources)
         try:
+            if not character.has_in_inventory(trip_resources):
+                bank_token = await Bank.reserve_items(trip_resources)
             if bank_token is not None:
                 await character.deposit_all_in_bank(comeback=False)
                 if not await character.withdraw_item_from_bank(bank_token):
