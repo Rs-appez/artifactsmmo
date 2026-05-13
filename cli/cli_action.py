@@ -1,3 +1,4 @@
+from models.dataclass.bank import Bank
 from models.enums import TaskType
 import routines
 from models import Character, Encyclopedia
@@ -77,3 +78,11 @@ async def asign_routine(character: Character, routine_name: str, *args):
         return
     character.assign_routine(routine_func, *args)
     print(f"🚀 {character.surname} started working on routine {routine_name}")
+
+
+def reserved_bank(_):
+    reserved = Bank.check_reservations()
+    for reservation in reserved.values():
+        print(
+            f"🔒reserved {', '.join([f'{qty}x {item.name}' for item, qty in reservation.items()])}"
+        )

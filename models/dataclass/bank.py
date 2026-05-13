@@ -49,6 +49,10 @@ class Bank:
     def items(self) -> dict[Item, int]:
         return self._items.copy()
 
+    @staticmethod
+    def check_reservations() -> dict[uuid.UUID, dict[Item, int]]:
+        return Bank.__tokens.copy()
+
     @classmethod
     async def __check_bank(cls) -> "Bank":
 

@@ -25,6 +25,7 @@ dict_actions = {
 dict_all = {
     "stopall": cli_action.stop_all,
     "status": cli_action.status,
+    "reserved_bank": cli_action.reserved_bank,
 }
 
 
