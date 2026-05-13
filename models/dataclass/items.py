@@ -47,7 +47,7 @@ class Item:
 
         # ugly temp (i hope)
         job = JobType(craft_data.get("skill", "no_job"))
-        if data["type"] == "resource":
+        if job == JobType.NO_JOB and data["type"] == "resource":
             try:
                 job = JobType(data["subtype"])
             except ValueError:
