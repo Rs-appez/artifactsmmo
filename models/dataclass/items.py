@@ -45,6 +45,14 @@ class Item:
             effect = await Encyclopedia.get_effect_by_code(effect_data["code"])
             effects[effect] = effect_data["value"]
 
+        # ugly temp (i hope)
+        job = JobType(craft_data.get("skill", "no_job"))
+        if data["type"] == "resource":
+            try:
+                job = JobType(data["subtype"])
+            except ValueError:
+                job = JobType.NO_JOB
+
         return cls(
             name=data["name"],
             code=data["code"],
@@ -54,7 +62,7 @@ class Item:
             description=data["description"],
             conditions=data.get("conditions", []),
             effects=effects,
-            job=JobType(craft_data.get("skill", "no_job")),
+            job=job,
             craft_level=craft_data.get("level", 0),
             craft_ingredients=craft_data.get("items", []),
             craft_quantity=craft_data.get("quantity", 0),
