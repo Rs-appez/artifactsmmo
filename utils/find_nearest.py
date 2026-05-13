@@ -21,12 +21,15 @@ def __find_nearest_location(
 
 
 async def find_nearest_lootable(
-    character: Character, lootable: Resource | Monster
+    character: Character, lootables: set[Resource | Monster]
 ) -> tuple[int, int]:
-    lootble_locations = await LocationRegistry.get_locations(lootable)
-    if not lootble_locations:
-        raise ValueError(f"No locations found for {lootable.name}")
-    return __find_nearest_location(lootble_locations, character.location)
+    pos = set()
+    for lootable in lootables:
+        lootble_locations = await LocationRegistry.get_locations(lootable)
+        if not lootble_locations:
+            raise ValueError(f"No locations found for {lootable.name}")
+        pos.add(__find_nearest_location(lootble_locations, character.location))
+    return __find_nearest_location(pos, character.location)
 
 
 async def find_nearest_workshop(character: Character, job: JobType) -> tuple[int, int]:

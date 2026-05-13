@@ -10,7 +10,7 @@ async def mob_farm(character: Character, mob: Monster | str):
             mob = await Encyclopedia.get_monster_by_code(mob)
 
         await character.weaponize()
-        mob_position = await find_nearest_lootable(character, mob)
+        mob_position = await find_nearest_lootable(character, {mob})
         if character.is_inventory_full:
             _ = await character.deposit_all_in_bank()
         if not character.will_win_against(mob):
