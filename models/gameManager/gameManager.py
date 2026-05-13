@@ -12,9 +12,11 @@ class GameManager(JobMixin):
     def __init__(self):
         self.characters: dict[str, Character] = {}
 
-        _ = asyncio.gather(
-            Encyclopedia.initialize(),
-            LocationRegistry.initialize(),
+        _ = asyncio.ensure_future(
+            asyncio.gather(
+                Encyclopedia.initialize(),
+                LocationRegistry.initialize(),
+            )
         )
 
     async def __load_characters(self):
