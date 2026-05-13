@@ -77,7 +77,7 @@ class StuffMixin(Protocol):
             if await self.withdraw_item_from_bank(bank_token):
                 if not await self.equip(better_weapon):
                     print(f"❌ {self.surname} failed to equip sticky sword")
-        finally:
+        except Exception as e:
             await Bank.unreserve_items(bank_token)
 
     async def toolize(self: "Character", job: JobType) -> None:
@@ -104,6 +104,6 @@ class StuffMixin(Protocol):
                 # redeposit the old weapon if the inventory was full
                 _ = await self.deposit_all_in_bank()
 
-        finally:
+        except Exception as e:
             if bank_token is not None:
                 await Bank.unreserve_items(bank_token)

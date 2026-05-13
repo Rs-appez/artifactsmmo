@@ -67,7 +67,7 @@ async def __item_task(character: Character) -> None:
             ):
                 print("Failed to complete task")
                 return
-        finally:
+        except Exception as e:
             if bank_token is not None:
                 await Bank.unreserve_items(bank_token)
 
