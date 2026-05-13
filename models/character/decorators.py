@@ -14,7 +14,7 @@ def request_action(func):
 
 def need_bank(func):
     async def wrapper(self, *args, **kwargs):
-        bank_location = find_nearest_bank(self.location)
+        bank_location = await find_nearest_bank(self.location)
         current_location = self.location
         if not await self.move(bank_location):
             print("❌ Failed to move to bank")
