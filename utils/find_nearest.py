@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 from models.dataclass import Monster, Resource
-from models.enums import JobType
+from models.enums import JobType, TaskType
 from models.locationRegistry import LocationRegistry
 
 if TYPE_CHECKING:
@@ -41,3 +41,16 @@ async def find_nearest_bank(location: tuple[int, int]) -> tuple[int, int]:
     if not bank_locations:
         raise ValueError("No bank locations found")
     return __find_nearest_location(bank_locations, location)
+
+
+async def find_nearest_tasks_master(
+    character: Character, task_type: TaskType
+) -> tuple[int, int]:
+    tasks_master_locations = await LocationRegistry.get_tasks_master_locations(
+        task_type
+    )
+    if not tasks_master_locations:
+        raise ValueError(
+            f"No task master locations found for task type {task_type.value}"
+        )
+    return __find_nearest_location(tasks_master_locations, character.location)

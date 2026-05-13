@@ -55,6 +55,12 @@ class LocationRegistry:
         await LocationRegistry.wait_location()
         return {(map.x, map.y) for map in LocationRegistry.__grand_exchange_locations}
 
+    @staticmethod
+    async def get_tasks_master_locations(task_type: TaskType) -> set[tuple[int, int]]:
+        await LocationRegistry.wait_location()
+        maps = LocationRegistry.__tasks_masters_locations.get(task_type, set())
+        return {(map.x, map.y) for map in maps}
+
     @classmethod
     async def __load_locations(cls):
         if cls.__maps_loaded:

@@ -1,20 +1,22 @@
-from locations import monster_task_master, item_task_master
 from models import Character
 from models.dataclass import Item, Monster
 from models.dataclass.bank import Bank
 from models.enums import TaskType
 from routines import mob_farm
+from utils.find_nearest import find_nearest_tasks_master
 
 
 async def complete_task(character: Character, type: TaskType) -> None:
 
-    match type:
-        case TaskType.MONSTER:
-            task_master = monster_task_master
-        case TaskType.ITEM:
-            task_master = item_task_master
-
     if character.task is None:
+        match type:
+            case TaskType.MONSTER:
+                task_master = await find_nearest_tasks_master(
+                    character, TaskType.MONSTER
+                )
+            case TaskType.ITEM:
+                task_master = await find_nearest_tasks_master(character, TaskType.ITEM)
+
         if not await character.move(task_master):
             print("Failed to move to task master")
             return
@@ -45,6 +47,7 @@ async def __item_task(character: Character) -> None:
     else:
         print("❌ Task cible is not an item")
         return
+    task_master = await find_nearest_tasks_master(character, TaskType.ITEM)
     while character.task_resources_left > 0:
         nb_resources_for_the_trip = min(
             character.task_resources_left, character.inventory_max_items
@@ -59,7 +62,7 @@ async def __item_task(character: Character) -> None:
                 await character.deposit_all_in_bank(comeback=False)
                 if not await character.withdraw_item_from_bank(bank_token):
                     return
-            if not await character.move(item_task_master):
+            if not await character.move(task_master):
                 print("Failed to move to task master")
                 return
             if not await character.trade_with_task_master(
@@ -93,8 +96,8 @@ async def __monster_task(character: Character) -> None:
     except Exception as e:
         print(f"❌ {character.surname} failed to complete the monster task : {e}")
         return
-
-    if not await character.move(monster_task_master):
+    task_master = await find_nearest_tasks_master(character, TaskType.MONSTER)
+    if not await character.move(task_master):
         print("Failed to move to task master")
         return
     if await character.complete_task():
