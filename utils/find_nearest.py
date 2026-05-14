@@ -55,8 +55,8 @@ async def find_nearest_tasks_master(character: Character, task_type: TaskType) -
     return __find_nearest_location(tasks_master_locations, character.location)
 
 
-async def find_nearest_transition(character: Character, layer: Layer) -> Map:
+async def find_nearest_transition(postion: Map, layer: Layer) -> Map:
     transition_locations = await LocationRegistry.get_transition_locations(layer)
     if not transition_locations:
         raise ValueError(f"No transition locations found for layer {layer.value}")
-    return __find_nearest_location(transition_locations, character.location)
+    return __find_nearest_location(transition_locations, postion)

@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from models.dataclass import Map
+from models.enums import Layer
 from utils.find_nearest import find_nearest_transition
 
 from ..decorators import refresh_after, request_action
@@ -81,7 +82,14 @@ class MoveMixin(Protocol):
         if destination.layer == self.location.layer:
             return
 
-        transition_map = await find_nearest_transition(self, destination.layer)
+        if self.location.layer is not Layer.OVERWORLD:
+            transition_map = await find_nearest_transition(
+                self.location, Layer.OVERWORLD
+            )
+        else:
+            transition_map = await find_nearest_transition(
+                destination, destination.layer
+            )
 
         if not await self.move(transition_map):
             print(
