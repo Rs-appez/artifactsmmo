@@ -80,6 +80,10 @@ class FightMixin(Protocol):
         try:
             if item.type != "consumable":
                 raise Exception(f"{item.name} is not a consumable item")
+            if quantity <= 0:
+                raise Exception(
+                    f"Cannot eat non-positive quantity of {item.name}: {quantity}"
+                )
             response = await self.client.post(
                 "/use",
                 json={"quantity": quantity, "code": item.code},
@@ -108,10 +112,11 @@ class FightMixin(Protocol):
             food.items(), key=lambda x: x[0].heal, reverse=True
         ):
             qty_to_eat = min(quantity, missing_hp // item.heal)
-            if not await self.eat(item, qty_to_eat):
-                print(f"❌ Failed to eat {item.name} x{qty_to_eat}")
-                continue
-            missing_hp -= item.heal * qty_to_eat
-            print(f" {self.surname} eats {qty_to_eat} {item.name} to recover hp")
-            if missing_hp <= 0:
-                break
+            if qty_to_eat > 0:
+                if not await self.eat(item, qty_to_eat):
+                    print(f"❌ Failed to eat {item.name} x{qty_to_eat}")
+                    continue
+                missing_hp -= item.heal * qty_to_eat
+                print(f" {self.surname} eats {qty_to_eat} {item.name} to recover hp")
+                if missing_hp <= 0:
+                    break
