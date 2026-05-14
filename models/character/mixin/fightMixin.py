@@ -49,7 +49,11 @@ class FightMixin(Protocol):
         try:
             response = await self.client.post(
                 "/fight",
-                json={"participants": [mate.name for mate in teammate]}
+                json={
+                    "participants": [
+                        mate.name for mate in teammate if mate.name != self.name
+                    ]
+                }
                 if teammate
                 else [],
             )
