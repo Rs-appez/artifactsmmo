@@ -1,6 +1,6 @@
 import uuid
 from models import Character, Encyclopedia
-from models.dataclass import Item
+from models.dataclass import Item, Map
 from models.dataclass.bank import Bank
 from utils.find_nearest import find_nearest_workshop
 from math import ceil
@@ -51,7 +51,7 @@ async def __get_trips_info(
 
 async def __make_trip(
     character: Character,
-    workshop_location: tuple[int, int],
+    workshop_location: Map,
     bank_token: uuid.UUID,
     item: Item,
     quantity: int,

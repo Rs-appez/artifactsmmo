@@ -6,7 +6,7 @@ from typing import override
 import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
-from models import Encyclopedia
+from models import Encyclopedia, LocationRegistry
 from models.dataclass import Item, TaskQuest
 from models.enums import Element, JobType, Layer
 from utils.math_fight import calc_attack
@@ -28,10 +28,10 @@ from .mixin import (
 
 @dataclass
 class Character(
+    MoveMixin,
     InventoryMixin,
     BankMixin,
     WorkMixin,
-    MoveMixin,
     FightMixin,
     GatherMixin,
     CraftMixin,
@@ -43,10 +43,6 @@ class Character(
     _name: str
     _surname: str
     _cooldown: datetime
-
-    _location: tuple[int, int]
-    _layer: Layer
-    _map: int
 
     _hp: int
     _max_hp: int
@@ -86,18 +82,6 @@ class Character(
     @property
     def client(self):
         return self.__client
-
-    @property
-    def location(self) -> tuple[int, int]:
-        return self._location
-
-    @property
-    def layer(self) -> Layer:
-        return self._layer
-
-    @property
-    def map(self) -> int:
-        return self._map
 
     @property
     def cooldown(self) -> float:
@@ -232,9 +216,7 @@ class Character(
         return dict(
             _name=data["name"],
             _surname=data["name"][3:],
-            _location=(data["x"], data["y"]),
-            _layer=Layer(data["layer"]),
-            _map=data["map_id"],
+            _location=await LocationRegistry.get_map_by_id(data["map_id"]),
             _cooldown=datetime.fromisoformat(
                 data["cooldown_expiration"].replace("Z", "+00:00")
             ),

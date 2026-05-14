@@ -6,7 +6,7 @@ from models.dataclass import Monster, Map, Resource
 from models.encyclopedia import Encyclopedia
 from collections import defaultdict
 
-from models.enums import JobType, TaskType
+from models.enums import JobType, Layer, TaskType
 
 
 class LocationRegistry:
@@ -29,10 +29,9 @@ class LocationRegistry:
             _ = await asyncio.sleep(1)
 
     @staticmethod
-    async def get_locations(entity: Resource | Monster) -> set[tuple[int, int]]:
+    async def get_locations(entity: Resource | Monster) -> set[Map]:
         await LocationRegistry.wait_location()
-        maps = LocationRegistry.__drop_locations.get(entity)
-        return {(map.x, map.y) for map in maps} if maps else set()
+        return LocationRegistry.__drop_locations.get(entity, set())
 
     @staticmethod
     async def get_map_by_id(map_id: int) -> Map:
@@ -40,26 +39,24 @@ class LocationRegistry:
         return LocationRegistry.__maps[map_id]
 
     @staticmethod
-    async def get_bank_locations() -> set[tuple[int, int]]:
+    async def get_bank_locations() -> set[Map]:
         await LocationRegistry.wait_location()
-        return {(map.x, map.y) for map in LocationRegistry.__bank_locations}
+        return LocationRegistry.__bank_locations
 
     @staticmethod
-    async def get_workshop_locations(job: JobType) -> set[tuple[int, int]]:
+    async def get_workshop_locations(job: JobType) -> set[Map]:
         await LocationRegistry.wait_location()
-        maps = LocationRegistry.__workshop_locations.get(job, set())
-        return {(map.x, map.y) for map in maps}
+        return LocationRegistry.__workshop_locations.get(job, set())
 
     @staticmethod
-    async def get_grand_exchange_locations() -> set[tuple[int, int]]:
+    async def get_grand_exchange_locations() -> set[Map]:
         await LocationRegistry.wait_location()
-        return {(map.x, map.y) for map in LocationRegistry.__grand_exchange_locations}
+        return LocationRegistry.__grand_exchange_locations
 
     @staticmethod
-    async def get_tasks_master_locations(task_type: TaskType) -> set[tuple[int, int]]:
+    async def get_tasks_master_locations(task_type: TaskType) -> set[Map]:
         await LocationRegistry.wait_location()
-        maps = LocationRegistry.__tasks_masters_locations.get(task_type, set())
-        return {(map.x, map.y) for map in maps}
+        return LocationRegistry.__tasks_masters_locations.get(task_type, set())
 
     @classmethod
     async def __load_locations(cls):
