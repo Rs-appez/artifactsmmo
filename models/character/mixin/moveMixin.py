@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from models.dataclass import Map
+from utils.find_nearest import find_nearest_transition
 
 from ..decorators import refresh_after, request_action
 
@@ -24,6 +25,10 @@ class MoveMixin(Protocol):
     async def move(self: "Character", destination: Map) -> tuple[bool, dict | None]:
         if destination == self.location:
             return True, None
+
+        if destination.layer != self.location.layer:
+            await self._change_layer(destination)
+            await self.available
         try:
             response = await self.client.post(
                 "/move",
@@ -47,13 +52,45 @@ class MoveMixin(Protocol):
         except Exception as e:
             print(f"❌ {e}")
             return False, None
+
+    @request_action
+    @refresh_after
+    async def transition(self: "Character") -> tuple[bool, dict | None]:
+        try:
+            response = await self.client.post(
+                "/transition",
+            )
+            data = response.json()
+
+            if "error" in data:
+                print("data : ", data)
+                raise Exception(data["error"]["message"])
+
             destination = data["data"]["destination"]
             character_data = data["data"]["character"]
 
             print(
-                f"🏃{self.surname} Moved to ({destination['x']}, {destination['y']}) on {destination['name']}"
+                f"󰓡 {self.surname} Transitioned to ({destination['x']}, {destination['y']}) on {destination['name']} layer : {destination['layer']}"
             )
             return True, character_data
         except Exception as e:
             print(f"❌ {e}")
             return False, None
+
+    async def _change_layer(self: "Character", destination: Map) -> None:
+        if destination.layer == self.location.layer:
+            return
+
+        transition_map = await find_nearest_transition(self, destination.layer)
+
+        if not await self.move(transition_map):
+            print(
+                f"❌ {self.surname} Failed to move to transition map {transition_map.name} to change layer"
+            )
+            return
+
+        if not await self.transition():
+            print(
+                f"❌ {self.surname} Failed to transition to layer {destination.layer} from {transition_map.name}"
+            )
+            return

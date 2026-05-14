@@ -16,6 +16,7 @@ class LocationRegistry:
     __workshop_locations: dict[JobType, set[Map]] = defaultdict(set)
     __grand_exchange_locations: set[Map] = set()
     __tasks_masters_locations: dict[TaskType, set[Map]] = defaultdict(set)
+    __transition_locations: dict[Layer, set[int]] = defaultdict(set)
     # __npc_locations: set[Map] = set()
     __maps: dict[int, Map] = {}
 
@@ -58,6 +59,12 @@ class LocationRegistry:
         await LocationRegistry.wait_location()
         return LocationRegistry.__tasks_masters_locations.get(task_type, set())
 
+    @staticmethod
+    async def get_transition_locations(layer: Layer) -> set[Map]:
+        await LocationRegistry.wait_location()
+        maps_id = LocationRegistry.__transition_locations.get(layer, set())
+        return {LocationRegistry.__maps[map_id] for map_id in maps_id}
+
     @classmethod
     async def __load_locations(cls):
         if cls.__maps_loaded:
@@ -84,6 +91,10 @@ class LocationRegistry:
                     cls.__maps[map.map_id] = map
 
                     if interaction := location.get("interactions"):
+                        if transition := interaction.get("transition"):
+                            layer = Layer(transition["layer"])
+                            cls.__transition_locations[layer].add(map.map_id)
+
                         if content := interaction.get("content"):
                             match content["type"]:
                                 case "resource":
