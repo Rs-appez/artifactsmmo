@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING, Protocol
 
-from config import HEADERS
 from exceptions import ImpossibleCombatException
 from models.character.decorators import refresh_after, request_action
 from models.dataclass import Item, Monster
