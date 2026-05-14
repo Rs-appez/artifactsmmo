@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING, Protocol
 
-from config import HEADERS
 
 from ..decorators import refresh_after, request_action
 
