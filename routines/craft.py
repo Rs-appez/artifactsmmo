@@ -143,6 +143,7 @@ async def craft(character: Character, item: Item, quantity: int):
         print(f"⚒️ {character.surname} finished crafting {quantity}x {item.name}")
     except Exception as e:
         print(f"❌ {e}")
+        return
+    finally:
         for token in tokens:
             await Bank.unreserve_items(token)
-        return
