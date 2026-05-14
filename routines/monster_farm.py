@@ -41,7 +41,9 @@ async def boss_farm(
         mob_position = await find_nearest_lootable(character, {boss})
         if character.is_inventory_full:
             _ = await character.deposit_all_in_bank()
-        _ = await __regenerate_hp(character)
+
+        if character.hp < 200:
+            _ = await __regenerate_hp(character)
         _ = await character.move(mob_position)
         if leader:
             for mate in teammate:
