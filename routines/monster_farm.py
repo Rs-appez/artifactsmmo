@@ -3,6 +3,7 @@ from models import Character, Encyclopedia
 from models.dataclass import Monster
 from models.dataclass.bank import Bank
 from utils.find_nearest import find_nearest_lootable
+from routines import empty_farm
 
 
 async def mob_farm(character: Character, mob: Monster | str):
@@ -41,17 +42,18 @@ async def boss_farm(
         await character.weaponize()
         mob_position = await find_nearest_lootable(character, {boss})
         if character.is_inventory_full:
-            _ = await character.deposit_all_in_bank()
+            for mate in teammate:
+                mate.do_one_time_task(empty_farm)
 
         if character.hp < 200:
             _ = await __regenerate_hp(character)
         _ = await character.move(mob_position)
+        await character.set_ready_to_fight()
         if leader:
             while any(not mate.is_ready_to_fight for mate in teammate):
-                await asyncio.sleep(1)
+                await asyncio.sleep(0.2)
             _ = await character.fight(teammate)
         else:
-            await character.set_ready_to_fight()
             await character.waiting_for_fight
 
     except Exception as e:
