@@ -5,6 +5,7 @@ import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS
 from models import Character, Encyclopedia, LocationRegistry
+from routines.monster_farm import boss_farm
 from .mixins import JobMixin
 
 
@@ -35,5 +36,22 @@ class GameManager(JobMixin):
     async def start(self) -> Sequence[Coroutine]:
 
         await self.__load_characters()
+        # tmp test boss fight
+        await self.__asign_boss()
         tasks = [char.start() for char in self.characters.values()]
         return tasks
+
+    async def __asign_boss(self):
+        boss = await Encyclopedia.get_monster_by_code("king_slime")
+        charlie = self.characters.get("charlie")
+        alice = self.characters.get("alice")
+        john = self.characters.get("john")
+
+        if alice:
+            alice.assign_routine(boss_farm, [], boss)
+
+        if john:
+            john.assign_routine(boss_farm, [], boss)
+
+        if charlie:
+            charlie.assign_routine(boss_farm, [alice, john], boss, True)
