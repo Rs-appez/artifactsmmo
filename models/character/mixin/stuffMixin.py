@@ -91,7 +91,6 @@ class StuffMixin(Protocol):
                 print(f"🛠️  {self.surname} equipped {item.name} to gather")
                 return
 
-        # temporary need refactor
         bank_token = None
         try:
             bank_token, best_tool = await Bank.get_tool(self, job)
@@ -101,9 +100,9 @@ class StuffMixin(Protocol):
             if await self.withdraw_item_from_bank(bank_token):
                 if not await self.equip(best_tool):
                     print(f"❌ {self.surname} failed to equip {job.value}_tool")
-                # redeposit the old weapon if the inventory was full
                 _ = await self.deposit_all_in_bank()
 
         except Exception as e:
+            print(f"❌ {e}")
             if bank_token is not None:
                 await Bank.unreserve_items(bank_token)
