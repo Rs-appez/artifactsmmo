@@ -108,7 +108,7 @@ class FightMixin(Protocol):
             result = True if fight["result"] == "win" else False
             participants = [mate.surname for mate in teammate] if teammate else []
             print(
-                f"{'󰓥 ' if result else ' '} {','.join([self.surname, *participants])} Fought and {'won' if result else 'lost'} against {fight['opponent']}"
+                f"{'󰓥 ' if result else ' '} {','.join(participants) if participants else self.surname} Fought and {'won' if result else 'lost'} against {fight['opponent']}"
             )
 
             return result, character_data
