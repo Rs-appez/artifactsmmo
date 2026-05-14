@@ -59,4 +59,11 @@ async def find_nearest_transition(postion: Map, layer: Layer) -> Map:
     transition_locations = await LocationRegistry.get_transition_locations(layer)
     if not transition_locations:
         raise ValueError(f"No transition locations found for layer {layer.value}")
-    return __find_nearest_location(transition_locations, postion)
+    return __find_nearest_location(
+        {
+            location
+            for location in transition_locations
+            if location.layer == postion.layer
+        },
+        postion,
+    )
