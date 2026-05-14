@@ -26,6 +26,35 @@ async def mob_farm(character: Character, mob: Monster | str):
             raise e
 
 
+async def boss_farm(
+    character: Character,
+    teammate: list[Character],
+    boss: str | Monster,
+    leader: bool = False,
+):
+    # V1 missing a lot of check
+    try:
+        if isinstance(boss, str):
+            boss = await Encyclopedia.get_monster_by_code(boss)
+
+        await character.weaponize()
+        mob_position = await find_nearest_lootable(character, {boss})
+        if character.is_inventory_full:
+            _ = await character.deposit_all_in_bank()
+        _ = await __regenerate_hp(character)
+        _ = await character.move(mob_position)
+        if leader:
+            for mate in teammate:
+                await mate.is_ready_to_fight
+            _ = await character.fight(teammate)
+        else:
+            await character.set_ready_to_fight()
+            await character.waiting_for_fight
+
+    except Exception as e:
+        print(f"❌ {character.surname} {e}")
+
+
 async def __regenerate_hp(character: Character):
     try:
         if not character.has_food:

@@ -1,3 +1,4 @@
+import asyncio
 from typing import TYPE_CHECKING, Protocol
 
 from exceptions import ImpossibleCombatException
@@ -10,6 +11,22 @@ if TYPE_CHECKING:
 
 
 class FightMixin(Protocol):
+    _ready_to_fight: bool = False
+
+    @property
+    async def is_ready_to_fight(self: "Character"):
+        while not self._ready_to_fight:
+            await asyncio.sleep(1)
+
+    @property
+    async def waiting_for_fight(self: "Character"):
+        while self._ready_to_fight:
+            await asyncio.sleep(1)
+
+    @request_action
+    async def set_ready_to_fight(self: "Character"):
+        self._ready_to_fight = True
+
     def will_win_against(self: "Character", monster: Monster) -> bool:
         damage = damage_on(self, monster)
         damage += (damage * 0.5) * (self.critical_strike / 100)
@@ -27,10 +44,15 @@ class FightMixin(Protocol):
 
     @request_action
     @refresh_after
-    async def fight(self: "Character") -> tuple[bool, dict | None]:
+    async def fight(
+        self: "Character", teammate: list[Character] | None = None
+    ) -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
                 "/fight",
+                json={"participants": [mate.name for mate in teammate]}
+                if teammate
+                else [],
             )
             data = response.json()["data"]
 
@@ -51,6 +73,8 @@ class FightMixin(Protocol):
         except Exception as e:
             print(f"❌ {e}")
             return False, None
+        finally:
+            self._ready_to_fight = False
 
     @request_action
     @refresh_after
