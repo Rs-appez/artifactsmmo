@@ -40,7 +40,7 @@ class InventoryMixin(Protocol):
         return False
 
     @property
-    def get_food(self) -> dict[Item, int]:
+    def get_food(self: "Character") -> dict[Item, int]:
         food_items = {}
         for item, quantity in self._inventory.items():
             if item.is_food and quantity > 0 and item.can_be_used_by(self):
