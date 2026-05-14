@@ -14,9 +14,8 @@ class FightMixin(Protocol):
     _ready_to_fight: bool = False
 
     @property
-    async def is_ready_to_fight(self: "Character"):
-        while not self._ready_to_fight:
-            await asyncio.sleep(1)
+    def is_ready_to_fight(self: "Character"):
+        return self._ready_to_fight
 
     @property
     async def waiting_for_fight(self: "Character"):

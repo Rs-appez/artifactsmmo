@@ -1,3 +1,4 @@
+import asyncio
 from models import Character, Encyclopedia
 from models.dataclass import Monster
 from models.dataclass.bank import Bank
@@ -46,8 +47,8 @@ async def boss_farm(
             _ = await __regenerate_hp(character)
         _ = await character.move(mob_position)
         if leader:
-            for mate in teammate:
-                await mate.is_ready_to_fight
+            while any(not mate.is_ready_to_fight for mate in teammate):
+                await asyncio.sleep(1)
             _ = await character.fight(teammate)
         else:
             await character.set_ready_to_fight()
@@ -56,7 +57,7 @@ async def boss_farm(
     except Exception as e:
         print(f"❌ {character.surname} {e}")
     finally:
-        character._ready_to_fight = False
+        character._ready_to_fight = False  # pyright: ignore[reportPrivateUsage]
 
 
 async def __regenerate_hp(character: Character):
