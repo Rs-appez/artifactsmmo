@@ -55,6 +55,8 @@ async def boss_farm(
 
     except Exception as e:
         print(f"❌ {character.surname} {e}")
+    finally:
+        character._ready_to_fight = False
 
 
 async def __regenerate_hp(character: Character):
