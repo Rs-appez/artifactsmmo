@@ -47,11 +47,13 @@ class GameManager(JobMixin):
         alice = self.characters.get("alice")
         john = self.characters.get("john")
 
+        team = [charlie, alice, john]
+
         if alice:
-            alice.assign_routine(boss_farm, [], boss)
+            alice.assign_routine(boss_farm, team, boss)
 
         if john:
-            john.assign_routine(boss_farm, [], boss)
+            john.assign_routine(boss_farm, team, boss)
 
         if charlie:
-            charlie.assign_routine(boss_farm, [alice, john], boss, True)
+            charlie.assign_routine(boss_farm, team, boss, True)
