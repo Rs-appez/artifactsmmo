@@ -34,7 +34,7 @@ class Item:
         craft_data = data.get("craft")
         if craft_data is None:
             craft_data: dict = {
-                "skill": "",
+                "skill": "no_job",
                 "level": 0,
                 "items": [],
                 "quantity": 0,
