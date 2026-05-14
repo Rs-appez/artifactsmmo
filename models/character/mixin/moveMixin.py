@@ -84,11 +84,11 @@ class MoveMixin(Protocol):
 
         if self.location.layer is not Layer.OVERWORLD:
             transition_map = await find_nearest_transition(
-                self.location, Layer.OVERWORLD
+                destination, destination.layer
             )
         else:
             transition_map = await find_nearest_transition(
-                destination, destination.layer
+                self.location, destination.layer
             )
 
         if not await self.move(transition_map):
