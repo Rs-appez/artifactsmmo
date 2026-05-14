@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 import uuid
 
@@ -11,7 +12,14 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
+@dataclass
 class StuffMixin(Protocol):
+    _weapon: Item | None = None
+
+    @property
+    def weapon(self) -> Item | None:
+        return self._weapon
+
     @request_action
     @refresh_after
     async def equip(

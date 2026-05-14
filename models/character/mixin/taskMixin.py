@@ -1,14 +1,21 @@
+from dataclasses import dataclass
 from typing import Protocol, TYPE_CHECKING
 
-from config import HEADERS
 from models.character.decorators import refresh_after, request_action
-from models.dataclass import Item
+from models.dataclass import Item, TaskQuest
 
 if TYPE_CHECKING:
     from models.character import Character
 
 
+@dataclass
 class TaskMixin(Protocol):
+    _task: TaskQuest | None = None
+
+    @property
+    def task(self) -> TaskQuest | None:
+        return self._task
+
     @property
     def task_resources_left(self: "Character") -> int:
         if not self.task:

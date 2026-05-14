@@ -1,17 +1,55 @@
 import asyncio
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Protocol
 
 from exceptions import ImpossibleCombatException
 from models.character.decorators import refresh_after, request_action
 from models.dataclass import Item, Monster
+from models.enums import Element
 from utils.math_fight import damage_on
 
 if TYPE_CHECKING:
     from models.character import Character
 
 
+@dataclass
 class FightMixin(Protocol):
+    _hp: int = 0
+    _max_hp: int = 0
+    _initiative: int = 0
+    _resistance: dict[Element, int] = field(default_factory=dict)
+    _attack: dict[Element, int] = field(default_factory=dict)
+    _critical_strike: int = 0
+
     _ready_to_fight: bool = False
+
+    @property
+    def hp(self) -> int:
+        return self._hp
+
+    @property
+    def max_hp(self) -> int:
+        return self._max_hp
+
+    @property
+    def missing_hp(self) -> int:
+        return self._max_hp - self._hp
+
+    @property
+    def resistance(self) -> dict[Element, int]:
+        return self._resistance.copy()
+
+    @property
+    def attack(self) -> dict[Element, int]:
+        return self._attack.copy()
+
+    @property
+    def critical_strike(self) -> int:
+        return self._critical_strike
+
+    @property
+    def initiative(self) -> int:
+        return self._initiative
 
     @property
     def is_ready_to_fight(self: "Character"):

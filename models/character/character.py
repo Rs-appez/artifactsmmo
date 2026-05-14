@@ -7,8 +7,8 @@ import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
 from models import Encyclopedia, LocationRegistry
-from models.dataclass import Item, TaskQuest
-from models.enums import Element, JobType, Layer
+from models.dataclass import TaskQuest
+from models.enums import Element, JobType
 from utils.math_fight import calc_attack
 
 from .decorators import refresh_after
@@ -44,22 +44,11 @@ class Character(
     _surname: str
     _cooldown: datetime
 
-    _hp: int
-    _max_hp: int
-    _initiative: int
-    _resistance: dict[Element, int]
-    _attack: dict[Element, int]
-    _critical_strike: int
-
     _xp: int
     _max_xp: int
     _level: int
 
     _jobs: dict[JobType, int]
-
-    _weapon: Item | None = None
-
-    _task: TaskQuest | None = None
 
     def __post_init__(self):
         self.__client = httpx.AsyncClient(
@@ -96,34 +85,6 @@ class Character(
             await asyncio.sleep(min(3.0, self.cooldown))
 
     @property
-    def hp(self) -> int:
-        return self._hp
-
-    @property
-    def max_hp(self) -> int:
-        return self._max_hp
-
-    @property
-    def missing_hp(self) -> int:
-        return self._max_hp - self._hp
-
-    @property
-    def resistance(self) -> dict[Element, int]:
-        return self._resistance.copy()
-
-    @property
-    def attack(self) -> dict[Element, int]:
-        return self._attack.copy()
-
-    @property
-    def critical_strike(self) -> int:
-        return self._critical_strike
-
-    @property
-    def initiative(self) -> int:
-        return self._initiative
-
-    @property
     def xp(self) -> int:
         return self._xp
 
@@ -134,14 +95,6 @@ class Character(
     @property
     def level(self) -> int:
         return self._level
-
-    @property
-    def weapon(self) -> Item | None:
-        return self._weapon
-
-    @property
-    def task(self) -> TaskQuest | None:
-        return self._task
 
     def get_job_level(self, job_name: str | JobType) -> int:
         job = JobType(job_name) if isinstance(job_name, str) else job_name
