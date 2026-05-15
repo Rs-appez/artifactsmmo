@@ -174,8 +174,8 @@ class FightMixin(Protocol):
             return
         missing_hp = self.missing_hp
 
-        for item, quantity in sorted(
-            food.items(), key=lambda x: x[0].heal, reverse=True
+        for i, (item, quantity) in enumerate(
+            sorted(food.items(), key=lambda x: x[0].heal, reverse=True)
         ):
             qty_to_eat = min(quantity, missing_hp // item.heal)
             if qty_to_eat > 0:
@@ -186,6 +186,8 @@ class FightMixin(Protocol):
                 print(f" {self.surname} eats {qty_to_eat} {item.name} to recover hp")
                 if missing_hp <= 0:
                     break
+            elif i == 0:
+                _ = await self.eat(item, 1)
             else:
                 raise Exception(
                     f"{item.name} cannot heal any more hp for {self.surname}"
