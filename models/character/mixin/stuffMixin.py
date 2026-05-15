@@ -1,10 +1,10 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Protocol
 import uuid
 
 from models import Encyclopedia
 from models.character.decorators import refresh_after, request_action
-from models.dataclass import Item, Monster
+from models.dataclass import Effect, Item, Monster
 from models.dataclass.bank import Bank
 from models.enums import JobType
 
@@ -15,10 +15,15 @@ if TYPE_CHECKING:
 @dataclass
 class StuffMixin(Protocol):
     _weapon: Item | None = None
+    _effects: dict[Effect, int] = field(default_factory=dict)
 
     @property
     def weapon(self) -> Item | None:
         return self._weapon
+
+    @property
+    def effects(self) -> dict[Effect, int]:
+        return self._effects.copy()
 
     @request_action
     @refresh_after

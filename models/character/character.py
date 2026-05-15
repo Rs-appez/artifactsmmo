@@ -166,6 +166,11 @@ class Character(
             ),
         }
 
+        effects = {
+            await Encyclopedia.get_effect_by_code(effect["code"]): effect["value"]
+            for effect in data.get("effects", [])
+        }
+
         return dict(
             _name=data["name"],
             _surname=data["name"][3:],
@@ -194,6 +199,7 @@ class Character(
             _weapon=await Encyclopedia.get_item_by_code(data["weapon_slot"])
             if data.get("weapon_slot")
             else None,
+            _effects=effects,
         )
 
     @classmethod
