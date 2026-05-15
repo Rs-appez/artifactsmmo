@@ -98,7 +98,7 @@ class BankMixin(Protocol):
         comeback: bool = False,
     ) -> tuple[bool, dict | None]:
         try:
-            items = Bank.get_reserved_items(bank_token)
+            items = Bank._get_reserved_items(bank_token)  # pyright: ignore[reportPrivateUsage]
             response = await self.client.post(
                 "/bank/withdraw/item",
                 json=[

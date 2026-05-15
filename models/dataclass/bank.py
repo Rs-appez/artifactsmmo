@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import asynccontextmanager
 import uuid
 from asyncio import Lock
 from collections import defaultdict
@@ -78,11 +79,21 @@ class Bank:
         return True, None
 
     @classmethod
-    def get_reserved_items(cls, token: uuid.UUID) -> dict[Item, int]:
+    def _get_reserved_items(cls, token: uuid.UUID) -> dict[Item, int]:
         return cls.__tokens.get(token, {}).copy()
 
     @classmethod
-    def get_reserved_items_partial(
+    @asynccontextmanager
+    async def get_reserved_items_partial(cls, token: uuid.UUID, items: dict[Item, int]):
+        async with cls.locked():
+            new_token = cls.__get_reserved_items_partial(token, items)
+        try:
+            yield new_token
+        finally:
+            cls._unreserve_items(new_token)
+
+    @classmethod
+    def __get_reserved_items_partial(
         cls, token: uuid.UUID, items: dict[Item, int]
     ) -> uuid.UUID:
         reserved_items = cls.__tokens.get(token, {})
@@ -98,11 +109,16 @@ class Bank:
         return new_token
 
     @classmethod
-    @lock_bank
+    @asynccontextmanager
     async def reserve_items(
         cls, items: dict[Item, int], imediately_needed: bool = True
-    ) -> uuid.UUID:
-        return await cls._reserve_items(items, imediately_needed)
+    ):
+        async with cls.locked():
+            token = await cls._reserve_items(items, imediately_needed)
+        try:
+            yield token
+        finally:
+            cls._unreserve_items(token)
 
     @classmethod
     async def _reserve_items(
@@ -125,11 +141,6 @@ class Bank:
         return token
 
     @classmethod
-    @lock_bank
-    async def unreserve_items(cls, token: uuid.UUID):
-        cls._unreserve_items(token)
-
-    @classmethod
     def _unreserve_items(cls, token: uuid.UUID):
         """
         Unreserve items without locking, should only be used internally when we are sure to already have the lock
@@ -141,46 +152,54 @@ class Bank:
             cls.__reserved_items[item] -= quantity
 
     @classmethod
-    @lock_bank
-    async def get_food(cls, character: Character, quantity: int) -> uuid.UUID:
-        bank = await cls.__check_bank()
-        food_items = {
-            item: quantity
-            for item, quantity in bank.items.items()
-            if item.is_food and item.can_be_used_by(character)
-        }
-        if not food_items:
-            raise Exception("No food found in bank for character")
-        packed_food = {}
-        for item, available_quantity in sorted(
-            food_items.items(), key=lambda x: x[1], reverse=True
-        ):
-            if quantity <= 0:
-                break
-            use_quantity = min(available_quantity, quantity)
-            packed_food[item] = use_quantity
-            quantity -= use_quantity
+    @asynccontextmanager
+    async def get_food(cls, character: Character, quantity: int):
+        async with cls.locked():
+            bank = await cls.__check_bank()
+            food_items = {
+                item: quantity
+                for item, quantity in bank.items.items()
+                if item.is_food and item.can_be_used_by(character)
+            }
+            if not food_items:
+                raise Exception("No food found in bank for character")
+            packed_food = {}
+            for item, available_quantity in sorted(
+                food_items.items(), key=lambda x: x[1], reverse=True
+            ):
+                if quantity <= 0:
+                    break
+                use_quantity = min(available_quantity, quantity)
+                packed_food[item] = use_quantity
+                quantity -= use_quantity
 
-        return await cls._reserve_items(packed_food, bank=bank)
+            token = await cls._reserve_items(packed_food, bank=bank)
+        try:
+            yield token
+        finally:
+            cls._unreserve_items(token)
 
     @classmethod
-    @lock_bank
-    async def get_tool(
-        cls, character: Character, job: JobType
-    ) -> tuple[uuid.UUID, Item]:
-        bank = await cls.__check_bank()
-        tool_items = {
-            item
-            for item in bank.items
-            if item.is_for_job(job)
-            and item.level <= character.level
-            and item.can_be_used_by(character)
-        }
-        if not tool_items:
-            raise Exception(f"No tool found for job {job.value} in bank")
+    @asynccontextmanager
+    async def get_tool(cls, character: Character, job: JobType):
+        async with cls.locked():
+            bank = await cls.__check_bank()
+            tool_items = {
+                item
+                for item in bank.items
+                if item.is_for_job(job)
+                and item.level <= character.level
+                and item.can_be_used_by(character)
+            }
+            if not tool_items:
+                raise Exception(f"No tool found for job {job.value} in bank")
 
-        best_tool = max(tool_items, key=lambda item: item.level)
-        return (await cls._reserve_items({best_tool: 1}, bank=bank), best_tool)
+            best_tool = max(tool_items, key=lambda item: item.level)
+            token = await cls._reserve_items({best_tool: 1}, bank=bank)
+        try:
+            yield token, best_tool
+        finally:
+            cls._unreserve_items(token)
 
     @classmethod
     async def __get_details(cls) -> dict:

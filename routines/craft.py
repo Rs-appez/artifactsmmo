@@ -91,59 +91,47 @@ async def craft(character: Character, item: Item, quantity: int):
     reserved_ingredients = {
         ingredient: qty * quantity for ingredient, qty in ingredients.items()
     }
-    tokens: list[uuid.UUID] = []
     try:
-        bank_token = await Bank.reserve_items(reserved_ingredients)
-        tokens.append(bank_token)
-    except Exception as e:
-        print(
-            f"❌ {character.surname} failed to reserve ingredients in bank for crafting {item.name} : {e}"
-        )
-        return
-
-    try:
-        (
-            nb_trips,
-            (nb_craft_per_trip, ingredients_for_trip),
+        async with Bank.reserve_items(reserved_ingredients) as bank_token:
             (
-                nb_craft_last_trip,
-                ingredients_for_last_trip,
-            ),
-        ) = await __get_trips_info(ingredients, quantity, character.inventory_max_items)
-        print(
-            f"⚒️ {character.surname} needs to make {nb_trips} trips to craft {quantity}x {item.name}"
-        )
+                nb_trips,
+                (nb_craft_per_trip, ingredients_for_trip),
+                (
+                    nb_craft_last_trip,
+                    ingredients_for_last_trip,
+                ),
+            ) = await __get_trips_info(
+                ingredients, quantity, character.inventory_max_items
+            )
+            print(
+                f"⚒️ {character.surname} needs to make {nb_trips} trips to craft {quantity}x {item.name}"
+            )
 
-        for _ in range(nb_trips - 1):
-            trip_token = Bank.get_reserved_items_partial(
-                bank_token, ingredients_for_trip
-            )
-            tokens.append(trip_token)
-            await __make_trip(
-                character,
-                nearest_workshop,
-                trip_token,
-                item,
-                nb_craft_per_trip,
-            )
-        last_trip_token = Bank.get_reserved_items_partial(
-            bank_token, ingredients_for_last_trip
-        )
-        tokens.append(last_trip_token)
-        await __make_trip(
-            character,
-            nearest_workshop,
-            last_trip_token,
-            item,
-            nb_craft_last_trip,
-        )
+            for _ in range(nb_trips - 1):
+                async with Bank.get_reserved_items_partial(
+                    bank_token, ingredients_for_trip
+                ) as trip_token:
+                    await __make_trip(
+                        character,
+                        nearest_workshop,
+                        trip_token,
+                        item,
+                        nb_craft_per_trip,
+                    )
+            async with Bank.get_reserved_items_partial(
+                bank_token, ingredients_for_last_trip
+            ) as last_trip_token:
+                await __make_trip(
+                    character,
+                    nearest_workshop,
+                    last_trip_token,
+                    item,
+                    nb_craft_last_trip,
+                )
 
         _ = await character.deposit_all_in_bank(comeback=False)
 
         print(f"⚒️ {character.surname} finished crafting {quantity}x {item.name}")
     except Exception as e:
-        print(f"❌ {e}")
+        print(f"❌ {character.surname} {e}")
         return
-    finally:
-        for token in tokens:
-            await Bank.unreserve_items(token)

@@ -76,6 +76,7 @@ class StuffMixin(Protocol):
                     print(f"❌ {self.surname} failed to equip {item.name} to fight")
                 print(f"⚔️  {self.surname} equipped {item.name} to fight")
                 return
+        return
 
         # temporary need refactor
         better_weapon = await Encyclopedia.get_item_by_code("sticky_sword")
@@ -89,28 +90,27 @@ class StuffMixin(Protocol):
             await Bank.unreserve_items(bank_token)
 
     async def toolize(self: "Character", job: JobType) -> None:
-        if self.weapon is not None and self.weapon.is_for_job(job):
-            return
-
-        for item in self.inventory:
-            if item.is_for_job(job):
-                if not await self.equip(item):
-                    print(f"❌ {self.surname} failed to equip {item.name} to gather")
-                print(f"🛠️  {self.surname} equipped {item.name} to gather")
+        try:
+            if self.weapon is not None and self.weapon.is_for_job(job):
                 return
 
-        bank_token = None
-        try:
-            bank_token, best_tool = await Bank.get_tool(self, job)
-            if not self.is_inventory_full and self.weapon is not None:
-                _ = await self.unequip("weapon")
-            _ = await self.deposit_all_in_bank()
-            if await self.withdraw_item_from_bank(bank_token):
-                if not await self.equip(best_tool):
-                    print(f"❌ {self.surname} failed to equip {job.value}_tool")
+            for item in self.inventory:
+                if item.is_for_job(job):
+                    if not await self.equip(item):
+                        print(
+                            f"❌ {self.surname} failed to equip {item.name} to gather"
+                        )
+                    print(f"🛠️  {self.surname} equipped {item.name} to gather")
+                    return
+
+            async with Bank.get_tool(self, job) as (bank_token, best_tool):
+                if not self.is_inventory_full and self.weapon is not None:
+                    _ = await self.unequip("weapon")
                 _ = await self.deposit_all_in_bank()
+                if await self.withdraw_item_from_bank(bank_token):
+                    if not await self.equip(best_tool):
+                        print(f"❌ {self.surname} failed to equip {job.value}_tool")
+                    _ = await self.deposit_all_in_bank()
 
         except Exception as e:
             print(f"❌ {e}")
-            if bank_token is not None:
-                await Bank.unreserve_items(bank_token)
