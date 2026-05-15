@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass, field
+from math import ceil, floor
 from typing import TYPE_CHECKING, Protocol
 
 from exceptions import ImpossibleCombatException
@@ -63,21 +64,6 @@ class FightMixin(Protocol):
     @request_action
     async def set_ready_to_fight(self: "Character"):
         self._ready_to_fight = True
-
-    def will_win_against(self: "Character", monster: Monster) -> bool:
-        damage = damage_on(self, monster)
-        damage += (damage * 0.5) * (self.critical_strike / 100)
-        nb_turns_to_kill = (monster.hp) // damage
-        if monster.initiative >= self.initiative:
-            nb_turns_to_kill += 1
-
-        damage_taken = damage_on(monster, self) * nb_turns_to_kill
-        damage_taken += (damage_taken * 0.5) * (monster.critical_strike / 100)
-
-        if damage_taken >= self.max_hp:
-            raise ImpossibleCombatException(f"can't win against {monster.name}")
-
-        return damage_taken < self.hp
 
     @request_action
     @refresh_after
@@ -192,3 +178,44 @@ class FightMixin(Protocol):
                 raise Exception(
                     f"{item.name} cannot heal any more hp for {self.surname}"
                 )
+
+    def will_win_against(self: "Character", monster: Monster) -> bool:
+
+        nb_turns_to_kill = self._compute_nb_turns_to_kill(monster)
+        damage_taken = self._compute_damage_taken(monster, nb_turns_to_kill)
+        health_regen = self._compute_health_regen(nb_turns_to_kill)
+
+        if damage_taken >= self.max_hp + health_regen:
+            raise ImpossibleCombatException(f"can't win against {monster.name}")
+
+        return damage_taken < self.hp + health_regen
+
+    def _compute_nb_turns_to_kill(self: "Character", monster: Monster) -> int:
+        damage = damage_on(self, monster)
+        damage += (damage * 0.5) * (self.critical_strike / 100)
+        nb_turns_to_kill = (monster.hp) // damage
+        if monster.initiative >= self.initiative:
+            nb_turns_to_kill += 1
+
+        return ceil(nb_turns_to_kill)
+
+    def _compute_damage_taken(
+        self: "Character", monster: Monster, nb_turns_to_kill: int
+    ) -> float:
+
+        damage_taken = damage_on(monster, self) * nb_turns_to_kill
+        damage_taken += (damage_taken * 0.5) * (monster.critical_strike / 100)
+
+        return damage_taken
+
+    def _compute_health_regen(self: "Character", nb_turns_to_kill: int) -> int:
+
+        total_regen = 0
+        for effect, value in self.effects.items():
+            match effect.code:
+                case "regen":
+                    total_regen += (value / 100) * self.max_hp * nb_turns_to_kill // 3
+                case _:
+                    continue
+
+        return floor(total_regen)
