@@ -77,7 +77,7 @@ class FightMixin(Protocol):
         if damage_taken >= self.max_hp:
             raise ImpossibleCombatException(f"can't win against {monster.name}")
 
-        return damage_taken * 1.3 < self.hp
+        return damage_taken < self.hp
 
     @request_action
     @refresh_after
@@ -93,7 +93,7 @@ class FightMixin(Protocol):
                     ]
                 }
                 if teammate
-                else [],
+                else None,
             )
             data = response.json()["data"]
 
@@ -186,3 +186,7 @@ class FightMixin(Protocol):
                 print(f" {self.surname} eats {qty_to_eat} {item.name} to recover hp")
                 if missing_hp <= 0:
                     break
+            else:
+                raise Exception(
+                    f"{item.name} cannot heal any more hp for {self.surname}"
+                )
