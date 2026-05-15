@@ -39,6 +39,10 @@ class Map:
     def __hash__(self) -> int:
         return hash(self.map_id)
 
+    @override
+    def __str__(self) -> str:
+        return f"({self.x}, {self.y})"
+
     @property
     def has_transition(self) -> bool:
         return self._transitions_map is not None
