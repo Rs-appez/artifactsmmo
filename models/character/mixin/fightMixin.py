@@ -22,7 +22,7 @@ class FightMixin(Protocol):
     _attack: dict[Element, int] = field(default_factory=dict)
     _critical_strike: int = 0
 
-    _ready_to_fight: bool = False
+    _ready_to_fight_boss: bool = False
 
     @property
     def hp(self) -> int:
@@ -53,17 +53,17 @@ class FightMixin(Protocol):
         return self._initiative
 
     @property
-    def is_ready_to_fight(self: "Character"):
-        return self._ready_to_fight
+    def is_ready_to_fight_boss(self: "Character"):
+        return self._ready_to_fight_boss
 
     @property
     async def waiting_for_fight(self: "Character"):
-        while self._ready_to_fight:
+        while self._ready_to_fight_boss:
             await asyncio.sleep(1)
 
     @request_action
     async def set_ready_to_fight(self: "Character"):
-        self._ready_to_fight = True
+        self._ready_to_fight_boss = True
 
     @request_action
     @refresh_after
@@ -102,7 +102,7 @@ class FightMixin(Protocol):
             print(f"❌ {e}")
             return False, None
         finally:
-            self._ready_to_fight = False
+            self._ready_to_fight_boss = False
 
     @request_action
     @refresh_after

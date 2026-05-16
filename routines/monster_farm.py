@@ -50,7 +50,7 @@ async def boss_farm(
         _ = await character.move(mob_position)
         await character.set_ready_to_fight()
         if leader:
-            while any(not mate.is_ready_to_fight for mate in teammate):
+            while any(not mate.is_ready_to_fight_boss for mate in teammate):
                 await asyncio.sleep(0.2)
             _ = await character.fight(teammate)
         else:
@@ -59,7 +59,7 @@ async def boss_farm(
     except Exception as e:
         print(f"❌ {character.surname} {e}")
     finally:
-        character._ready_to_fight = False  # pyright: ignore[reportPrivateUsage]
+        character._ready_to_fight_boss = False  # pyright: ignore[reportPrivateUsage]
 
 
 async def __regenerate_hp(character: Character):
