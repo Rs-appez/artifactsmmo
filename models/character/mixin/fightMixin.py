@@ -99,7 +99,7 @@ class FightMixin(Protocol):
 
             return result, character_data
         except Exception as e:
-            print(f"❌ {e}")
+            print(f"❌ {self.surname} fight : {e}")
             return False, None
         finally:
             self._ready_to_fight_boss = False
@@ -121,7 +121,7 @@ class FightMixin(Protocol):
 
             return True, character_data
         except Exception as e:
-            print(f"❌ {e}")
+            print(f"❌ {self.surname} Rest : {e}")
             return False, None
 
     @request_action
@@ -150,7 +150,7 @@ class FightMixin(Protocol):
 
             return True, character_data
         except Exception as e:
-            print(f"❌ {e}")
+            print(f"❌ {self.surname} Eat : {e}")
             return False, None
 
     async def regenerate_hp(self: "Character") -> None:
