@@ -3,7 +3,6 @@ import asyncio
 import signal
 import sys
 
-from cli import cli
 from config import LOCAL
 from models import GameManager
 
@@ -14,19 +13,24 @@ async def main():
     loop = asyncio.get_event_loop()
 
     character_tasks = await manager.start()
-    tasks = asyncio.gather(
-        *character_tasks, cli(manager) if LOCAL else asyncio.sleep(0)
-    )
+    tasks = list(character_tasks)
+
+    if LOCAL:
+        from cli import cli
+
+        tasks.append(cli(manager))
+
+    gathered = asyncio.gather(*tasks)
 
     def shutdown():
         print("Shutting down gracefully...")
-        _ = tasks.cancel()
+        _ = gathered.cancel()
 
     loop.add_signal_handler(signal.SIGINT, shutdown)
     loop.add_signal_handler(signal.SIGTERM, shutdown)
 
     try:
-        await tasks
+        await gathered
     except asyncio.CancelledError:
         for character in manager.characters.values():
             character.save_routine()
