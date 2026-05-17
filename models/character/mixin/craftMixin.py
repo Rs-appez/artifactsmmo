@@ -39,5 +39,5 @@ class CraftMixin(Protocol):
             print(f"✅ {self.surname} Crafted {quantity}x {item.name}")
             return True, character_data
         except Exception as e:
-            print(f"❌ {e}")
+            print(f"❌ {self.surname} Craft : {e}")
             return False, None

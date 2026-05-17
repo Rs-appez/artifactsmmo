@@ -45,7 +45,7 @@ class StuffMixin(Protocol):
 
             return True, character_data
         except Exception as e:
-            print(f"❌ {e}")
+            print(f"❌ {self.surname} equip : {e}")
             return False, None
 
     @request_action
@@ -68,7 +68,7 @@ class StuffMixin(Protocol):
 
             return True, character_data
         except Exception as e:
-            print(f"❌ {e}")
+            print(f"❌ {self.surname} unequip : {e}")
             return False, None
 
     async def weaponize(self: "Character") -> None:
@@ -118,4 +118,4 @@ class StuffMixin(Protocol):
                     _ = await self.deposit_all_in_bank()
 
         except Exception as e:
-            print(f"❌ {e}")
+            print(f"❌ {self.surname} Toolize : {e}")
