@@ -3,8 +3,9 @@ import asyncio
 import signal
 import sys
 
-from models import GameManager
 from cli import cli
+from config import LOCAL
+from models import GameManager
 
 
 async def main():
@@ -14,8 +15,7 @@ async def main():
 
     character_tasks = await manager.start()
     tasks = asyncio.gather(
-        *character_tasks,
-        cli(manager),
+        *character_tasks, cli(manager) if LOCAL else asyncio.sleep(0)
     )
 
     def shutdown():

@@ -1,6 +1,8 @@
 from decouple import config
 from zoneinfo import ZoneInfo
 
+LOCAL = config("LOCAL", default=False, cast=bool)
+
 ARTIFACTSMMO_URL = "https://api.artifactsmmo.com"
 HEADERS = {
     "Accept": "application/json",
