@@ -11,9 +11,9 @@ from .mixins import JobMixin
 
 
 class GameManager(JobMixin):
-    def __init__(self):
-        self.characters: dict[str, Character] = {}
+    characters: dict[str, Character] = {}
 
+    def __init__(self):
         _ = asyncio.ensure_future(
             asyncio.gather(
                 Encyclopedia.initialize(),
