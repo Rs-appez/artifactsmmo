@@ -70,16 +70,20 @@ class Item:
         )
 
     @property
+    def is_weapon(self) -> bool:
+        return self.type == "weapon" and self.subtype == ""
+
+    @property
+    def is_craftable(self) -> bool:
+        return len(self.craft_ingredients) > 0
+
+    @property
     def is_food(self) -> bool:
         return (
             self.type == "consumable"
             and self.subtype == "food"
             and self.code not in not_to_eat_food
         )
-
-    @property
-    def is_weapon(self) -> bool:
-        return self.type == "weapon" and self.subtype == ""
 
     @property
     def heal(self) -> int:
