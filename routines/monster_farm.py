@@ -1,4 +1,5 @@
 import asyncio
+from itertools import count
 from models import Character, Encyclopedia
 from models.dataclass import Monster
 from models.dataclass.bank import Bank
@@ -6,19 +7,21 @@ from utils.find_nearest import find_nearest_lootable
 from routines import empty_farm
 
 
-async def mob_farm(character: Character, mob: Monster | str):
+async def mob_farm(character: Character, mob: Monster | str, nb: int = -1):
     try:
         if isinstance(mob, str):
             mob = await Encyclopedia.get_monster_by_code(mob)
 
         await character.weaponize()
         mob_position = await find_nearest_lootable(character, {mob})
-        if character.is_inventory_full:
-            _ = await character.deposit_all_in_bank()
-        while not character.will_win_against(mob):
-            await __regenerate_hp(character)
-        _ = await character.move(mob_position)
-        _ = await character.fight()
+        iterations = range(nb) if nb > 0 else count()
+        for _ in iterations:
+            if character.is_inventory_full:
+                _ = await character.deposit_all_in_bank()
+            while not character.will_win_against(mob):
+                await __regenerate_hp(character)
+            _ = await character.move(mob_position)
+            _ = await character.fight()
 
     except Exception as e:
         print(f"❌ {character.surname} {e}")

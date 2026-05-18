@@ -3,7 +3,7 @@ from models import Character
 from models.dataclass import Item, Monster
 from models.dataclass.bank import Bank
 from models.enums import TaskType
-from routines import mob_farm
+from routines import gather, mob_farm
 from utils.find_nearest import find_nearest_tasks_master
 
 
@@ -61,9 +61,18 @@ async def __item_task(character: Character) -> None:
                     await character.deposit_all_in_bank(comeback=False)
                     if not await character.withdraw_item_from_bank(bank_token):
                         raise Exception("Failed to withdraw item from bank")
-            except NotEnoughInBankException as e:
-                print(f"❌ {character.surname} failed to complete the item task : {e}")
-                return
+            except NotEnoughInBankException:
+                async with Bank.reserve_items(trip_resources, False) as bank_token:
+                    if item.is_craftable:
+                        # TODO : craft the item if not enough in bank
+                        raise Exception(
+                            "Not enough item in bank and crafting not implemented yet"
+                        )
+                    else:
+                        resources = Bank.check_reserved_items(bank_token)
+                        missing = abs(resources.get(item, 0))
+                        await gather(character, item, missing)
+                        continue
         if not await character.move(task_master):
             print("Failed to move to task master")
             return
@@ -88,8 +97,7 @@ async def __monster_task(character: Character) -> None:
         return
 
     try:
-        while character.task_resources_left > 0:
-            await mob_farm(character, monster)
+        await mob_farm(character, monster, character.task_resources_left)
     except Exception as e:
         print(f"❌ {character.surname} failed to complete the monster task : {e}")
         return
