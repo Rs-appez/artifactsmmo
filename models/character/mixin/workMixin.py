@@ -17,6 +17,7 @@ class WorkMixin(Protocol):
     _previous_routine: Callable | None = None
     _work_task: asyncio.Task | None = None
     _interrupted: bool = False
+    _is_on_routine: bool = False
     _priority_tasks: deque[Callable]
     _character_lock: asyncio.Lock
 
@@ -58,9 +59,11 @@ class WorkMixin(Protocol):
             while True:
                 try:
                     if self._priority_tasks:
+                        self._is_on_routine = False
                         priority = self._priority_tasks.popleft()
                         await priority(self)
                     else:
+                        self._is_on_routine = True
                         await self._routine(self)
                 except asyncio.CancelledError:
                     if not self._interrupted:
@@ -74,7 +77,7 @@ class WorkMixin(Protocol):
 
     def do_one_time_task(self: "Character", task: Callable):
         self._priority_tasks.append(task)
-        if len(self._priority_tasks) == 1:
+        if self._is_on_routine:
             self._interrupt_routine()
 
     def stop(self: "Character"):
@@ -86,14 +89,16 @@ class WorkMixin(Protocol):
         if self.is_working:
             print("❌ Character is already working on a routine")
             return
+        if not self._is_on_routine:
+            self._priority_tasks.clear()
+            self._interrupt_routine()
+            return
 
         if self._previous_routine is None:
             print("❌ No previous routine to resume")
             return
         self._routine = self._previous_routine
-
-        if len(self._priority_tasks) == 0:
-            self._interrupt_routine()
+        self._interrupt_routine()
 
     def _interrupt_routine(self: "Character"):
         if self._work_task is not None:
