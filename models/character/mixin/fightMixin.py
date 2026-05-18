@@ -187,7 +187,6 @@ class FightMixin(Protocol):
 
         if damage_taken >= self.max_hp + health_regen:
             raise ImpossibleCombatException(f"can't win against {monster.name}")
-
         return damage_taken < self.hp + health_regen
 
     def _compute_nb_turns_to_kill(self: "Character", monster: Monster) -> int:
@@ -213,8 +212,8 @@ class FightMixin(Protocol):
         total_regen = 0
         for effect, value in self.effects.items():
             match effect.code:
-                case "regen":
-                    total_regen += (value / 100) * self.max_hp * nb_turns_to_kill // 3
+                case "healing":
+                    total_regen += (value / 100) * self.max_hp * (nb_turns_to_kill // 3)
                 case _:
                     continue
 
