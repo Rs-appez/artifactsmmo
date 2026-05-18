@@ -38,7 +38,7 @@ class GameManager(JobMixin):
 
         await self.__load_characters()
         # tmp test boss fight
-        await self.__asign_boss()
+        # await self.__asign_boss()
         tasks = [char.start() for char in self.characters.values()]
         return tasks
 
