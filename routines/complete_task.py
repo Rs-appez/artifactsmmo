@@ -1,3 +1,4 @@
+from exceptions import NotEnoughInBankException
 from models import Character
 from models.dataclass import Item, Monster
 from models.dataclass.bank import Bank
@@ -55,10 +56,14 @@ async def __item_task(character: Character) -> None:
 
         trip_resources = {item: nb_resources_for_the_trip}
         if not character.has_in_inventory(trip_resources):
-            async with Bank.reserve_items(trip_resources) as bank_token:
-                await character.deposit_all_in_bank(comeback=False)
-                if not await character.withdraw_item_from_bank(bank_token):
-                    return
+            try:
+                async with Bank.reserve_items(trip_resources) as bank_token:
+                    await character.deposit_all_in_bank(comeback=False)
+                    if not await character.withdraw_item_from_bank(bank_token):
+                        raise Exception("Failed to withdraw item from bank")
+            except NotEnoughInBankException as e:
+                print(f"❌ {character.surname} failed to complete the item task : {e}")
+                return
         if not await character.move(task_master):
             print("Failed to move to task master")
             return

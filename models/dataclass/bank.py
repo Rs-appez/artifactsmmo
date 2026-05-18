@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from httpx import AsyncClient
 
 from config import ARTIFACTSMMO_URL, HEADERS
+from exceptions import NotEnoughInBankException
 from models.dataclass import Item
 from models.encyclopedia import Encyclopedia
 from models.enums import JobType
@@ -132,7 +133,9 @@ class Bank:
                 bank = await cls.__check_bank()
             have_enough, missing_item = bank.__have_items(items)
             if not have_enough and missing_item is not None:
-                raise Exception(f"Not enough {missing_item.name} in bank")
+                raise NotEnoughInBankException(
+                    f"Not enough {missing_item.name} in bank"
+                )
         for item, quantity in items.items():
             cls.__reserved_items[item] += quantity
 
