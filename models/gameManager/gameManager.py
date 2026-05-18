@@ -37,23 +37,23 @@ class GameManager(JobMixin):
 
         await self.__load_characters()
         # tmp test boss fight
-        # await self.__asign_boss()
+        await self.__asign_boss()
         tasks = [char.start() for char in self.characters.values()]
         return tasks
 
     async def __asign_boss(self):
         boss = await Encyclopedia.get_monster_by_code("king_slime")
-        charlie = self.characters.get("charlie")
-        alice = self.characters.get("alice")
+        john = self.characters.get("john")
+        jane = self.characters.get("jane")
         bob = self.characters.get("bob")
 
-        team = [charlie, alice, bob]
+        team = [john, jane, bob]
 
-        if alice:
-            alice.assign_routine(boss_farm, team, boss)
+        if jane:
+            jane.assign_routine(boss_farm, team, boss)
 
         if bob:
-            bob.assign_routine(boss_farm, team, boss)
+            bob.assign_routine(boss_farm, team, boss, True)
 
-        if charlie:
-            charlie.assign_routine(boss_farm, team, boss, True)
+        if john:
+            john.assign_routine(boss_farm, team, boss)
