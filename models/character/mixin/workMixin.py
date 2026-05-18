@@ -74,8 +74,7 @@ class WorkMixin(Protocol):
 
     def do_one_time_task(self: "Character", task: Callable):
         self._priority_tasks.append(task)
-        if len(self._priority_tasks) == 1:
-            self._interrupt_routine()
+        self._interrupt_routine()
 
     def stop(self: "Character"):
         self._previous_routine = self._routine
@@ -96,7 +95,7 @@ class WorkMixin(Protocol):
             self._interrupt_routine()
 
     def _interrupt_routine(self: "Character"):
-        if self._work_task is not None:
+        if self._work_task is not None and len(self._priority_tasks) == 1:
             self._interrupted = True
             _ = self._work_task.cancel()
 
