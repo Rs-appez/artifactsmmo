@@ -191,7 +191,7 @@ class FightMixin(Protocol):
 
     def _compute_nb_turns_to_kill(self: "Character", monster: Monster) -> int:
         damage = damage_on(self, monster)
-        damage += (damage * 0.5) * (self.critical_strike / 100)
+        damage += (damage * 0.5) * (self.critical_strike * 0.75 / 100)
         nb_turns_to_kill = (monster.hp) // damage
         if monster.initiative >= self.initiative:
             nb_turns_to_kill += 1
