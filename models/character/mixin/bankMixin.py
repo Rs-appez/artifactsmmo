@@ -11,8 +11,10 @@ if TYPE_CHECKING:
 
 
 class BankMixin(Protocol):
-    async def deposit_all_in_bank(self: "Character", comeback: bool = False):
-        if self.gold > 0:
+    async def deposit_all_in_bank(
+        self: "Character", with_gold: bool = True, comeback: bool = False
+    ):
+        if with_gold and self.gold > 0:
             if not await self.deposit_gold_in_bank(self.gold, comeback=comeback):
                 print("❌ Failed to deposit gold in bank")
                 return

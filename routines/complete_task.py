@@ -7,9 +7,15 @@ from routines import gather, mob_farm
 from utils.find_nearest import find_nearest_tasks_master
 
 
-async def complete_task(character: Character, type: TaskType) -> None:
+async def complete_task(character: Character, type: TaskType | str) -> None:
 
     if character.task is None:
+        if isinstance(type, str):
+            try:
+                type = TaskType(type)
+            except ValueError:
+                print(f"❌ Invalid task type : {type}")
+                return
         match type:
             case TaskType.MONSTER:
                 task_master = await find_nearest_tasks_master(
@@ -58,7 +64,7 @@ async def __item_task(character: Character) -> None:
         if not character.has_in_inventory(trip_resources):
             try:
                 async with Bank.reserve_items(trip_resources) as bank_token:
-                    await character.deposit_all_in_bank(comeback=False)
+                    await character.deposit_all_in_bank(with_gold=False)
                     if not await character.withdraw_item_from_bank(bank_token):
                         raise Exception("Failed to withdraw item from bank")
             except NotEnoughInBankException:
