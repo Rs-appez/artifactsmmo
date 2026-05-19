@@ -203,7 +203,9 @@ class FightMixin(Protocol):
     ) -> float:
 
         damage_taken = damage_on(monster, self) * nb_turns_to_kill
-        damage_taken += (damage_taken * 0.5) * (monster.critical_strike / 100)
+        damage_taken += (damage_taken * 0.5) * (
+            min(monster.critical_strike * 1.5, 100) / 100
+        )
 
         return damage_taken
 
