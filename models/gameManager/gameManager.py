@@ -5,6 +5,7 @@ import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS
 from models import Character, Encyclopedia, LocationRegistry
+import routines
 from routines.monster_farm import boss_farm
 from .mixins import JobMixin
 
