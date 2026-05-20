@@ -193,8 +193,11 @@ class FightMixin(Protocol):
         damage = damage_on(self, monster)
         damage += (damage * 0.5) * (self.critical_strike * 0.75 / 100)
         nb_turns_to_kill = (monster.hp) // damage
-        if monster.initiative >= self.initiative:
+        if monster.initiative > self.initiative:
             nb_turns_to_kill += 1
+        elif monster.initiative == self.initiative:
+            if monster.hp > self.hp:
+                nb_turns_to_kill += 1
 
         return ceil(nb_turns_to_kill)
 
