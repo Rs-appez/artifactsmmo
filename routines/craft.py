@@ -92,7 +92,9 @@ async def craft(character: Character, item: Item, quantity: int):
         ingredient: qty * quantity for ingredient, qty in ingredients.items()
     }
     try:
-        async with Bank.reserve_items(reserved_ingredients) as bank_token:
+        async with Bank.reserve_items(
+            reserved_ingredients, inventory=character.inventory
+        ) as bank_token:
             (
                 nb_trips,
                 (nb_craft_per_trip, ingredients_for_trip),

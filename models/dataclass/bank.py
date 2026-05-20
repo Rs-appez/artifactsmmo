@@ -31,7 +31,7 @@ class Bank:
     __bankelock = Lock()
     __url = f"{ARTIFACTSMMO_URL}/my/bank"
     __reserved_items = defaultdict(int)
-    __tokens = defaultdict(dict)
+    __tokens = defaultdict(tuple[dict, int])
 
     _gold: int
     _slots: int
@@ -51,13 +51,66 @@ class Bank:
     def items(self) -> dict[Item, int]:
         return self._items.copy()
 
+    @classmethod
+    @asynccontextmanager
+    async def reserve_items(
+        cls,
+        items: dict[Item, int],
+        imediately_needed: bool = True,
+        inventory: dict[Item, int] | None = None,
+    ):
+        async with cls.locked():
+            token = await cls._reserve_items(
+                items, imediately_needed=imediately_needed, inventory=inventory
+            )
+        try:
+            yield token
+        finally:
+            cls._unreserve_items(token)
+
+    @classmethod
+    async def _reserve_items(
+        cls,
+        items: dict[Item, int],
+        imediately_needed: bool = True,
+        bank: "Bank | None" = None,
+        inventory: dict[Item, int] | None = None,
+    ) -> uuid.UUID:
+        if bank is None:
+            bank = await cls.__check_bank()
+        have_enough, missing_item, missing_count = bank.__have_items(
+            items, inventory=inventory
+        )
+        if imediately_needed and not have_enough and missing_item is not None:
+            raise NotEnoughInBankException(
+                f"Missing {missing_count} {missing_item.name} in bank"
+            )
+        for item, quantity in items.items():
+            item_in_inventory = inventory.get(item, 0) if inventory is not None else 0
+            cls.__reserved_items[item] += quantity - item_in_inventory
+
+        token = uuid.uuid4()
+        cls.__tokens[token] = (
+            {item: quantity for item, quantity in items.items()},
+            missing_count,
+        )
+        return token
+
     @staticmethod
     def show_reservations() -> dict[uuid.UUID, dict[Item, int]]:
         """
         Check the current reservations in the bank
         (only for display purposes, does not guarantee that the items are still reserved when you want to use them)
         """
-        return Bank.__tokens.copy()
+        return {token: items for token, (items, _) in Bank.__tokens.items()}
+
+    @staticmethod
+    @lock_bank
+    async def get_missing_promise(token: uuid.UUID) -> int:
+        """
+        Get the missing promise for a given token, i.e. the quantity of items that were not reserved because not enough in bank
+        """
+        return Bank.__tokens.get(token, ({}, 0))[1]
 
     @classmethod
     async def __check_bank(cls) -> "Bank":
@@ -77,10 +130,15 @@ class Bank:
             _items=items,
         )
 
-    def __have_items(self, items: dict[Item, int]) -> tuple[bool, Item | None, int]:
+    def __have_items(
+        self, items: dict[Item, int], inventory: dict[Item, int] | None = None
+    ) -> tuple[bool, Item | None, int]:
         for item, quantity in items.items():
             quantity_in_bank = self._items.get(item, 0) - self.__reserved_items[item]
-            if quantity_in_bank < quantity:
+            quantity_in_inventory = (
+                inventory.get(item, 0) if inventory is not None else 0
+            )
+            if quantity_in_bank < quantity - quantity_in_inventory:
                 return (
                     False,
                     item,
@@ -90,7 +148,7 @@ class Bank:
 
     @classmethod
     def _get_reserved_items(cls, token: uuid.UUID) -> dict[Item, int]:
-        return cls.__tokens.get(token, {}).copy()
+        return cls.__tokens.get(token, ({}, 0))[0].copy()
 
     @classmethod
     @asynccontextmanager
@@ -106,7 +164,7 @@ class Bank:
     def __get_reserved_items_partial(
         cls, token: uuid.UUID, items: dict[Item, int]
     ) -> uuid.UUID:
-        reserved_items = cls.__tokens.get(token, {})
+        reserved_items = cls.__tokens.get(token, ({}, 0))[0]
         for item, quantity in items.items():
             if reserved_items.get(item, 0) < quantity:
                 raise Exception(f"Not enough {item.name} reserved for token {token}")
@@ -115,42 +173,11 @@ class Bank:
             reserved_items[item] -= quantity
 
         new_token = uuid.uuid4()
-        cls.__tokens[new_token] = {item: quantity for item, quantity in items.items()}
+        cls.__tokens[new_token] = (
+            {item: quantity for item, quantity in items.items()},
+            0,
+        )
         return new_token
-
-    @classmethod
-    @asynccontextmanager
-    async def reserve_items(
-        cls, items: dict[Item, int], imediately_needed: bool = True
-    ):
-        async with cls.locked():
-            token = await cls._reserve_items(items, imediately_needed)
-        try:
-            yield token
-        finally:
-            cls._unreserve_items(token)
-
-    @classmethod
-    async def _reserve_items(
-        cls,
-        items: dict[Item, int],
-        imediately_needed: bool = True,
-        bank: "Bank | None" = None,
-    ) -> uuid.UUID:
-        if imediately_needed:
-            if bank is None:
-                bank = await cls.__check_bank()
-            have_enough, missing_item, missing_count = bank.__have_items(items)
-            if not have_enough and missing_item is not None:
-                raise NotEnoughInBankException(
-                    f"Missing {missing_count} {missing_item.name} in bank"
-                )
-        for item, quantity in items.items():
-            cls.__reserved_items[item] += quantity
-
-        token = uuid.uuid4()
-        cls.__tokens[token] = {item: quantity for item, quantity in items.items()}
-        return token
 
     @classmethod
     def _unreserve_items(cls, token: uuid.UUID):
@@ -159,7 +186,7 @@ class Bank:
         """
         if token not in cls.__tokens:
             return
-        items = cls.__tokens.pop(token)
+        items = cls.__tokens.pop(token)[0]
         for item, quantity in items.items():
             cls.__reserved_items[item] -= quantity
 

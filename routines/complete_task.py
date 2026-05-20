@@ -56,35 +56,41 @@ async def __item_task(character: Character) -> None:
         return
     task_master = await find_nearest_tasks_master(character, TaskType.ITEM)
     while character.task_resources_left > 0:
-        nb_resources_for_the_trip = min(
-            character.task_resources_left, character.inventory_max_items
-        )
-
-        trip_resources = {item: nb_resources_for_the_trip}
-        if not character.has_in_inventory(trip_resources):
-            try:
-                async with Bank.reserve_items(trip_resources) as bank_token:
+        task_resources = {item: character.task_resources_left}
+        try:
+            async with Bank.reserve_items(
+                task_resources, inventory=character.inventory
+            ) as bank_token:
+                nb_resources_for_the_trip = min(
+                    character.task_resources_left, character.inventory_max_items
+                )
+                trip_resources = {item: nb_resources_for_the_trip}
+                async with Bank.get_reserved_items_partial(
+                    bank_token, trip_resources
+                ) as trip_token:
                     await character.deposit_all_in_bank(with_gold=False)
-                    if not await character.withdraw_item_from_bank(bank_token):
+                    if not await character.withdraw_item_from_bank(trip_token):
                         raise Exception("Failed to withdraw item from bank")
-            except NotEnoughInBankException:
-                async with Bank.reserve_items(trip_resources, False) as bank_token:
-                    if item.is_craftable:
-                        # TODO : craft the item if not enough in bank
-                        raise Exception(
-                            "Not enough item in bank and crafting not implemented yet"
-                        )
-                    else:
-                        resources = Bank.check_reserved_items(bank_token)
-                        missing = abs(resources.get(item, 0))
-                        await gather(character, item, missing)
-                        continue
-        if not await character.move(task_master):
-            print("Failed to move to task master")
-            return
-        if not await character.trade_with_task_master(item, nb_resources_for_the_trip):
-            print("Failed to complete task")
-            return
+                if not await character.move(task_master):
+                    print("Failed to move to task master")
+                    return
+                if not await character.trade_with_task_master(
+                    item, nb_resources_for_the_trip
+                ):
+                    print("Failed to complete task")
+                    return
+        except NotEnoughInBankException:
+            async with Bank.reserve_items(
+                task_resources, False, inventory=character.inventory
+            ) as bank_token:
+                need_to_generate = await Bank.get_missing_promise(bank_token)
+                if item.is_craftable:
+                    # TODO : craft the item if not enough in bank
+                    raise Exception(
+                        "Not enough item in bank and crafting not implemented yet"
+                    )
+                else:
+                    await gather(character, item, need_to_generate)
 
     if await character.complete_task():
         print(f"  {character.surname} completed the item task")
