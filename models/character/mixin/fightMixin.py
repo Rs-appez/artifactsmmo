@@ -204,8 +204,8 @@ class FightMixin(Protocol):
     def _compute_damage_taken(
         self: "Character", monster: Monster, nb_turns_to_kill: int
     ) -> float:
-
-        damage_taken = damage_on(monster, self) * nb_turns_to_kill
+        bonus_damage = self._compute_monster_damage_effects(monster)
+        damage_taken = (damage_on(monster, self) + bonus_damage) * nb_turns_to_kill
         damage_taken += (damage_taken * 0.5) * (
             min(monster.critical_strike * 1.5, 100) / 100
         )
@@ -223,3 +223,19 @@ class FightMixin(Protocol):
                     continue
 
         return floor(total_regen)
+
+    def _compute_monster_damage_effects(self: "Character", monster: Monster) -> float:
+        bonus_damage = 0
+        for effect, value in monster.effects.items():
+            match effect.code:
+                case "poison":
+                    antipoison = sum(
+                        self.effects[effect]
+                        for effect in self.effects
+                        if effect.code == "antipoison"
+                    )
+                    bonus_damage += max(0, value - antipoison)
+                case _:
+                    continue
+
+        return bonus_damage
