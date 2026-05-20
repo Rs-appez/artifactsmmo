@@ -77,11 +77,16 @@ class Bank:
             _items=items,
         )
 
-    def __have_items(self, items: dict[Item, int]) -> tuple[bool, Item | None]:
+    def __have_items(self, items: dict[Item, int]) -> tuple[bool, Item | None, int]:
         for item, quantity in items.items():
-            if self._items.get(item, 0) - self.__reserved_items[item] < quantity:
-                return False, item
-        return True, None
+            quantity_in_bank = self._items.get(item, 0) - self.__reserved_items[item]
+            if quantity_in_bank < quantity:
+                return (
+                    False,
+                    item,
+                    quantity - quantity_in_bank,
+                )
+        return True, None, 0
 
     @classmethod
     def _get_reserved_items(cls, token: uuid.UUID) -> dict[Item, int]:
