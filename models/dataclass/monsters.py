@@ -22,7 +22,7 @@ class Monster:
     resistance: dict[Element, int]
     critical_strike: int
     initiative: int
-    effects: list[tuple[Effect, int]]
+    effects: dict[Effect, int]
     min_gold: int
     max_gold: int
     drops: list[dict[Item, dict[str, str | int]]]
@@ -54,13 +54,12 @@ class Monster:
             resistance=resistance,
             critical_strike=data["critical_strike"],
             initiative=data["initiative"],
-            effects=[
-                (
-                    await Encyclopedia.get_effect_by_code(effect_data["code"]),
-                    effect_data["value"],
-                )
+            effects={
+                await Encyclopedia.get_effect_by_code(effect_data["code"]): effect_data[
+                    "value"
+                ]
                 for effect_data in data.get("effects", [])
-            ],
+            },
             min_gold=data["min_gold"],
             max_gold=data["max_gold"],
             drops=[
