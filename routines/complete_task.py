@@ -110,7 +110,8 @@ async def __monster_task(character: Character) -> None:
         return
 
     try:
-        await mob_farm(character, monster, character.task_resources_left)
+        while character.task_resources_left > 0:
+            await mob_farm(character, monster, character.task_resources_left)
     except Exception as e:
         print(f"❌ {character.surname} failed to complete the monster task : {e}")
         return
