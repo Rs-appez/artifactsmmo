@@ -52,7 +52,11 @@ class Bank:
         return self._items.copy()
 
     @staticmethod
-    def check_reservations() -> dict[uuid.UUID, dict[Item, int]]:
+    def show_reservations() -> dict[uuid.UUID, dict[Item, int]]:
+        """
+        Check the current reservations in the bank
+        (only for display purposes, does not guarantee that the items are still reserved when you want to use them)
+        """
         return Bank.__tokens.copy()
 
     @staticmethod
