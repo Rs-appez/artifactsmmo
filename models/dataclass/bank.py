@@ -59,10 +59,6 @@ class Bank:
         """
         return Bank.__tokens.copy()
 
-    @staticmethod
-    def check_reserved_items(token: uuid.UUID) -> dict[Item, int]:
-        return Bank.__tokens.get(token, {}).copy()
-
     @classmethod
     async def __check_bank(cls) -> "Bank":
 
