@@ -68,6 +68,7 @@ async def __item_task(character: Character) -> None:
                 async with Bank.get_reserved_items_partial(
                     bank_token, trip_resources
                 ) as trip_token:
+                    # TODO : optimize by not depositing/withdrawing if the items are already in inventory for the trip and avoid unhandled reservations
                     await character.deposit_all_in_bank(with_gold=False)
                     if not await character.withdraw_item_from_bank(trip_token):
                         raise Exception("Failed to withdraw item from bank")
