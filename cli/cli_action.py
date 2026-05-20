@@ -81,7 +81,7 @@ async def asign_routine(character: Character, routine_name: str, *args):
 
 
 def reserved_bank(_):
-    reserved = Bank.check_reservations()
+    reserved = Bank.show_reservations()
     for reservation in reserved.values():
         print(
             f"🔒reserved {', '.join([f'{qty}x {item.name}' for item, qty in reservation.items()])}"

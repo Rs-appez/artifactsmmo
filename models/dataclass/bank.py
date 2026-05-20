@@ -140,10 +140,10 @@ class Bank:
         if imediately_needed:
             if bank is None:
                 bank = await cls.__check_bank()
-            have_enough, missing_item = bank.__have_items(items)
+            have_enough, missing_item, missing_count = bank.__have_items(items)
             if not have_enough and missing_item is not None:
                 raise NotEnoughInBankException(
-                    f"Not enough {missing_item.name} in bank"
+                    f"Missing {missing_count} {missing_item.name} in bank"
                 )
         for item, quantity in items.items():
             cls.__reserved_items[item] += quantity
