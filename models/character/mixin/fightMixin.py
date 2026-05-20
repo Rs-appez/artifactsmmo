@@ -196,7 +196,7 @@ class FightMixin(Protocol):
         if monster.initiative > self.initiative:
             nb_turns_to_kill += 1
         elif monster.initiative == self.initiative:
-            if monster.hp > self.hp:
+            if monster.hp > self.max_hp:
                 nb_turns_to_kill += 1
 
         return ceil(nb_turns_to_kill)
