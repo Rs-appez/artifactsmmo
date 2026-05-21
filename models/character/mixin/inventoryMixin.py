@@ -26,6 +26,14 @@ class InventoryMixin(Protocol):
         return self._inventory_max_items
 
     @property
+    def inventory_used_slots(self) -> int:
+        return sum(self._inventory.values())
+
+    @property
+    def inventory_free_slots(self) -> int:
+        return self._inventory_max_items - self.inventory_used_slots
+
+    @property
     def is_inventory_full(self) -> bool:
         return (
             sum(self._inventory.values()) >= self._inventory_max_items - 5
