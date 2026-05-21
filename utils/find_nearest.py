@@ -44,11 +44,13 @@ async def find_nearest_bank(location: Map) -> Map:
     return __find_nearest_location(bank_locations, location)
 
 
-async def find_nearest_tasks_master(character: Character, task_type: TaskType) -> Map:
+async def find_nearest_tasks_master(
+    character: Character, task_type: TaskType | None = None
+) -> Map:
     tasks_master_locations = await LocationRegistry.get_tasks_master_locations(
         task_type
     )
-    if not tasks_master_locations:
+    if not tasks_master_locations and task_type is not None:
         raise ValueError(
             f"No task master locations found for task type {task_type.value}"
         )

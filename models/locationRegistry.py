@@ -57,8 +57,10 @@ class LocationRegistry:
         return LocationRegistry.__grand_exchange_locations
 
     @staticmethod
-    async def get_tasks_master_locations(task_type: TaskType) -> set[Map]:
+    async def get_tasks_master_locations(task_type: TaskType | None = None) -> set[Map]:
         await LocationRegistry.wait_location()
+        if task_type is None:
+            return set.union(*LocationRegistry.__tasks_masters_locations.values())
         return LocationRegistry.__tasks_masters_locations.get(task_type, set())
 
     @staticmethod
