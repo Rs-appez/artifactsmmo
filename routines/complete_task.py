@@ -1,7 +1,6 @@
 from exceptions import NotEnoughInBankException
 from models import Character
-from models.dataclass import Item, Monster
-from models.dataclass.bank import Bank
+from models.dataclass import Bank, Item, Monster
 from models.enums import TaskType
 from routines import gather, mob_farm
 from utils.find_nearest import find_nearest_tasks_master

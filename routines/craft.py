@@ -1,9 +1,9 @@
 import uuid
-from models import Character, Encyclopedia
-from models.dataclass import Item, Map
-from models.dataclass.bank import Bank
-from utils.find_nearest import find_nearest_workshop
 from math import ceil
+
+from models import Character, Encyclopedia
+from models.dataclass import Item, Map, Bank
+from utils.find_nearest import find_nearest_workshop
 
 
 async def __get_trips_info(
