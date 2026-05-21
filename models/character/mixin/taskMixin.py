@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from typing import Protocol, TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from models.character.decorators import refresh_after, request_action
 from models.dataclass import Item, TaskQuest
+from models.encyclopedia import Encyclopedia
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -39,7 +40,7 @@ class TaskMixin(Protocol):
 
             return True, character_data
         except Exception as e:
-            print(f"❌ {e}")
+            print(f"❌ {self.surname} Accept task : {e}")
             return False, None
 
     @request_action
@@ -59,7 +60,7 @@ class TaskMixin(Protocol):
 
             return True, character_data
         except Exception as e:
-            print(f"❌ {e}")
+            print(f"❌ {self.surname} Complete task : {e}")
             return False, None
 
     @request_action
@@ -82,5 +83,53 @@ class TaskMixin(Protocol):
 
             return True, character_data
         except Exception as e:
-            print(f"❌ {e}")
+            print(f"❌ {self.surname} Trade with task master : {e}")
+            return False, None
+
+    @request_action
+    @refresh_after
+    async def give_up_task(self: "Character") -> tuple[bool, dict | None]:
+        try:
+            if not self.task:
+                raise Exception("No active task to give up")
+            if await Encyclopedia.get_item_by_code("tasks_coin") not in self.inventory:
+                raise Exception("Cannot give up task without a tasks coin in inventory")
+            response = await self.client.post(
+                "/task/cancel",
+            )
+            data = response.json()
+
+            if "error" in data:
+                print("data : ", data)
+                raise Exception(data["error"]["message"])
+
+            character_data = data["data"]["character"]
+
+            return True, character_data
+        except Exception as e:
+            print(f"❌ {self.surname} Give up task : {e}")
+            return False, None
+
+    @request_action
+    @refresh_after
+    async def exchange_task_coin(self: "Character") -> tuple[bool, dict | None]:
+        try:
+            if await Encyclopedia.get_item_by_code("tasks_coin") not in self.inventory:
+                raise Exception(
+                    "Cannot exchange task coin without a tasks coin in inventory"
+                )
+            response = await self.client.post(
+                "/task/exchange",
+            )
+            data = response.json()
+
+            if "error" in data:
+                print("data : ", data)
+                raise Exception(data["error"]["message"])
+
+            character_data = data["data"]["character"]
+
+            return True, character_data
+        except Exception as e:
+            print(f"❌ {self.surname} Exchange task coin : {e}")
             return False, None
