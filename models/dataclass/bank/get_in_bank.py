@@ -1,0 +1,63 @@
+from contextlib import asynccontextmanager
+
+from typing import TYPE_CHECKING
+
+from models.dataclass.bank import Bank
+from models.enums import JobType
+
+if TYPE_CHECKING:
+    from models.character import Character
+
+_check_bank = Bank._Bank__check_bank  # pyright: ignore[reportAttributeAccessIssue]
+_reserve_items = Bank._reserve_items  # pyright: ignore[reportPrivateUsage]
+_unreserve_items = Bank._unreserve_items  # pyright: ignore[reportPrivateUsage]
+
+
+@asynccontextmanager
+async def get_food(character: Character, quantity: int):
+    async with Bank.locked():
+        bank = await _check_bank()
+        food_items = {
+            item: quantity
+            for item, quantity in bank.items.items()
+            if item.is_food and item.can_be_used_by(character)
+        }
+        if not food_items:
+            raise Exception("No food found in bank for character")
+        packed_food = {}
+        for item, available_quantity in sorted(
+            food_items.items(), key=lambda x: x[1], reverse=True
+        ):
+            if quantity <= 0:
+                break
+            use_quantity = min(available_quantity, quantity)
+            packed_food[item] = use_quantity
+            quantity -= use_quantity
+
+        token = await _reserve_items(packed_food, bank=bank)
+    try:
+        yield token
+    finally:
+        _unreserve_items(token)
+
+
+@asynccontextmanager
+async def get_tool(character: Character, job: JobType):
+    async with Bank.locked():
+        bank = await _check_bank()
+        tool_items = {
+            item
+            for item in bank.items
+            if item.is_for_job(job)
+            and item.level <= character.level
+            and item.can_be_used_by(character)
+        }
+        if not tool_items:
+            raise Exception(f"No tool found for job {job.value} in bank")
+
+        best_tool = max(tool_items, key=lambda item: item.level)
+        token = await _reserve_items({best_tool: 1}, bank=bank)
+    try:
+        yield token, best_tool
+    finally:
+        _unreserve_items(token)

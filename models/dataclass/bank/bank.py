@@ -191,56 +191,6 @@ class Bank:
             cls.__reserved_items[item] -= quantity
 
     @classmethod
-    @asynccontextmanager
-    async def get_food(cls, character: Character, quantity: int):
-        async with cls.locked():
-            bank = await cls.__check_bank()
-            food_items = {
-                item: quantity
-                for item, quantity in bank.items.items()
-                if item.is_food and item.can_be_used_by(character)
-            }
-            if not food_items:
-                raise Exception("No food found in bank for character")
-            packed_food = {}
-            for item, available_quantity in sorted(
-                food_items.items(), key=lambda x: x[1], reverse=True
-            ):
-                if quantity <= 0:
-                    break
-                use_quantity = min(available_quantity, quantity)
-                packed_food[item] = use_quantity
-                quantity -= use_quantity
-
-            token = await cls._reserve_items(packed_food, bank=bank)
-        try:
-            yield token
-        finally:
-            cls._unreserve_items(token)
-
-    @classmethod
-    @asynccontextmanager
-    async def get_tool(cls, character: Character, job: JobType):
-        async with cls.locked():
-            bank = await cls.__check_bank()
-            tool_items = {
-                item
-                for item in bank.items
-                if item.is_for_job(job)
-                and item.level <= character.level
-                and item.can_be_used_by(character)
-            }
-            if not tool_items:
-                raise Exception(f"No tool found for job {job.value} in bank")
-
-            best_tool = max(tool_items, key=lambda item: item.level)
-            token = await cls._reserve_items({best_tool: 1}, bank=bank)
-        try:
-            yield token, best_tool
-        finally:
-            cls._unreserve_items(token)
-
-    @classmethod
     async def __get_details(cls) -> dict:
         try:
             async with AsyncClient() as client:
