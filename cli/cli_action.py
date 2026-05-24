@@ -2,7 +2,6 @@ from models.dataclass.bank import Bank
 from models.enums import TaskType
 import routines
 from models import Character, Encyclopedia
-from models.dataclass import Item
 
 
 def _check_freshness(function):
@@ -78,6 +77,11 @@ async def asign_routine(character: Character, routine_name: str, *args):
         return
     character.assign_routine(routine_func, *args)
     print(f"🚀 {character.surname} started working on routine {routine_name}")
+
+
+async def exchange_task_coin(character: Character):
+    character.do_one_time_task(routines.exchange_task_coin)
+    print(f"🪙 {character.surname} will exchange task coins")
 
 
 def reserved_bank(_):

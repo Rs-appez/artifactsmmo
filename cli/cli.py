@@ -14,6 +14,7 @@ dict_single = {
     "resume": cli_action.resume,
     "gobank": cli_action.go_bank,
     "gotask": cli_action.complete_task,
+    "exchange_coin": cli_action.exchange_task_coin,
 }
 
 dict_actions = {
