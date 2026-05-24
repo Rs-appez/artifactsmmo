@@ -114,10 +114,9 @@ class TaskMixin(Protocol):
     @refresh_after
     async def exchange_task_coin(self: "Character") -> tuple[bool, dict | None]:
         try:
-            if await Encyclopedia.get_item_by_code("tasks_coin") not in self.inventory:
-                raise Exception(
-                    "Cannot exchange task coin without a tasks coin in inventory"
-                )
+            task_coin = await Encyclopedia.get_item_by_code("task_coin")
+            if not self.has_in_inventory({task_coin: 6}):
+                return False, None
             response = await self.client.post(
                 "/task/exchange",
             )
