@@ -36,8 +36,40 @@ class CraftMixin(Protocol):
 
             character_data = data["data"]["character"]
 
-            print(f"✅ {self.surname} Crafted {quantity}x {item.name}")
+            print(f"󱤲 {self.surname} Crafted {quantity}x {item.name}")
             return True, character_data
         except Exception as e:
             print(f"❌ {self.surname} Craft : {e}")
+            return False, None
+
+    @request_action
+    @refresh_after
+    async def decraft(
+        self: "Character", item: Item, quantity: int
+    ) -> tuple[bool, dict | None]:
+        if quantity <= 0:
+            print(f"❌ Cannot decraft non-positive quantity of items: {quantity}")
+            return False, None
+
+        if not self.has_in_inventory({item: quantity}):
+            print(f"❌ Cannot decraft {quantity}x {item.name}")
+            return False, None
+
+        try:
+            response = await self.client.post(
+                "/recycling",
+                json={"code": item.code, "quantity": quantity},
+            )
+            data = response.json()
+
+            if "error" in data:
+                print("data : ", data)
+                raise Exception(data["error"]["message"])
+
+            character_data = data["data"]["character"]
+
+            print(f"󰑌 {self.surname} Decrafted {quantity}x {item.name}")
+            return True, character_data
+        except Exception as e:
+            print(f"❌ {self.surname} Decraft : {e}")
             return False, None
