@@ -25,6 +25,7 @@ async def exchange_task_coin(character: Character) -> None:
                     print("Failed to move to task master")
                 while await character.exchange_task_coin():
                     pass
+        await character.deposit_all_in_bank()
         print(f"🪙 {character.surname} has finished exchanging task coin")
     except Exception as e:
         print(f"❌ {character.surname} failed to exchange task coin : {e}")
