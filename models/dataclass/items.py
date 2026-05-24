@@ -8,7 +8,7 @@ from models.enums import JobType
 if TYPE_CHECKING:
     from models.character.character import Character
 
-not_to_eat_food = {"apple"}
+NOT_TO_EAT_FOOD = {"apple"}
 
 
 @dataclass(frozen=True)
@@ -82,7 +82,7 @@ class Item:
         return (
             self.type == "consumable"
             and self.subtype == "food"
-            and self.code not in not_to_eat_food
+            and self.code not in NOT_TO_EAT_FOOD
         )
 
     @property
