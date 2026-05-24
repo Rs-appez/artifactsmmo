@@ -118,3 +118,5 @@ class StuffMixin(Protocol):
 
         except Exception as e:
             print(f"❌ {self.surname} Toolize : {e}")
+
+    async def wisdomize(self: "Character") -> None: ...

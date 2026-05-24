@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from typing import TYPE_CHECKING
 
+from models import Encyclopedia
 from models.dataclass import Item
 from models.dataclass.bank import Bank
 from models.enums import JobType
@@ -81,5 +82,26 @@ async def get_tool(character: Character, job: JobType):
         token = await _reserve_items({best_tool: 1}, bank=bank)
     try:
         yield token, best_tool
+    finally:
+        _unreserve_items(token)
+
+
+@asynccontextmanager
+async def get_best_wisdom_item():
+    async with Bank.locked():
+        bank = await _check_bank()
+        wisdom_effect = await Encyclopedia.get_effect_by_code("wisdom")
+        wisdom_items = {
+            item
+            for item in bank.items
+            if item.is_equipment and wisdom_effect in item.effects
+        }
+        if not wisdom_items:
+            raise Exception(f"No wisdom item found in bank")
+
+        best_wisdom_item = max(wisdom_items, key=lambda item: item.wisdom)
+        token = await _reserve_items({best_wisdom_item: 1}, bank=bank)
+    try:
+        yield token, best_wisdom_item
     finally:
         _unreserve_items(token)
