@@ -2,7 +2,7 @@ import asyncio
 from itertools import count
 from models import Character, Encyclopedia
 from models.dataclass import Monster
-from models.dataclass.bank import Bank
+from models.dataclass.bank import get_food
 from utils.find_nearest import find_nearest_lootable
 from routines import empty_farm
 
@@ -70,7 +70,7 @@ async def __regenerate_hp(character: Character):
         if not character.has_food:
             print(f"󰜎 {character.surname} will search for food in bank")
             qty = character.inventory_max_items // 2
-            async with Bank.get_food(character, qty) as food_token:
+            async with get_food(character, qty) as food_token:
                 _ = await character.deposit_all_in_bank()
                 if not await character.withdraw_item_from_bank(food_token):
                     print(f"❌ {character.surname} couldn't withdraw food from bank")

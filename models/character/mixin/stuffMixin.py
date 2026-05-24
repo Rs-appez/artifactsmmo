@@ -1,11 +1,10 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Protocol
-import uuid
 
 from models import Encyclopedia
 from models.character.decorators import refresh_after, request_action
-from models.dataclass import Effect, Item, Monster
-from models.dataclass.bank import Bank
+from models.dataclass import Effect, Item
+from models.dataclass.bank import Bank, get_tool
 from models.enums import JobType
 
 if TYPE_CHECKING:
@@ -108,7 +107,7 @@ class StuffMixin(Protocol):
                     print(f"🛠️  {self.surname} equipped {item.name} to gather")
                     return
 
-            async with Bank.get_tool(self, job) as (bank_token, best_tool):
+            async with get_tool(self, job) as (bank_token, best_tool):
                 if not self.is_inventory_full and self.weapon is not None:
                     _ = await self.unequip("weapon")
                 _ = await self.deposit_all_in_bank()
