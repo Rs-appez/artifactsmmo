@@ -143,7 +143,9 @@ class StuffMixin(Protocol):
             if self.is_inventory_full:
                 await self.deposit_all_in_bank()
             if not await self.withdraw_item_from_bank(bank_token):
-                print(f"❌ {self.surname} failed to withdraw item from bank")
+                print(
+                    f"❌ {self.surname} failed to withdraw item from bank for maximaze stats"
+                )
                 return
 
         for item in best_item:
