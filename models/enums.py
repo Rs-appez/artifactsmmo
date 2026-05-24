@@ -30,3 +30,16 @@ class JobType(Enum):
     JEWELRYCRAFTING = "jewelrycrafting"
     COOKING = "cooking"
     ALCHEMY = "alchemy"
+
+
+class EquipentType(Enum):
+    HELMET = "helmet"
+    SHIELD = "shield"
+    BODY_ARMOR = "body_armor"
+    AMULET = "amulet"
+    LEG_ARMOR = "leg_armor"
+    BOOTS = "boots"
+    RING = "ring"
+    BAG = "bag"
+    RUNE = "rune"
+    ARTIFACT = "artifact"
