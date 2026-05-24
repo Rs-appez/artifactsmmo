@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from typing import TYPE_CHECKING
 
+from models.dataclass import Item
 from models.dataclass.bank import Bank
 from models.enums import JobType
 
@@ -11,6 +12,20 @@ if TYPE_CHECKING:
 _check_bank = Bank._Bank__check_bank  # pyright: ignore[reportAttributeAccessIssue]
 _reserve_items = Bank._reserve_items  # pyright: ignore[reportPrivateUsage]
 _unreserve_items = Bank._unreserve_items  # pyright: ignore[reportPrivateUsage]
+
+
+@asynccontextmanager
+async def get_max_items(character: Character, item: Item):
+    async with Bank.locked():
+        bank = await _check_bank()
+        item_quantity = min(bank.items.get(item, 0), character.inventory_max_items)
+        if item_quantity <= 0:
+            raise Exception(f"No {item.name} found in bank for character")
+        token = await _reserve_items({item: item_quantity}, bank=bank)
+    try:
+        yield token, item_quantity
+    finally:
+        _unreserve_items(token)
 
 
 @asynccontextmanager
