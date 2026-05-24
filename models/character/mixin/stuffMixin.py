@@ -41,12 +41,16 @@ class StuffMixin(Protocol):
     @request_action
     @refresh_after
     async def equip(
-        self: "Character", item: Item, quantity: int = 1
+        self: "Character", item: Item, quantity: int = 1, slot: str | None = None
     ) -> tuple[bool, dict | None]:
         try:
             response = await self.client.post(
                 "/equip",
-                json={"code": item.code, "slot": item.type, "quantity": quantity},
+                json={
+                    "code": item.code,
+                    "slot": item.type if slot is None else slot,
+                    "quantity": quantity,
+                },
             )
             data = response.json()
 
@@ -152,11 +156,11 @@ class StuffMixin(Protocol):
             (item[0], item[1]) for item in best_item if item.type == EquipentType.RING
         ]
         if rings[0][1] == 2:
-            _ = await self.equip(rings[0][0])
-            _ = await self.equip(rings[0][0])
+            _ = await self.equip(rings[0][0], slot="ring1")
+            _ = await self.equip(rings[0][0], slot="ring2")
         else:
-            _ = await self.equip(rings[0][0])
+            _ = await self.equip(rings[0][0], slot="ring1")
             if len(rings) > 1:
-                _ = await self.equip(rings[1][0])
+                _ = await self.equip(rings[1][0], slot="ring2")
 
         await self.deposit_all_in_bank()
