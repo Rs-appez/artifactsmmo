@@ -3,6 +3,7 @@ from .monster_farm import mob_farm
 from .gather import gather
 from .craft import craft
 from .complete_task import complete_task
+from .exchange_coin import exchange_task_coin
 
 __all__ = [
     "mob_farm",
@@ -10,4 +11,5 @@ __all__ = [
     "craft",
     "empty_farm",
     "complete_task",
+    "exchange_task_coin",
 ]
