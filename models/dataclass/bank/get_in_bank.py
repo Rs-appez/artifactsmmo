@@ -15,13 +15,20 @@ _unreserve_items = Bank._unreserve_items  # pyright: ignore[reportPrivateUsage]
 
 
 @asynccontextmanager
-async def get_max_items(character: Character, item: Item):
+async def get_max_items(
+    character: Character, item: Item, keep_free_slots: int = 0, per_stack: int = 1
+):
     async with Bank.locked():
         bank = await _check_bank()
-        item_quantity = min(bank.items.get(item, 0), character.inventory_max_items)
+        item_quantity = min(
+            bank.items.get(item, 0), character.inventory_max_items - keep_free_slots
+        )
+        item_quantity = (item_quantity // per_stack) * per_stack
         if item_quantity <= 0:
             raise Exception(f"No {item.name} found in bank for character")
-        token = await _reserve_items({item: item_quantity}, bank=bank)
+        token = await _reserve_items(
+            {item: item_quantity}, bank=bank, inventory=character.inventory
+        )
     try:
         yield token, item_quantity
     finally:

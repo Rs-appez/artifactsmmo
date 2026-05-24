@@ -10,13 +10,14 @@ async def exchange_task_coin(character: Character) -> None:
 
     try:
         while True:
-            async with get_max_items(character, task_coin) as (token, token_quantity):
+            async with get_max_items(character, task_coin, 2, 6) as (
+                token,
+                token_quantity,
+            ):
                 if token_quantity < 6:
                     print("No more task coin in bank")
                     break
-                if not await character.deposit_all_in_bank(with_gold=False):
-                    print("Failed to deposit task coin in bank")
-                    return
+                await character.deposit_all_in_bank(with_gold=False)
                 if not await character.withdraw_item_from_bank(token):
                     print("Failed to withdraw task coin from bank")
                     return
@@ -24,7 +25,6 @@ async def exchange_task_coin(character: Character) -> None:
                     print("Failed to move to task master")
                 while await character.exchange_task_coin():
                     pass
-                return
         print(f"🪙 {character.surname} has finished exchanging task coin")
     except Exception as e:
         print(f"❌ {character.surname} failed to exchange task coin : {e}")
