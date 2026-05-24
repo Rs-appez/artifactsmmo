@@ -108,7 +108,9 @@ async def craft(character: Character, item: Item, quantity: int):
             print(
                 f"⚒️ {character.surname} needs to make {nb_trips} trips to craft {quantity}x {item.name}"
             )
-
+            if character.get_job_level(item.job) <= item.craft_level + 11:
+                wisdom = await Encyclopedia.get_effect_by_code("wisdom")
+                await character.maximaze_stats(wisdom)
             for _ in range(nb_trips - 1):
                 async with Bank.get_reserved_items_partial(
                     bank_token, ingredients_for_trip
