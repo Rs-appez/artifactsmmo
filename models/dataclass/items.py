@@ -3,7 +3,7 @@ from typing import override
 from typing import TYPE_CHECKING
 
 from models.dataclass import Effect
-from models.enums import JobType
+from models.enums import EquipentType, JobType
 
 if TYPE_CHECKING:
     from models.character.character import Character
@@ -72,6 +72,10 @@ class Item:
     @property
     def is_weapon(self) -> bool:
         return self.type == "weapon" and self.subtype == ""
+
+    @property
+    def is_equipment(self) -> bool:
+        return self.type in EquipentType
 
     @property
     def is_craftable(self) -> bool:
