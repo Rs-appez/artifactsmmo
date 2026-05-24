@@ -5,7 +5,7 @@ from models import Encyclopedia
 from models.character.decorators import refresh_after, request_action
 from models.dataclass import Effect, Item
 from models.dataclass.bank import Bank, get_tool
-from models.enums import JobType
+from models.enums import EquipentType, JobType
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -15,6 +15,12 @@ if TYPE_CHECKING:
 class StuffMixin(Protocol):
     _weapon: Item | None = None
     _effects: dict[Effect, int] = field(default_factory=dict)
+    _equipped_items: dict[EquipentType, Item] = field(default_factory=dict)
+    _ring_1: Item | None = None
+    _ring_2: Item | None = None
+    _artifact_1: Item | None = None
+    _artifact_2: Item | None = None
+    _artifact_3: Item | None = None
 
     @property
     def weapon(self) -> Item | None:
@@ -23,6 +29,9 @@ class StuffMixin(Protocol):
     @property
     def effects(self) -> dict[Effect, int]:
         return self._effects.copy()
+
+    def get_equipped_item_by_slot(self, slot: EquipentType) -> Item | None:
+        return self._equipped_items.get(slot, None)
 
     @request_action
     @refresh_after
