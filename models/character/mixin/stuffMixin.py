@@ -5,6 +5,7 @@ from models import Encyclopedia
 from models.character.decorators import refresh_after, request_action
 from models.dataclass import Effect, Item
 from models.dataclass.bank import Bank, get_tool
+from models.dataclass.bank.get_in_bank import get_best_stat_item
 from models.enums import EquipentType, JobType
 
 if TYPE_CHECKING:
@@ -29,6 +30,10 @@ class StuffMixin(Protocol):
     @property
     def effects(self) -> dict[Effect, int]:
         return self._effects.copy()
+
+    @property
+    def get_rings(self) -> tuple[Item | None, Item | None]:
+        return self._ring_1, self._ring_2
 
     def get_equipped_item_by_slot(self, slot: EquipentType) -> Item | None:
         return self._equipped_items.get(slot, None)
@@ -128,4 +133,30 @@ class StuffMixin(Protocol):
         except Exception as e:
             print(f"❌ {self.surname} Toolize : {e}")
 
-    async def wisdomize(self: "Character") -> None: ...
+    async def maximaze_stats(self: "Character", stats: Effect) -> None:
+        # TODO : handle artifacts
+        async with get_best_stat_item(self, stats) as (bank_token, best_item):
+            if self.is_inventory_full:
+                await self.deposit_all_in_bank()
+            if not await self.withdraw_item_from_bank(bank_token):
+                print(f"❌ {self.surname} failed to withdraw item from bank")
+                return
+
+        for item in best_item:
+            if item.type in [EquipentType.RING, EquipentType.ARTIFACT]:
+                continue
+            if not await self.equip(item):
+                print(f"❌ {self.surname} failed to equip {item.name}")
+
+        rings = [
+            (item[0], item[1]) for item in best_item if item.type == EquipentType.RING
+        ]
+        if rings[0][1] == 2:
+            _ = await self.equip(rings[0][0])
+            _ = await self.equip(rings[0][0])
+        else:
+            _ = await self.equip(rings[0][0])
+            if len(rings) > 1:
+                _ = await self.equip(rings[1][0])
+
+        await self.deposit_all_in_bank()
