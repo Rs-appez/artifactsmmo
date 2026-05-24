@@ -1,11 +1,11 @@
+import heapq
+from collections import defaultdict
 from contextlib import asynccontextmanager
-
 from typing import TYPE_CHECKING
 
-from models import Encyclopedia
-from models.dataclass import Item
+from models.dataclass import Effect, Item
 from models.dataclass.bank import Bank
-from models.enums import JobType
+from models.enums import EquipentType, JobType
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -87,21 +87,78 @@ async def get_tool(character: Character, job: JobType):
 
 
 @asynccontextmanager
-async def get_best_wisdom_item():
+async def get_best_stat_item(character: Character, wanted_effect: Effect):
     async with Bank.locked():
         bank = await _check_bank()
-        wisdom_effect = await Encyclopedia.get_effect_by_code("wisdom")
-        wisdom_items = {
-            item
-            for item in bank.items
-            if item.is_equipment and wisdom_effect in item.effects
+        better_items_in_bank = defaultdict(int)
+        best_equipment = {
+            equipmentType: max(
+                (
+                    item
+                    for item in bank.items
+                    if item.is_equipment
+                    and item.can_be_used_by(character)
+                    and wanted_effect in item.effects
+                    and item.equipment_type == equipmentType
+                ),
+                key=lambda item: item.effects.get(wanted_effect, 0),
+                default=None,
+            )
+            for equipmentType in EquipentType
+            if equipmentType not in [EquipentType.RING, EquipentType.ARTIFACT]
         }
-        if not wisdom_items:
-            raise Exception(f"No wisdom item found in bank")
+        best_rings = heapq.nlargest(
+            2,
+            (
+                (item, qty)
+                for item, qty in bank.items.items()
+                if item.is_equipment
+                and item.can_be_used_by(character)
+                and wanted_effect in item.effects
+                and item.equipment_type == EquipentType.RING
+            ),
+            key=lambda item: item[0].effects.get(wanted_effect, 0),
+        )
+        # TODO : handle artifacts
+        best_artifact = heapq.nlargest(
+            3,
+            (
+                (item, qty)
+                for item, qty in bank.items.items()
+                if item.is_equipment
+                and item.can_be_used_by(character)
+                and wanted_effect in item.effects
+                and item.equipment_type == EquipentType.ARTIFACT
+            ),
+            key=lambda item: item[0].effects.get(wanted_effect, 0),
+        )
 
-        best_wisdom_item = max(wisdom_items, key=lambda item: item.wisdom)
-        token = await _reserve_items({best_wisdom_item: 1}, bank=bank)
+        for equipment_type, equipement in best_equipment.items():
+            if equipement is not None:
+                current_item = character.get_equipped_item_by_slot(equipment_type)
+                if current_item is None or current_item.effects.get(
+                    wanted_effect, 0
+                ) < equipement.effects.get(wanted_effect, 0):
+                    better_items_in_bank[equipement] = 1
+
+        current_ring_1, current_ring_2 = character.get_rings
+        current_ring_1_stat = (
+            current_ring_1.effects.get(wanted_effect, 0) if current_ring_1 else 0
+        )
+        current_ring_2_stat = (
+            current_ring_2.effects.get(wanted_effect, 0) if current_ring_2 else 0
+        )
+        if len(best_rings) > 0 and best_rings[0][1] > 1:
+            if best_rings[0][0].effects.get(wanted_effect, 0) > current_ring_1_stat:
+                better_items_in_bank[best_rings[0][0]] += 1
+            if best_rings[0][0].effects.get(wanted_effect, 0) > current_ring_2_stat:
+                better_items_in_bank[best_rings[0][0]] += 1
+        elif len(best_rings) > 1:
+            if best_rings[1][0].effects.get(wanted_effect, 0) > current_ring_2_stat:
+                better_items_in_bank[best_rings[1][0]] += 1
+
+        token = await _reserve_items(better_items_in_bank, bank=bank)
     try:
-        yield token, best_wisdom_item
+        yield token, better_items_in_bank
     finally:
         _unreserve_items(token)
