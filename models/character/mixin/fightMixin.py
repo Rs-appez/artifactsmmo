@@ -191,8 +191,9 @@ class FightMixin(Protocol):
 
     def _compute_nb_turns_to_kill(self: "Character", monster: Monster) -> int:
         damage = damage_on(self, monster)
+        bonus_damage = self._compute_effects_damage()
         damage += (damage * 0.5) * (self.critical_strike * 0.75 / 100)
-        nb_turns_to_kill = (monster.hp) // damage
+        nb_turns_to_kill = (monster.hp) // (damage + bonus_damage)
         if monster.initiative > self.initiative:
             nb_turns_to_kill += 1
         elif monster.initiative == self.initiative:
@@ -235,6 +236,17 @@ class FightMixin(Protocol):
                         if effect.code == "antipoison"
                     )
                     bonus_damage += max(0, value - antipoison)
+                case _:
+                    continue
+
+        return bonus_damage
+
+    def _compute_effects_damage(self: "Character") -> float:
+        bonus_damage = 0
+        for effect, value in self.effects.items():
+            match effect.code:
+                case "burn":
+                    bonus_damage += (value * 0.75 / 100) * sum(self.attack.values())
                 case _:
                     continue
 
