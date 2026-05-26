@@ -26,7 +26,11 @@ dict_actions = {
 dict_all = {
     "stopall": cli_action.stop_all,
     "status": cli_action.status,
+}
+
+dict_special = {
     "reserved_bank": cli_action.reserved_bank,
+    "refresh_events": cli_action.refresh_events,
 }
 
 
@@ -56,6 +60,7 @@ async def cli(game_manager: GameManager):
             }
         },
         **{cmd: None for cmd in dict_all},
+        **{cmd: None for cmd in dict_special},
     }
 
     completer = FuzzyCompleter(NestedCompleter.from_nested_dict(completer_dict))
@@ -110,6 +115,12 @@ async def cli(game_manager: GameManager):
                 if not parts:
                     continue
                 action, *args = parts
+
+                if action in dict_special:
+                    cmd = dict_special[action](game_manager)
+                    if asyncio.iscoroutine(cmd):
+                        await cmd
+                    continue
 
                 if action in dict_all:
                     cmd = dict_all[action](list(characters.values()))

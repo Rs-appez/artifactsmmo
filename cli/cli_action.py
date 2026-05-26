@@ -1,7 +1,7 @@
 from models.dataclass.bank import Bank
 from models.enums import TaskType
 import routines
-from models import Character, Encyclopedia
+from models import Character, Encyclopedia, GameManager
 
 
 def _check_freshness(function):
@@ -90,3 +90,8 @@ def reserved_bank(_):
         print(
             f"🔒reserved {', '.join([f'{qty}x {item.name}' for item, qty in reservation.items()])}"
         )
+
+
+async def refresh_events(gm: GameManager):
+
+    await gm.event_handler.refresh_current_events()
