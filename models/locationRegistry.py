@@ -1,12 +1,11 @@
 import asyncio
-
-import httpx
-from config import ARTIFACTSMMO_URL, HEADERS
-from models.dataclass import NPC, Monster, Map, Resource
-from models.dataclass.events import Event
-from models.encyclopedia import Encyclopedia
 from collections import defaultdict
 
+import httpx
+
+from config import ARTIFACTSMMO_URL, HEADERS
+from models.dataclass import NPC, Event, Map, Monster, Resource
+from models.encyclopedia import Encyclopedia
 from models.enums import JobType, Layer, TaskType
 
 
