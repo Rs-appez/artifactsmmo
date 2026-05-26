@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import override
 
-from models import Encyclopedia, LocationRegistry
-from models.dataclass import NPC, Map, Monster, Resource
+from models.dataclass import NPC, Monster, Resource
 
 
 @dataclass(frozen=True)
@@ -17,6 +16,8 @@ class Event:
 
     @classmethod
     async def from_dict(cls, data):
+        from models import Encyclopedia
+
         match data["content"]["type"]:
             case "monster":
                 content = await Encyclopedia.get_monster_by_code(

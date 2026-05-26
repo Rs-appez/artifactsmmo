@@ -1,5 +1,5 @@
 from models.dataclass import Map, Event
-from models import Encyclopedia, LocationRegistry
+from models import LocationRegistry
 from httpx import AsyncClient
 from config import ARTIFACTSMMO_URL, HEADERS
 
@@ -20,6 +20,8 @@ class EventHandler:
             LocationRegistry.add_event_location(map_location, event)
 
     async def __get_current_events(self) -> list[tuple[Event, Map]]:
+        from models import Encyclopedia
+
         try:
             async with AsyncClient() as client:
                 response = await client.get(
