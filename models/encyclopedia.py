@@ -3,7 +3,7 @@ import asyncio
 import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS
-from models.dataclass import Effect, Item, Monster, Resource
+from models.dataclass import Effect, Event, Item, Monster, Resource
 from models.enums import JobType
 
 
@@ -20,6 +20,9 @@ class Encyclopedia:
     _resources: dict[str, Resource] = {}
     __resources_loaded = False
 
+    _events: dict[str, Event] = {}
+    __events_loaded = False
+
     @classmethod
     async def initialize(cls):
         _ = await asyncio.gather(
@@ -27,6 +30,7 @@ class Encyclopedia:
             cls.__load_effects(),
             cls.__load_monsters(),
             cls.__load_resources(),
+            cls.__load_events(),
         )
 
     # ITEMS
@@ -245,3 +249,51 @@ class Encyclopedia:
 
         cls.__resources_loaded = True
         print(f"Loaded {len(cls._resources)} resources.")
+
+    # EVENTS
+
+    @classmethod
+    async def wait_event(cls) -> None:
+        while not cls.__events_loaded:
+            _ = await asyncio.sleep(1)
+
+    @staticmethod
+    async def get_event_by_code(code: str) -> Event:
+        await Encyclopedia.wait_event()
+
+        event = Encyclopedia._events.get(code)
+        if not event:
+            raise ValueError(f"Event with code '{code}' not found.")
+
+        return event
+
+    @classmethod
+    async def __load_events(cls):
+        if cls.__events_loaded:
+            print("Events already loaded, skipping fetch.")
+            return
+
+        async with httpx.AsyncClient() as client:
+            page = 1
+            max_pages = 2
+            while page <= max_pages:
+                response = await client.get(
+                    f"{ARTIFACTSMMO_URL}/events",
+                    headers=HEADERS,
+                    params={"size": 50, "page": page},
+                )
+                if response.status_code != 200:
+                    raise Exception(
+                        f"Failed to fetch events: {response.status_code} - {response.text}"
+                    )
+
+                events_data = response.json()
+                for event_data in events_data["data"]:
+                    event = await Event.from_dict(event_data)
+                    cls._events[event.code] = event
+
+                page += 1
+                max_pages = events_data["pages"]
+
+        cls.__events_loaded = True
+        print(f"Loaded {len(cls._events)} events.")
