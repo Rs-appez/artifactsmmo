@@ -40,6 +40,17 @@ async def complete_task(character: Character, type: TaskType | str) -> None:
             await __monster_task(character)
         elif isinstance(character.task.cible, Item):
             await __item_task(character)
+
+        if character.is_inventory_full:
+            if not await character.deposit_all_in_bank(with_gold=False, comeback=True):
+                print("Failed to deposit items in bank")
+                return
+
+        if await character.complete_task():
+            print(f"  {character.surname} completed the task")
+        else:
+            print(f"❌ {character.surname} failed to complete the task")
+
     except Exception as e:
         print(f"❌ {character.surname} failed to complete the task : {e}")
         return
@@ -93,11 +104,6 @@ async def __item_task(character: Character) -> None:
                 else:
                     await gather(character, item, need_to_generate)
 
-    if await character.complete_task():
-        print(f"  {character.surname} completed the item task")
-    else:
-        print(f"❌ {character.surname} failed to complete the item task")
-
 
 async def __monster_task(character: Character) -> None:
     if character.task is None:
@@ -119,7 +125,3 @@ async def __monster_task(character: Character) -> None:
     if not await character.move(task_master):
         print("Failed to move to task master")
         return
-    if await character.complete_task():
-        print(f"  {character.surname} completed the monster task")
-    else:
-        print(f"❌ {character.surname} failed to complete the monster task")
