@@ -32,10 +32,9 @@ class EventHandler:
                 return [
                     (
                         await Encyclopedia.get_event_by_code(event["code"]),
-                        await LocationRegistry.get_map_by_id(map_event["map_id"]),
+                        await LocationRegistry.get_map_by_id(event["map"]["map_id"]),
                     )
-                    for map_event in events_data["maps"]
-                    for event in events_data
+                    for event in events_data["data"]
                 ]
         except Exception as e:
             print(f"Error fetching current events: {e}")
