@@ -18,7 +18,6 @@ class Event:
 
     @classmethod
     async def from_dict(cls, data):
-        content = None
         match data["content"]["type"]:
             case "monster":
                 content = await Encyclopedia.get_monster_by_code(
@@ -32,8 +31,9 @@ class Event:
                 pass
                 # TODO: NPC data is not yet available in the encyclopedia, so this will be implemented later.
                 # content = await Encyclopedia.get_npc_by_code(data["content"]["code"])
+                content = None
             case _:
-                pass
+                content = None
 
         return cls(
             name=data["name"],
