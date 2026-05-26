@@ -43,6 +43,8 @@ class EquipentType(Enum):
     BAG = "bag"
     RUNE = "rune"
     ARTIFACT = "artifact"
+
+
 class NPCType(Enum):
     TRADER = "trader"
     MERCHANT = "merchant"
