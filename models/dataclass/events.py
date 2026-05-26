@@ -10,7 +10,6 @@ class Event:
     name: str
     code: str
     content: Monster | Resource | NPC | None
-    maps: list[Map]
 
     @override
     def __hash__(self):
@@ -39,8 +38,4 @@ class Event:
             name=data["name"],
             code=data["code"],
             content=content,
-            maps=[
-                await LocationRegistry.get_map_by_id(map_code)
-                for map_code in data["maps"]["map_id"]
-            ],
         )

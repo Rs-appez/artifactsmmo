@@ -4,7 +4,8 @@ from .items import Item
 from .monsters import Monster
 from .resources import Resource
 from .task import TaskQuest
+from .events import Event
 from .maps import Map
 
 
-__all__ = ["Item", "Monster", "Effect", "TaskQuest", "Resource", "Map", "NPC"]
+__all__ = ["Item", "Monster", "Effect", "TaskQuest", "Resource", "Map", "NPC", "Event"]
