@@ -22,8 +22,10 @@ class GameManager(JobMixin):
         )
 
     async def __load_characters(self):
-        with httpx.Client() as client:
-            response = client.get(f"{ARTIFACTSMMO_URL}/my/characters", headers=HEADERS)
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{ARTIFACTSMMO_URL}/my/characters", headers=HEADERS
+            )
             if response.status_code != 200:
                 raise Exception(
                     f"Failed to fetch characters: {response.status_code} - {response.text}"
