@@ -21,6 +21,7 @@ dict_actions = {
     "craft": cli_action.craft,
     "gotask": cli_action.complete_task,
     "goroutine": cli_action.asign_routine,
+    "gomission": cli_action.asign_mission,
 }
 
 dict_all = {
@@ -48,13 +49,19 @@ async def cli(game_manager: GameManager):
         **{cmd: character_names for cmd in dict_single},
         **{"craft": {name: {} for name in characters.keys()}},
         **{
-            "gotask": {
+            "goTask": {
                 name: {task: None for task in ["items", "monsters"]}
                 for name in characters.keys()
             }
         },
         **{
-            "goroutine": {
+            "goMission": {
+                name: {routine: {} for routine in routine_names}
+                for name in characters.keys()
+            }
+        },
+        **{
+            "goRoutine": {
                 name: {routine: {} for routine in routine_names}
                 for name in characters.keys()
             }
@@ -76,7 +83,26 @@ async def cli(game_manager: GameManager):
                 }
                 for name in characters.keys()
             },
-            "goroutine": {
+            "goRoutine": {
+                name: {
+                    routine: (
+                        {
+                            monster: None
+                            for monster in await Encyclopedia.get_all_items_names()
+                        }
+                        if routine == "gather"
+                        else {
+                            monster: None
+                            for monster in await Encyclopedia.get_all_monsters_names()
+                        }
+                        if routine == "mob_farm"
+                        else {}
+                    )
+                    for routine in routine_names
+                }
+                for name in characters.keys()
+            },
+            "goMission": {
                 name: {
                     routine: (
                         {

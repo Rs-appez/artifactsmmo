@@ -79,6 +79,16 @@ async def asign_routine(character: Character, routine_name: str, *args):
     print(f"🚀 {character.surname} started working on routine {routine_name}")
 
 
+@_check_freshness
+async def asign_mission(character: Character, routine_name: str, *args):
+    routine_func = getattr(routines, routine_name, None)
+    if not routine_func:
+        print(f"❌ Unknown routine: {routine_name}")
+        return
+    character.do_one_time_task(routine_func, *args)
+    print(f"🚀 {character.surname} started working on {routine_name}")
+
+
 async def exchange_task_coin(character: Character):
     character.do_one_time_task(routines.exchange_task_coin)
     print(f"🪙 {character.surname} will exchange task coins")
