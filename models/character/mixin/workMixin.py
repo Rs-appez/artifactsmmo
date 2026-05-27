@@ -75,8 +75,11 @@ class WorkMixin(Protocol):
         finally:
             self._work_task = None
 
-    def do_one_time_task(self: "Character", task: Callable):
-        self._priority_tasks.append(task)
+    def do_one_time_task(self: "Character", task: Callable, *args, **kwargs):
+        def mission(char):
+            return task(char, *args, **kwargs)
+
+        self._priority_tasks.append(mission)
         if self._is_on_routine:
             self._interrupt_routine()
 

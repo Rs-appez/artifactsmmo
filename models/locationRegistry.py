@@ -1,11 +1,11 @@
 import asyncio
-
-import httpx
-from config import ARTIFACTSMMO_URL, HEADERS
-from models.dataclass import Monster, Map, Resource
-from models.encyclopedia import Encyclopedia
 from collections import defaultdict
 
+import httpx
+
+from config import ARTIFACTSMMO_URL, HEADERS
+from models.dataclass import NPC, Event, Map, Monster, Resource
+from models.encyclopedia import Encyclopedia
 from models.enums import JobType, Layer, TaskType
 
 
@@ -68,6 +68,30 @@ class LocationRegistry:
         await LocationRegistry.wait_location()
         maps_id = LocationRegistry.__transition_locations.get(layer, set())
         return {LocationRegistry.__maps[map_id] for map_id in maps_id}
+
+    @staticmethod
+    def add_event_location(map: Map, event: Event) -> None:
+        if event.content is None:
+            return
+
+        match event.content:
+            case Monster() | Resource():
+                LocationRegistry.__drop_locations[event.content].add(map)
+            case NPC():
+                # TODO: NPC data is not yet available in the encyclopedia, so this will be implemented later.
+                pass
+
+    @staticmethod
+    def remove_event_location(map: Map, event: Event) -> None:
+        if event.content is None:
+            return
+
+        match event.content:
+            case Monster() | Resource():
+                LocationRegistry.__drop_locations[event.content].discard(map)
+            case NPC():
+                # TODO: NPC data is not yet available in the encyclopedia, so this will be implemented later.
+                pass
 
     @classmethod
     async def __load_locations(cls):
