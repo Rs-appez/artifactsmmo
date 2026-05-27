@@ -49,7 +49,7 @@ async def cli(game_manager: GameManager):
         **{cmd: character_names for cmd in dict_single},
         **{"craft": {name: {} for name in characters.keys()}},
         **{
-            "goTask": {
+            "gotask": {
                 name: {task: None for task in ["items", "monsters"]}
                 for name in characters.keys()
             }
