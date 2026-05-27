@@ -193,6 +193,10 @@ class FightMixin(Protocol):
         damage = damage_on(self, monster)
         bonus_damage = self._compute_effects_damage()
         damage += (damage * 0.5) * (self.critical_strike * 0.75 / 100)
+        if damage + bonus_damage <= 0:
+            raise ImpossibleCombatException(
+                f"{self.surname} cannot deal damage to {monster.name}"
+            )
         nb_turns_to_kill = (monster.hp) // (damage + bonus_damage)
         if monster.initiative > self.initiative:
             nb_turns_to_kill += 1
