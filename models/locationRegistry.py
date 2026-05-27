@@ -83,6 +83,7 @@ class LocationRegistry:
                     f"{ARTIFACTSMMO_URL}/maps",
                     headers=HEADERS,
                     params={"size": 500, "page": page},
+                    timeout=30,
                 )
                 data = response.json()
                 if "error" in data:
