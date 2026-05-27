@@ -4,9 +4,15 @@ from models.dataclass import Item, Resource
 from utils.find_nearest import find_nearest_lootable
 
 
-async def gather(character: Character, item: Item | str, nb: int = -1) -> None:
+async def gather(character: Character, item: Item | str, nb: int | str = -1) -> None:
     if isinstance(item, str):
         item = await Encyclopedia.get_item_by_code(item)
+    if isinstance(nb, str):
+        try:
+            nb = int(nb)
+        except ValueError:
+            print(f"❌ Invalid number of iterations : {nb}")
+            return
     await character.toolize(item.job)
 
     iterations = range(nb) if nb > 0 else count()

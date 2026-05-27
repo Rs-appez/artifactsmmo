@@ -7,10 +7,17 @@ from utils.find_nearest import find_nearest_lootable
 from routines import empty_farm
 
 
-async def mob_farm(character: Character, mob: Monster | str, nb: int = -1):
+async def mob_farm(character: Character, mob: Monster | str, nb: int | str = -1):
     try:
         if isinstance(mob, str):
             mob = await Encyclopedia.get_monster_by_code(mob)
+
+        if isinstance(nb, str):
+            try:
+                nb = int(nb)
+            except ValueError:
+                print(f"❌ Invalid number of iterations : {nb}")
+                return
 
         await character.weaponize()
         mob_position = await find_nearest_lootable(character, {mob})
