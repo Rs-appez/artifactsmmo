@@ -42,7 +42,7 @@ class BankMixin(Protocol):
             return False, None
         try:
             response = await self.client.post(
-                "bank/deposit/gold",
+                "/bank/deposit/gold",
                 json={"quantity": quantity},
             )
             data = response.json()
