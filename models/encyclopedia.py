@@ -83,6 +83,7 @@ class Encyclopedia:
                     f"{ARTIFACTSMMO_URL}/items",
                     headers=HEADERS,
                     params={"size": 500, "page": page},
+                    timeout=30.0,
                 )
                 if response.status_code != 200:
                     raise Exception(
@@ -131,7 +132,10 @@ class Encyclopedia:
             max_pages = 2
             while page <= max_pages:
                 response = await client.get(
-                    f"{ARTIFACTSMMO_URL}/effects", headers=HEADERS, params={"size": 100}
+                    f"{ARTIFACTSMMO_URL}/effects",
+                    headers=HEADERS,
+                    params={"size": 100},
+                    timeout=30.0,
                 )
                 if response.status_code != 200:
                     raise Exception(
@@ -185,6 +189,7 @@ class Encyclopedia:
                     f"{ARTIFACTSMMO_URL}/monsters",
                     headers=HEADERS,
                     params={"size": 100, "page": page},
+                    timeout=30.0,
                 )
                 if response.status_code != 200:
                     raise Exception(
@@ -233,6 +238,7 @@ class Encyclopedia:
                     f"{ARTIFACTSMMO_URL}/resources",
                     headers=HEADERS,
                     params={"size": 50, "page": page},
+                    timeout=30.0,
                 )
                 if response.status_code != 200:
                     raise Exception(
