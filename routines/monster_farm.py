@@ -35,7 +35,7 @@ async def mob_farm(character: Character, mob: Monster | str, nb: int | str = -1)
         if character.work_on == "mob_farm":
             character.stop()
         else:
-            raise e
+            return
 
 
 async def boss_farm(
