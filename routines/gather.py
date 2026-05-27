@@ -15,5 +15,9 @@ async def gather(character: Character, item: Item | str, nb: int = -1) -> None:
             _ = await character.deposit_all_in_bank()
         resources = Resource.from_drop_item(item)
         resource_position = await find_nearest_lootable(character, set(resources))
-        _ = await character.move(resource_position)
-        _ = await character.gather()
+        if not await character.move(resource_position):
+            print(f"❌ {character.surname} Failed to move to {resource_position.name}")
+            return
+        if not await character.gather():
+            print(f"❌ {character.surname} Failed to gather {item.name}")
+            return
