@@ -8,7 +8,7 @@ import httpx
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
 from models import Encyclopedia, LocationRegistry
 from models.dataclass import TaskQuest
-from models.enums import Element, JobType
+from models.enums import Element, EquipentType, JobType
 from utils.math_fight import calc_attack
 
 from .decorators import refresh_after
@@ -171,6 +171,40 @@ class Character(
             for effect in data.get("effects", [])
         }
 
+        equipments = {
+            EquipentType.RUNE: await Encyclopedia.get_item_by_code(data["rune_slot"])
+            if data.get("rune_slot")
+            else None,
+            EquipentType.SHIELD: await Encyclopedia.get_item_by_code(
+                data["shield_slot"]
+            )
+            if data.get("shield_slot")
+            else None,
+            EquipentType.HELMET: await Encyclopedia.get_item_by_code(
+                data["helmet_slot"]
+            )
+            if data.get("helmet_slot")
+            else None,
+            EquipentType.BODY_ARMOR: await Encyclopedia.get_item_by_code(
+                data["body_armor_slot"]
+            )
+            if data.get("body_armor_slot")
+            else None,
+            EquipentType.LEG_ARMOR: await Encyclopedia.get_item_by_code(
+                data["leg_armor_slot"]
+            )
+            if data.get("leg_armor_slot")
+            else None,
+            EquipentType.BOOTS: await Encyclopedia.get_item_by_code(data["boots_slot"])
+            if data.get("boots_slot")
+            else None,
+            EquipentType.AMULET: await Encyclopedia.get_item_by_code(
+                data["amulet_slot"]
+            )
+            if data.get("amulet_slot")
+            else None,
+        }
+
         return dict(
             _name=data["name"],
             _surname=data["name"][3:],
@@ -196,10 +230,26 @@ class Character(
             _attack=attack,
             _critical_strike=data.get("critical_strike", 0),
             _initiative=data.get("initiative", 0),
+            _effects=effects,
             _weapon=await Encyclopedia.get_item_by_code(data["weapon_slot"])
             if data.get("weapon_slot")
             else None,
-            _effects=effects,
+            _equipped_items=equipments,
+            _ring_1=await Encyclopedia.get_item_by_code(data["ring_1_slot"])
+            if data.get("ring_1_slot")
+            else None,
+            _ring_2=await Encyclopedia.get_item_by_code(data["ring_2_slot"])
+            if data.get("ring_2_slot")
+            else None,
+            _artifact_1=await Encyclopedia.get_item_by_code(data["artifact_1_slot"])
+            if data.get("artifact_1_slot")
+            else None,
+            _artifact_2=await Encyclopedia.get_item_by_code(data["artifact_2_slot"])
+            if data.get("artifact_2_slot")
+            else None,
+            _artifact_3=await Encyclopedia.get_item_by_code(data["artifact_3_slot"])
+            if data.get("artifact_3_slot")
+            else None,
         )
 
     @classmethod
