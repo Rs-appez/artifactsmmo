@@ -32,10 +32,6 @@ async def mob_farm(character: Character, mob: Monster | str, nb: int | str = -1)
 
     except Exception as e:
         print(f"❌ {character.surname} {e}")
-        if character.work_on == "mob_farm":
-            character.stop()
-        else:
-            return
 
 
 async def boss_farm(

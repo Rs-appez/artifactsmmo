@@ -30,7 +30,3 @@ async def gather(character: Character, item: Item | str, nb: int | str = -1) -> 
                 raise Exception(f"❌ {character.surname} Failed to gather {item.name}")
     except Exception as e:
         print(f"❌ {character.surname} {e}")
-        if character.work_on == "gather":
-            character.stop()
-        else:
-            return
