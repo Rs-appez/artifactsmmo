@@ -14,9 +14,11 @@ if TYPE_CHECKING:
 
 @dataclass
 class StuffMixin(Protocol):
-    _weapon: Item | None = None
     _effects: dict[Effect, int] = field(default_factory=dict)
+
     _equipped_items: dict[EquipentType, Item] = field(default_factory=dict)
+
+    _weapon: Item | None = None
     _ring_1: Item | None = None
     _ring_2: Item | None = None
     _artifact_1: Item | None = None
