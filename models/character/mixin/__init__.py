@@ -1,3 +1,4 @@
+from .jobMixin import JobMixin
 from .bankMixin import BankMixin
 from .fightMixin import FightMixin
 from .gatherMixin import GatherMixin
@@ -20,4 +21,5 @@ __all__ = [
     "StuffMixin",
     "InventoryMixin",
     "SaveMixin",
+    "JobMixin",
 ]
