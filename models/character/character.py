@@ -15,6 +15,7 @@ from .decorators import refresh_after
 from .mixin import (
     BankMixin,
     CraftMixin,
+    JobMixin,
     FightMixin,
     GatherMixin,
     MoveMixin,
@@ -29,6 +30,7 @@ from .mixin import (
 @dataclass
 class Character(
     MoveMixin,
+    JobMixin,
     InventoryMixin,
     BankMixin,
     WorkMixin,
@@ -47,8 +49,6 @@ class Character(
     _xp: int
     _max_xp: int
     _level: int
-
-    _jobs: dict[JobType, int]
 
     def __post_init__(self):
         self.__client = httpx.AsyncClient(
@@ -95,14 +95,6 @@ class Character(
     @property
     def level(self) -> int:
         return self._level
-
-    def get_job_level(self, job_name: str | JobType) -> int:
-        job = JobType(job_name) if isinstance(job_name, str) else job_name
-        return self._jobs.get(job, 0)
-
-    def has_job(self: "Character", job_name: str | JobType, level=1) -> bool:
-        job = JobType(job_name) if isinstance(job_name, str) else job_name
-        return self._jobs.get(job, 0) >= level
 
     @refresh_after
     async def refresh(self) -> tuple[bool, dict | None]:
