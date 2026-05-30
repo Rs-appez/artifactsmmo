@@ -16,6 +16,10 @@ async def gather(character: Character, item: Item | str, nb: int | str = -1) -> 
                 return
         await character.toolize(item.job)
 
+        if character.will_gain_xp_with(item):
+            wisdom = await Encyclopedia.get_effect_by_code("wisdom")
+            await character.maximaze_stats(wisdom)
+
         iterations = range(nb) if nb > 0 else count()
         for _ in iterations:
             if character.is_inventory_full:
