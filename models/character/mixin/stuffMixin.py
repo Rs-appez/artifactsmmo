@@ -142,6 +142,10 @@ class StuffMixin(Protocol):
     async def maximaze_stats(self: "Character", stats: Effect) -> None:
         # TODO : handle artifacts
         async with get_best_stat_item(self, stats) as (bank_token, best_item):
+            if not best_item:
+                return
+            print(f"👚 {self.surname} is going to search {stats.name} items in bank")
+
             if self.is_inventory_full:
                 await self.deposit_all_in_bank()
             if not await self.withdraw_item_from_bank(bank_token):
