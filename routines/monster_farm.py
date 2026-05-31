@@ -20,13 +20,13 @@ async def mob_farm(character: Character, mob: Monster | str, nb: int | str = -1)
                 return
 
         await character.weaponize()
-        mob_position = await find_nearest_lootable(character, {mob})
         iterations = range(nb) if nb > 0 else count()
         for _ in iterations:
             if character.is_inventory_full:
                 _ = await character.deposit_all_in_bank()
             while not character.will_win_against(mob):
                 await __regenerate_hp(character)
+            mob_position = await find_nearest_lootable(character, {mob})
             _ = await character.move(mob_position)
             _ = await character.fight()
 
