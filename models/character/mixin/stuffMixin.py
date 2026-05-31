@@ -155,13 +155,15 @@ class StuffMixin(Protocol):
                 return
 
         for item in best_item:
-            if item.type in [EquipentType.RING, EquipentType.ARTIFACT]:
+            if item.type in [EquipentType.RING.value, EquipentType.ARTIFACT.value]:
                 continue
             if not await self.equip(item):
                 print(f"❌ {self.surname} failed to equip {item.name}")
 
         rings = [
-            (item[0], item[1]) for item in best_item if item.type == EquipentType.RING
+            (item[0], item[1])
+            for item in best_item.items()
+            if item[0].type == EquipentType.RING.value
         ]
         if rings[0][1] == 2:
             _ = await self.equip(rings[0][0], slot="ring1")

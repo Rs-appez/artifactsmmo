@@ -108,7 +108,6 @@ async def get_best_stat_item(character: Character, wanted_effect: Effect):
             for equipmentType in EquipentType
             if equipmentType not in [EquipentType.RING, EquipentType.ARTIFACT]
         }
-        print("best_equipment : ", best_equipment)
         best_rings = heapq.nlargest(
             2,
             (
@@ -117,7 +116,7 @@ async def get_best_stat_item(character: Character, wanted_effect: Effect):
                 if item.is_equipment
                 and item.can_be_used_by(character)
                 and wanted_effect in item.effects
-                and item.type == EquipentType.RING
+                and item.type == EquipentType.RING.value
             ),
             key=lambda item: item[0].effects.get(wanted_effect, 0),
         )
@@ -130,7 +129,7 @@ async def get_best_stat_item(character: Character, wanted_effect: Effect):
                 if item.is_equipment
                 and item.can_be_used_by(character)
                 and wanted_effect in item.effects
-                and item.type == EquipentType.ARTIFACT
+                and item.type == EquipentType.ARTIFACT.value
             ),
             key=lambda item: item[0].effects.get(wanted_effect, 0),
         )
@@ -159,7 +158,6 @@ async def get_best_stat_item(character: Character, wanted_effect: Effect):
             if best_rings[1][0].effects.get(wanted_effect, 0) > current_ring_2_stat:
                 better_items_in_bank[best_rings[1][0]] += 1
 
-        print("better_items_in_bank : ", better_items_in_bank)
         token = await _reserve_items(better_items_in_bank, bank=bank)
     try:
         yield token, better_items_in_bank
