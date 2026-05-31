@@ -102,6 +102,9 @@ async def __item_task(character: Character) -> None:
                         "Not enough item in bank and crafting not implemented yet"
                     )
                 else:
+                    print(
+                        f"󰢟 Not enough {item.name} in bank for the task, need to gather {need_to_generate}"
+                    )
                     await gather(character, item, need_to_generate)
 
 
