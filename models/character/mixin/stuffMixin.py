@@ -165,12 +165,13 @@ class StuffMixin(Protocol):
             for item in best_item.items()
             if item[0].type == EquipentType.RING.value
         ]
-        if rings[0][1] == 2:
-            _ = await self.equip(rings[0][0], slot="ring1")
-            _ = await self.equip(rings[0][0], slot="ring2")
-        else:
-            _ = await self.equip(rings[0][0], slot="ring1")
-            if len(rings) > 1:
-                _ = await self.equip(rings[1][0], slot="ring2")
+        if rings:
+            if rings[0][1] == 2:
+                _ = await self.equip(rings[0][0], slot="ring1")
+                _ = await self.equip(rings[0][0], slot="ring2")
+            else:
+                _ = await self.equip(rings[0][0], slot="ring1")
+                if len(rings) > 1:
+                    _ = await self.equip(rings[1][0], slot="ring2")
 
         await self.deposit_all_in_bank()
