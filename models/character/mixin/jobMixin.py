@@ -21,6 +21,7 @@ class JobMixin(Protocol):
         return self._jobs.get(job, 0) >= level
 
     def will_gain_xp_with(self: "Character", item: Item) -> bool:
-        if self.get_job_level(item.job) >= item.craft_level + 11:
+        item_level = item.craft_level or item.level
+        if self.get_job_level(item.job) > item_level + 10:
             return False
         return True
