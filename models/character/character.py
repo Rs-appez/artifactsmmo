@@ -227,20 +227,20 @@ class Character(
             if data.get("weapon_slot")
             else None,
             _equipped_items=equipments,
-            _ring_1=await Encyclopedia.get_item_by_code(data["ring_1_slot"])
-            if data.get("ring_1_slot")
+            _ring_1=await Encyclopedia.get_item_by_code(data["ring1_slot"])
+            if data.get("ring1_slot")
             else None,
-            _ring_2=await Encyclopedia.get_item_by_code(data["ring_2_slot"])
-            if data.get("ring_2_slot")
+            _ring_2=await Encyclopedia.get_item_by_code(data["ring2_slot"])
+            if data.get("ring2_slot")
             else None,
-            _artifact_1=await Encyclopedia.get_item_by_code(data["artifact_1_slot"])
-            if data.get("artifact_1_slot")
+            _artifact_1=await Encyclopedia.get_item_by_code(data["artifact1_slot"])
+            if data.get("artifact1_slot")
             else None,
-            _artifact_2=await Encyclopedia.get_item_by_code(data["artifact_2_slot"])
-            if data.get("artifact_2_slot")
+            _artifact_2=await Encyclopedia.get_item_by_code(data["artifact2_slot"])
+            if data.get("artifact2_slot")
             else None,
-            _artifact_3=await Encyclopedia.get_item_by_code(data["artifact_3_slot"])
-            if data.get("artifact_3_slot")
+            _artifact_3=await Encyclopedia.get_item_by_code(data["artifact3_slot"])
+            if data.get("artifact3_slot")
             else None,
         )
 
