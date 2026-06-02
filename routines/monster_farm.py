@@ -27,8 +27,10 @@ async def mob_farm(character: Character, mob: Monster | str, nb: int | str = -1)
             while not character.will_win_against(mob):
                 await __regenerate_hp(character)
             mob_position = await find_nearest_lootable(character, {mob})
-            _ = await character.move(mob_position)
-            _ = await character.fight()
+            if not await character.move(mob_position):
+                raise Exception(f"Failed to move to {mob_position.name}")
+            if not await character.fight():
+                raise Exception(f"Failed to fight {mob.name}")
 
     except Exception as e:
         print(f"❌ {character.surname} {e}")
