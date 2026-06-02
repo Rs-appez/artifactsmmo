@@ -49,7 +49,10 @@ class Bank:
 
     @property
     def items(self) -> dict[Item, int]:
-        return self._items.copy()
+        return {
+            item: quantity - self.__reserved_items[item]
+            for item, quantity in self._items.items()
+        }
 
     @classmethod
     @asynccontextmanager
@@ -134,7 +137,7 @@ class Bank:
         self, items: dict[Item, int], inventory: dict[Item, int] | None = None
     ) -> tuple[bool, Item | None, int]:
         for item, quantity in items.items():
-            quantity_in_bank = self._items.get(item, 0) - self.__reserved_items[item]
+            quantity_in_bank = self.items.get(item, 0)
             quantity_in_inventory = (
                 inventory.get(item, 0) if inventory is not None else 0
             )
