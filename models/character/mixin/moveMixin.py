@@ -30,6 +30,8 @@ class MoveMixin(Protocol):
         if destination.layer != self.location.layer:
             await self._change_layer(destination)
             await self.available
+            if destination == self.location:
+                return True, None
         try:
             response = await self.client.post(
                 "/move",
