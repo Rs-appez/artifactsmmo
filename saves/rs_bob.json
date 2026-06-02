@@ -1,0 +1,10 @@
+{
+    "routine_name": "mob_farm",
+    "routine_module": "routines.monster_farm",
+    "routine_args": [
+        [
+            "imp"
+        ],
+        {}
+    ]
+}
