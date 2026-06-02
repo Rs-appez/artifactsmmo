@@ -29,8 +29,9 @@ def lock_bank(func):
 class Bank:
     __bankelock = Lock()
     __url = f"{ARTIFACTSMMO_URL}/my/bank"
-    __reserved_items = defaultdict(int)
-    __tokens = defaultdict(tuple[dict, int])
+    __reserved_items = defaultdict[Item, int](int)
+    __tokens = defaultdict[uuid.UUID, dict[Item, int]](dict)
+    __missing_promises = defaultdict[uuid.UUID, dict[Item, int]](dict)
 
     _gold: int
     _slots: int
@@ -80,22 +81,25 @@ class Bank:
     ) -> uuid.UUID:
         if bank is None:
             bank = await cls.__check_bank()
-        have_enough, missing_item, missing_count = bank.__have_items(
-            items, inventory=inventory
-        )
-        if imediately_needed and not have_enough and missing_item is not None:
+        missing_items = bank.__get_missing_items(items, inventory=inventory)
+
+        if imediately_needed and missing_items:
             raise NotEnoughInBankException(
-                f"Missing {missing_count} {missing_item.name} in bank"
+                f"Not enough items in bank to reserve {items}, missing : "
+                + ", ".join(
+                    f"{item.name} x{quantity}"
+                    for item, quantity in missing_items.items()
+                )
             )
         for item, quantity in items.items():
             item_in_inventory = inventory.get(item, 0) if inventory is not None else 0
             cls.__reserved_items[item] += quantity - item_in_inventory
 
         token = uuid.uuid4()
-        cls.__tokens[token] = (
-            {item: quantity for item, quantity in items.items()},
-            missing_count,
-        )
+        cls.__tokens[token] = {item: quantity for item, quantity in items.items()}
+        if missing_items:
+            cls.__missing_promises[token] = missing_items
+
         return token
 
     @staticmethod
@@ -104,15 +108,14 @@ class Bank:
         Check the current reservations in the bank
         (only for display purposes, does not guarantee that the items are still reserved when you want to use them)
         """
-        return {token: items for token, (items, _) in Bank.__tokens.items()}
+        return {token: items for token, items in Bank.__tokens.items()}
 
     @staticmethod
-    @lock_bank
-    async def get_missing_promise(token: uuid.UUID) -> int:
+    async def get_missing_promise(token: uuid.UUID) -> dict[Item, int]:
         """
         Get the missing promise for a given token, i.e. the quantity of items that were not reserved because not enough in bank
         """
-        return Bank.__tokens.get(token, ({}, 0))[1]
+        return Bank.__missing_promises.get(token, {}).copy()
 
     @classmethod
     async def __check_bank(cls) -> "Bank":
@@ -132,25 +135,23 @@ class Bank:
             _items=items,
         )
 
-    def __have_items(
+    def __get_missing_items(
         self, items: dict[Item, int], inventory: dict[Item, int] | None = None
-    ) -> tuple[bool, Item | None, int]:
+    ) -> dict[Item, int]:
+        missing_item: dict[Item, int] = {}
         for item, quantity in items.items():
             quantity_in_bank = self.items.get(item, 0)
             quantity_in_inventory = (
                 inventory.get(item, 0) if inventory is not None else 0
             )
             if quantity_in_bank < quantity - quantity_in_inventory:
-                return (
-                    False,
-                    item,
-                    quantity - quantity_in_bank,
-                )
-        return True, None, 0
+                missing_item[item] = quantity - quantity_in_bank - quantity_in_inventory
+
+        return missing_item
 
     @classmethod
     def _get_reserved_items(cls, token: uuid.UUID) -> dict[Item, int]:
-        return cls.__tokens.get(token, ({}, 0))[0].copy()
+        return cls.__tokens.get(token, {}).copy()
 
     @classmethod
     @asynccontextmanager
@@ -166,7 +167,7 @@ class Bank:
     def __get_reserved_items_partial(
         cls, token: uuid.UUID, items: dict[Item, int]
     ) -> uuid.UUID:
-        reserved_items = cls.__tokens.get(token, ({}, 0))[0]
+        reserved_items = cls.__tokens.get(token, {})
         for item, quantity in items.items():
             if reserved_items.get(item, 0) < quantity:
                 raise Exception(f"Not enough {item.name} reserved for token {token}")
@@ -175,10 +176,7 @@ class Bank:
             reserved_items[item] -= quantity
 
         new_token = uuid.uuid4()
-        cls.__tokens[new_token] = (
-            {item: quantity for item, quantity in items.items()},
-            0,
-        )
+        cls.__tokens[new_token] = {item: quantity for item, quantity in items.items()}
         return new_token
 
     @classmethod
@@ -188,7 +186,7 @@ class Bank:
         """
         if token not in cls.__tokens:
             return
-        items = cls.__tokens.pop(token)[0]
+        items = cls.__tokens.pop(token)
         for item, quantity in items.items():
             cls.__reserved_items[item] -= quantity
 
