@@ -1,8 +1,8 @@
 import asyncio
-from contextlib import asynccontextmanager
 import uuid
 from asyncio import Lock
 from collections import defaultdict
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -12,7 +12,6 @@ from config import ARTIFACTSMMO_URL, HEADERS
 from exceptions import NotEnoughInBankException
 from models.dataclass import Item
 from models.encyclopedia import Encyclopedia
-from models.enums import JobType
 
 if TYPE_CHECKING:
     from models.character import Character
