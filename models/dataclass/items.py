@@ -8,7 +8,7 @@ from models.enums import EquipentType, JobType
 if TYPE_CHECKING:
     from models.character.character import Character
 
-NOT_TO_EAT_FOOD = {"apple"}
+NOT_TO_EAT_FOOD = {"apple", "coconut"}
 
 
 @dataclass(frozen=True)
