@@ -128,12 +128,9 @@ async def __monster_task(character: Character) -> None:
         print("❌ Task cible is not a monster")
         return
 
-    try:
-        while character.task_resources_left > 0:
-            await mob_farm(character, monster, character.task_resources_left)
-    except Exception as e:
-        print(f"❌ {character.surname} failed to complete the monster task : {e}")
-        return
+    while character.task_resources_left > 0:
+        await mob_farm(character, monster, character.task_resources_left)
+
     task_master = await find_nearest_tasks_master(character, TaskType.MONSTER)
     if not await character.move(task_master):
         print("Failed to move to task master")
