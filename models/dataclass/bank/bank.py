@@ -187,6 +187,7 @@ class Bank:
         if token not in cls.__tokens:
             return
         items = cls.__tokens.pop(token)
+        _ = cls.__missing_promises.pop(token, None)
         for item, quantity in items.items():
             cls.__reserved_items[item] -= quantity
 
