@@ -1,5 +1,6 @@
 import asyncio
 from itertools import count
+from exceptions import ImpossibleCombatException
 from models import Character, Encyclopedia
 from models.dataclass import Monster
 from models.dataclass.bank import get_food
@@ -31,6 +32,8 @@ async def mob_farm(character: Character, mob: Monster | str, nb: int | str = -1)
                 raise Exception(f"Failed to move to {mob_position.name}")
             _ = await character.fight()
 
+    except ImpossibleCombatException as e:
+        raise e
     except Exception as e:
         print(f"❌ {character.surname} {e}")
 

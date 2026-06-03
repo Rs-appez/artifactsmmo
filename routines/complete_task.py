@@ -1,6 +1,10 @@
 from itertools import count
 
-from exceptions import NotEnoughInBankException, NotWorthableTaskException
+from exceptions import (
+    ImpossibleCombatException,
+    NotEnoughInBankException,
+    NotWorthableTaskException,
+)
 from models import Character, Encyclopedia
 from models.dataclass import Item, Monster
 from models.dataclass.bank import Bank
@@ -72,6 +76,9 @@ async def complete_task(
         except NotWorthableTaskException as e:
             print(f"⚠️ {character.surname} skipped the task : {e}")
             continue
+        except ImpossibleCombatException as e:
+            print(f"⚠️ {character.surname} cannot complete the task because : {e}")
+            return
         except Exception as e:
             print(f"❌ {character.surname} failed to complete the task : {e}")
             return
