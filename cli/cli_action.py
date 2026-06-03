@@ -65,7 +65,7 @@ async def status(characters: list[Character]):
 @_check_freshness
 async def complete_task(character: Character, task_type_str: str = "items"):
     task_type = TaskType(task_type_str)
-    character.do_one_time_task(lambda char: routines.complete_task(char, task_type))
+    character.do_one_time_task(routines.complete_task, task_type, nb=1)
     print(f"  {character.surname} will complete a task")
 
 
