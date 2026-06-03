@@ -76,10 +76,11 @@ async def __regenerate_hp(character: Character):
             print(f"󰜎 {character.surname} will search for food in bank")
             qty = character.inventory_max_items // 2
             async with get_food(character, qty) as food_token:
-                _ = await character.deposit_all_in_bank()
+                deposit_gold = True if character.gold > 10000 else False
+                if not await character.deposit_all_in_bank(with_gold=deposit_gold):
+                    raise Exception("Failed to deposit items in bank")
                 if not await character.withdraw_item_from_bank(food_token):
-                    print(f"❌ {character.surname} couldn't withdraw food from bank")
-                    return
+                    raise Exception("Failed to withdraw food from bank")
         await character.regenerate_hp()
     except Exception:
         _ = await character.rest()
