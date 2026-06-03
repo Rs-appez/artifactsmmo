@@ -25,7 +25,6 @@ class SaveMixin(Protocol):
             routine_name = save_data.get("routine_name")
             routine_module = save_data.get("routine_module")
             routine_args = save_data.get("routine_args", [])
-            print("routine_args : ", routine_args)
             if routine_name and routine_module:
                 module = importlib.import_module(routine_module)
                 func = getattr(module, routine_name)
