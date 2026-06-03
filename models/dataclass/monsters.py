@@ -78,6 +78,10 @@ class Monster:
     def __hash__(self):
         return hash(self.code)
 
+    @override
+    def __str__(self):
+        return self.name
+
     @property
     def average_gold(self) -> float:
         return (self.min_gold + self.max_gold) / 2
