@@ -3,7 +3,7 @@ from exceptions import NotEnoughInBankException
 from models import Character, Encyclopedia
 from models.dataclass import Item, Map
 from models.dataclass.bank import Bank
-from routines import gather
+from routines.utils import generate_missing_items
 from utils.find_nearest import find_nearest_workshop
 from math import ceil
 
@@ -141,14 +141,7 @@ async def craft(character: Character, item: Item, quantity: int):
 
         print(f"⚒️ {character.surname} finished crafting {quantity}x {item.name}")
     except NotEnoughInBankException:
-        async with Bank.reserve_items(
-            reserved_ingredients, False, inventory=character.inventory
-        ) as bank_token:
-            need_to_generate = await Bank.get_missing_promise(bank_token)
-            print(
-                f"󰢟 Not enough ingredients in bank for crafting {item.name}, need to gather {need_to_generate}x {item.name}"
-            )
-            await gather(character, item, need_to_generate)
+        await generate_missing_items(character, reserved_ingredients)
 
     except Exception as e:
         print(f"❌ {character.surname} {e}")

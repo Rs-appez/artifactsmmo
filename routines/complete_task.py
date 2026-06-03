@@ -3,7 +3,8 @@ from models import Character
 from models.dataclass import Item, Monster
 from models.dataclass.bank import Bank
 from models.enums import TaskType
-from routines import gather, mob_farm, craft
+from routines import mob_farm
+from routines.utils import generate_missing_items
 from utils.find_nearest import find_nearest_tasks_master
 
 
@@ -92,20 +93,7 @@ async def __item_task(character: Character) -> None:
                     print("Failed to complete task")
                     return
         except NotEnoughInBankException:
-            async with Bank.reserve_items(
-                task_resources, False, inventory=character.inventory
-            ) as bank_token:
-                need_to_generate = await Bank.get_missing_promise(bank_token)
-                if item.is_craftable:
-                    print(
-                        f"󰢟 Not enough {item.name} in bank for the task, need to craft {need_to_generate}x {item.name}"
-                    )
-                    await craft(character, item, need_to_generate)
-                else:
-                    print(
-                        f"󰢟 Not enough {item.name} in bank for the task, need to gather {need_to_generate}x {item.name}"
-                    )
-                    await gather(character, item, need_to_generate)
+            await generate_missing_items(character, task_resources)
 
 
 async def __monster_task(character: Character) -> None:
