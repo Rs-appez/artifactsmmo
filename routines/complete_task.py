@@ -8,6 +8,14 @@ from utils.find_nearest import find_nearest_tasks_master
 
 
 async def complete_task(character: Character, type: TaskType | str) -> None:
+    match type:
+        case TaskType.MONSTER:
+            task_master = await find_nearest_tasks_master(character, TaskType.MONSTER)
+        case TaskType.ITEM:
+            task_master = await find_nearest_tasks_master(character, TaskType.ITEM)
+        case _:
+            print(f"❌ Invalid task type : {type}")
+            return
 
     if character.task is None:
         if isinstance(type, str):
@@ -16,13 +24,6 @@ async def complete_task(character: Character, type: TaskType | str) -> None:
             except ValueError:
                 print(f"❌ Invalid task type : {type}")
                 return
-        match type:
-            case TaskType.MONSTER:
-                task_master = await find_nearest_tasks_master(
-                    character, TaskType.MONSTER
-                )
-            case TaskType.ITEM:
-                task_master = await find_nearest_tasks_master(character, TaskType.ITEM)
 
         if not await character.move(task_master):
             print("Failed to move to task master")
@@ -42,10 +43,13 @@ async def complete_task(character: Character, type: TaskType | str) -> None:
             await __item_task(character)
 
         if character.is_inventory_full:
-            if not await character.deposit_all_in_bank(with_gold=False, comeback=True):
+            if not await character.deposit_all_in_bank(with_gold=False):
                 print("Failed to deposit items in bank")
                 return
 
+        if not await character.move(task_master):
+            print("Failed to move to task master to complete the task")
+            return
         if await character.complete_task():
             print(f"  {character.surname} completed the task")
         else:
