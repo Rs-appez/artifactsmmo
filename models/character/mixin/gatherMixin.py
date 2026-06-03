@@ -25,5 +25,5 @@ class GatherMixin(Protocol):
 
             return True, character_data
         except Exception as e:
-            print(f"❌ {e}")
+            print(f"❌ {self.surname} {e}")
             return False, None
