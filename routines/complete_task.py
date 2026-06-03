@@ -1,7 +1,7 @@
 from itertools import count
 
 from exceptions import NotEnoughInBankException, NotWorthableTaskException
-from models import Character
+from models import Character, Encyclopedia
 from models.dataclass import Item, Monster
 from models.dataclass.bank import Bank
 from models.enums import TaskType
@@ -86,10 +86,7 @@ async def __item_task(character: Character) -> None:
         raise Exception("Task cible is not an item")
     task_master = await find_nearest_tasks_master(character, TaskType.ITEM)
     if not __is_worth_it(item):
-        if not await character.move(task_master):
-            raise Exception("Failed to move to task master")
-        if not await character.give_up_task():
-            raise Exception("Failed to give up task")
+        _ = await __give_up_task(character, TaskType.ITEM)
         raise NotWorthableTaskException(
             f"Task for {item.name} is not worth it, skipping..."
         )
@@ -148,3 +145,21 @@ def __is_worth_it(item: Item) -> bool:
     if item.level == 35 or item.level == 50:
         return False
     return True
+
+
+async def __give_up_task(character: Character, task_type: TaskType) -> None:
+    task_master = await find_nearest_tasks_master(character, task_type)
+
+    if await Encyclopedia.get_item_by_code("tasks_coin") not in character.inventory:
+        async with Bank.reserve_items(
+            {await Encyclopedia.get_item_by_code("tasks_coin"): 1}
+        ) as bank_token:
+            if character.is_inventory_full:
+                if not await character.deposit_all_in_bank(with_gold=False):
+                    raise Exception("Failed to deposit items in bank")
+            if not await character.withdraw_item_from_bank(bank_token):
+                raise Exception("Failed to withdraw task coin from bank")
+    if not await character.move(task_master):
+        raise Exception("Failed to move to task master")
+    if not await character.give_up_task():
+        raise Exception("Failed to give up task")
