@@ -1,10 +1,12 @@
 import uuid
+from math import ceil
+
 from exceptions import NotEnoughInBankException
 from models import Character, Encyclopedia
 from models.dataclass import Item, Map
 from models.dataclass.bank import Bank
+from routines import generate_missing_items
 from utils.find_nearest import find_nearest_workshop
-from math import ceil
 
 
 async def __get_trips_info(
@@ -140,8 +142,6 @@ async def craft(character: Character, item: Item, quantity: int):
 
         print(f"⚒️ {character.surname} finished crafting {quantity}x {item.name}")
     except NotEnoughInBankException:
-        from routines import generate_missing_items
-
         await generate_missing_items(character, reserved_ingredients)
 
     except Exception as e:
