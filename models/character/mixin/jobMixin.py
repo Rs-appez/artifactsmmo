@@ -20,6 +20,11 @@ class JobMixin(Protocol):
         job = JobType(job_name) if isinstance(job_name, str) else job_name
         return self._jobs.get(job, 0) >= level
 
+    def can_genenerate(self: "Character", item: Item) -> bool:
+        job_level = self.get_job_level(item.job)
+        item_level = item.craft_level or item.level
+        return job_level >= item_level
+
     def will_gain_xp_with(self: "Character", item: Item) -> bool:
         job_level = self.get_job_level(item.job)
         if job_level == 50:
