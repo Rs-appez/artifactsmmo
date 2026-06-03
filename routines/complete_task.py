@@ -3,8 +3,7 @@ from models import Character
 from models.dataclass import Item, Monster
 from models.dataclass.bank import Bank
 from models.enums import TaskType
-from routines import mob_farm
-from routines.utils import generate_missing_items
+from routines import mob_farm, generate_missing_items
 from utils.find_nearest import find_nearest_tasks_master
 
 

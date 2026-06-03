@@ -1,4 +1,4 @@
-from .utils import empty_farm
+from .utils import empty_farm, generate_missing_items
 from .monster_farm import mob_farm
 from .gather import gather
 from .craft import craft
@@ -12,4 +12,5 @@ __all__ = [
     "empty_farm",
     "complete_task",
     "exchange_task_coin",
+    "generate_missing_items",
 ]

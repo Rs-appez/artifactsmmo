@@ -1,6 +1,5 @@
 from models import Character
 from models.dataclass.bank import Bank
-from routines import craft, gather
 
 
 async def empty_farm(character: Character):
@@ -8,6 +7,8 @@ async def empty_farm(character: Character):
 
 
 async def generate_missing_items(character: Character, items: dict):
+    from routines import craft, gather
+
     async with Bank.reserve_items(
         items, False, inventory=character.inventory
     ) as bank_token:
