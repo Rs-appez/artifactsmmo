@@ -74,7 +74,7 @@ async def __regenerate_hp(character: Character):
     try:
         if not character.has_food:
             print(f"󰜎 {character.surname} will search for food in bank")
-            qty = character.inventory_max_items // 2
+            qty = int(character.inventory_max_items * 0.8)
             async with get_food(character, qty) as food_token:
                 deposit_gold = True if character.gold > 10000 else False
                 await character.deposit_all_in_bank(with_gold=deposit_gold)
