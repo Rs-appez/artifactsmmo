@@ -191,6 +191,12 @@ class FightMixin(Protocol):
 
     def _compute_nb_turns_to_kill(self: "Character", monster: Monster) -> int:
         damage = damage_on(self, monster)
+        for effect, value in monster.effects.items():
+            match effect.code:
+                case "corrupted":
+                    damage *= 1.5
+                case _:
+                    continue
         bonus_damage = self._compute_effects_damage()
         damage += (damage * 0.5) * (self.critical_strike * 0.75 / 100)
         if damage + bonus_damage <= 0:
