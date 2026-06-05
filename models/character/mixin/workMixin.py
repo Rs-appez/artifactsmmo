@@ -13,7 +13,7 @@ async def seeking_the_meaning_of_life(character: "Character"):
 
 
 class WorkMixin(Protocol):
-    _routine: Callable  # pyright: ignore[reportRedeclaration]
+    _routine: Callable
     _routine_info: list | None = None
     _previous_routine: Callable | None = None
     _work_task: asyncio.Task | None = None
@@ -29,7 +29,7 @@ class WorkMixin(Protocol):
             print(
                 f"❌ No routine found for {self.surname}, defaulting to seeking the meaning of life. Error: {e}"
             )
-            self._routine: Callable = seeking_the_meaning_of_life
+            self.idle()
         self._priority_tasks = deque()
         self._character_lock = asyncio.Lock()
 
@@ -39,9 +39,6 @@ class WorkMixin(Protocol):
 
     @property
     def work_on(self) -> str:
-        routine = self._routine.__name__
-        if self._priority_tasks:
-            routine += " (with priority tasks: " + ", ".join(self.priority_tasks) + ")"
         return self._routine.__name__
 
     @property
@@ -87,9 +84,13 @@ class WorkMixin(Protocol):
         if self._is_on_routine:
             self._interrupt_routine()
 
+    def idle(self: "Character"):
+        self._routine = seeking_the_meaning_of_life
+        self._routine_info = []
+
     def stop(self: "Character"):
         self._previous_routine = self._routine
-        self._routine = seeking_the_meaning_of_life
+        self.idle()
         self._interrupt_routine()
 
     async def resume(self: "Character"):
