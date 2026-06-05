@@ -50,7 +50,7 @@ class Bank:
     @property
     def items(self) -> dict[Item, int]:
         return {
-            item: quantity - self.__reserved_items[item]
+            item: max(quantity - self.__reserved_items[item], 0)
             for item, quantity in self._items.items()
         }
 
