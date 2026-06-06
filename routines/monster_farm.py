@@ -24,7 +24,8 @@ async def mob_farm(character: Character, mob: Monster | str, nb: int | str = -1)
         iterations = range(nb) if nb > 0 else count()
         for _ in iterations:
             if character.is_inventory_full:
-                _ = await character.deposit_all_in_bank()
+                deposit_gold = True if character.gold > 10000 else False
+                _ = await character.deposit_all_in_bank(with_gold=deposit_gold)
             while not character.will_win_against(mob):
                 await __regenerate_hp(character)
             mob_position = await find_nearest_lootable(character, {mob})
@@ -78,8 +79,7 @@ async def __regenerate_hp(character: Character):
             print(f"󰜎 {character.surname} will search for food in bank")
             qty = int(character.inventory_max_items * 0.8)
             async with get_food(character, qty) as food_token:
-                deposit_gold = True if character.gold > 10000 else False
-                await character.deposit_all_in_bank(with_gold=deposit_gold)
+                await character.deposit_all_in_bank(with_gold=False)
                 if not await character.withdraw_item_from_bank(food_token):
                     raise Exception("Failed to withdraw food from bank")
         await character.regenerate_hp()
