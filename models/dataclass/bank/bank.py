@@ -29,6 +29,7 @@ def lock_bank(func):
 class Bank:
     __bankelock = Lock()
     __url = f"{ARTIFACTSMMO_URL}/my/bank"
+
     __reserved_items = defaultdict[Item, int](int)
     __tokens = defaultdict[uuid.UUID, dict[Item, int]](dict)
     __missing_promises = defaultdict[uuid.UUID, dict[Item, int]](dict)
@@ -92,8 +93,7 @@ class Bank:
                 )
             )
         for item, quantity in items.items():
-            item_in_inventory = inventory.get(item, 0) if inventory is not None else 0
-            cls.__reserved_items[item] += quantity - item_in_inventory
+            cls.__reserved_items[item] += quantity
 
         token = uuid.uuid4()
         cls.__tokens[token] = {item: quantity for item, quantity in items.items()}
