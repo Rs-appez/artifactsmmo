@@ -71,13 +71,15 @@ class WorkMixin(Protocol):
                         raise
                     _ = await self.refresh()
                     self._interrupted = False
+                except Exception as e:
+                    print(f"❌ {self.surname} work error : {e}")
+                    if self._is_on_routine:
+                        self._is_on_routine = False
+                        self.seek_the_meaning_of_life()
         except asyncio.CancelledError:
             pass
-        except Exception as e:
-            print(f"❌ {self.surname} work error : {e}")
         finally:
             self._work_task = None
-            self._is_on_routine = False
 
     def do_one_time_task(self: "Character", task: Callable, *args, **kwargs):
         def mission(char):
