@@ -87,6 +87,10 @@ class Item:
         return self.type == "resource" and self.subtype in JobType
 
     @property
+    def is_dropable_resource(self) -> bool:
+        return self.type == "resource" and self.subtype == "mob"
+
+    @property
     def is_food(self) -> bool:
         return (
             self.type == "consumable"
