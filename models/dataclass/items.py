@@ -91,6 +91,10 @@ class Item:
         )
 
     @property
+    def is_npc_resource(self) -> bool:
+        return self.type == "resource" and self.subtype == "npc"
+
+    @property
     def heal(self) -> int:
         if self.is_food:
             for effect in self.effects:
