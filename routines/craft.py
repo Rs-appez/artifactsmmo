@@ -138,8 +138,6 @@ async def craft(character: Character, item: Item, quantity: int):
                     nb_craft_last_trip,
                 )
 
-        _ = await character.deposit_all_in_bank(comeback=False)
-
         print(f"⚒️ {character.surname} finished crafting {quantity}x {item.name}")
     except NotEnoughInBankException:
         await generate_missing_items(character, reserved_ingredients)
