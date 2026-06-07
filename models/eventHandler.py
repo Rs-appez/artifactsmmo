@@ -13,7 +13,6 @@ class EventHandler:
 
         self.current_events = await self.__get_current_events()
         if not self.current_events:
-            print("No active events found.")
             return
 
         for event, map_location in self.current_events:
