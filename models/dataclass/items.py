@@ -83,6 +83,10 @@ class Item:
         return len(self.craft_ingredients) > 0
 
     @property
+    def is_gatherable_resource(self) -> bool:
+        return self.type == "resource" and self.subtype in JobType
+
+    @property
     def is_food(self) -> bool:
         return (
             self.type == "consumable"
