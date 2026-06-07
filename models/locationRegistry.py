@@ -17,7 +17,7 @@ class LocationRegistry:
     __grand_exchange_locations: set[Map] = set()
     __tasks_masters_locations: dict[TaskType, set[Map]] = defaultdict(set)
     __transition_locations: dict[Layer, set[int]] = defaultdict(set)
-    # __npc_locations: set[Map] = set()
+    __npc_locations: defaultdict[NPC, set[Map]] = defaultdict(set)
     __maps: dict[int, Map] = {}
 
     @classmethod
@@ -45,6 +45,11 @@ class LocationRegistry:
         return LocationRegistry.__bank_locations.difference(
             {await LocationRegistry.get_map_by_id(1234)}
         )
+
+    @staticmethod
+    async def get_npc_locations(npc: NPC) -> set[Map]:
+        await LocationRegistry.wait_location()
+        return LocationRegistry.__npc_locations.get(npc, set())
 
     @staticmethod
     async def get_workshop_locations(job: JobType) -> set[Map]:
@@ -78,8 +83,7 @@ class LocationRegistry:
             case Monster() | Resource():
                 LocationRegistry.__drop_locations[event.content].add(map)
             case NPC():
-                # TODO: NPC data is not yet available in the encyclopedia, so this will be implemented later.
-                pass
+                LocationRegistry.__npc_locations[event.content].add(map)
 
     @staticmethod
     def remove_event_location(map: Map, event: Event) -> None:
@@ -90,8 +94,7 @@ class LocationRegistry:
             case Monster() | Resource():
                 LocationRegistry.__drop_locations[event.content].discard(map)
             case NPC():
-                # TODO: NPC data is not yet available in the encyclopedia, so this will be implemented later.
-                pass
+                LocationRegistry.__npc_locations[event.content].discard(map)
 
     @classmethod
     async def __load_locations(cls):
@@ -150,7 +153,10 @@ class LocationRegistry:
                                     task_type = TaskType(content["code"])
                                     cls.__tasks_masters_locations[task_type].add(map)
                                 case "npc":
-                                    pass  # For now, we won't store NPC locations
+                                    npc = await Encyclopedia.get_npc_by_code(
+                                        content["code"]
+                                    )
+                                    cls.__npc_locations[npc].add(map)
                                 case _:
                                     raise Exception(
                                         f"Unknown interaction type: {interaction['content']['type']}"
