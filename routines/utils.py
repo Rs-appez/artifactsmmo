@@ -24,8 +24,26 @@ async def generate_missing_items(character: Character, items: dict):
                     f"󰢟 Not enough {missing_item.name} in bank for the task, need to craft {missing_quantity}x {missing_item.name}"
                 )
                 await craft(character, missing_item, missing_quantity)
-            else:
+            elif missing_item.is_gatherable_resource:
                 print(
                     f"󰢟 Not enough {missing_item.name} in bank for the task, need to gather {missing_quantity}x {missing_item.name}"
                 )
                 await gather(character, missing_item, missing_quantity)
+            elif missing_item.is_dropable_resource:
+                # TODO : implement mob farming when auto stuff implemented
+                raise Exception("Not implemented yet")
+                print(
+                    f"󰢟 Not enough {missing_item.name} in bank for the task, need to farm {missing_quantity}x {missing_item.name}"
+                )
+                await mob_farm(character, missing_item, missing_quantity)
+
+            elif missing_item.is_npc_resource:
+                # TODO : implement auto npc buy
+                raise Exception("Not implemented yet")
+                print(
+                    f"󰢟 Not enough {missing_item.name} in bank for the task, need to buy {missing_quantity}x {missing_item.name} from npc"
+                )
+                await buy_from_npc(character, missing_item, missing_quantity)
+
+            else:
+                raise Exception(f"Don't know how to generate {missing_item.name}")
