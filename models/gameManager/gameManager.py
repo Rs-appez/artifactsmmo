@@ -18,6 +18,7 @@ class GameManager:
             asyncio.gather(
                 Encyclopedia.initialize(),
                 LocationRegistry.initialize(),
+                self.event_handler.refresh_current_events(),
             )
         )
 
