@@ -106,7 +106,7 @@ class LocationRegistry:
                 response = await client.get(
                     f"{ARTIFACTSMMO_URL}/maps",
                     headers=HEADERS,
-                    params={"size": 500, "page": page},
+                    params={"size": 500, "page": page, "hide_blocked_maps": True},
                     timeout=30,
                 )
                 data = response.json()
