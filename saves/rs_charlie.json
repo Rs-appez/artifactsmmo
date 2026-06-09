@@ -1,10 +1,5 @@
 {
-    "routine_name": "mob_farm",
-    "routine_module": "routines.monster_farm",
-    "routine_args": [
-        [
-            "cursed_tree"
-        ],
-        {}
-    ]
+    "routine_name": "seeking_the_meaning_of_life",
+    "routine_module": "models.character.mixin.workMixin",
+    "routine_args": []
 }
