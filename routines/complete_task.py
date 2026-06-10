@@ -24,14 +24,26 @@ async def complete_task(
             print(f"❌ Invalid number of iterations : {nb}")
             return
 
-    match type:
-        case TaskType.MONSTER:
+    if character.task is not None:
+        if isinstance(character.task.cible, Monster):
             task_master = await find_nearest_tasks_master(character, TaskType.MONSTER)
-        case TaskType.ITEM:
+        elif isinstance(character.task.cible, Item):
             task_master = await find_nearest_tasks_master(character, TaskType.ITEM)
-        case _:
-            print(f"❌ Invalid task type : {type}")
+        else:
+            print(f"❌ Invalid task cible : {character.task.cible}")
             return
+
+    else:
+        match type:
+            case TaskType.MONSTER:
+                task_master = await find_nearest_tasks_master(
+                    character, TaskType.MONSTER
+                )
+            case TaskType.ITEM:
+                task_master = await find_nearest_tasks_master(character, TaskType.ITEM)
+            case _:
+                print(f"❌ Invalid task type : {type}")
+                return
 
     iterations = range(nb) if nb > 0 else count()
     for _ in iterations:
@@ -137,11 +149,6 @@ async def __monster_task(character: Character) -> None:
 
     while character.task_resources_left > 0:
         await mob_farm(character, monster, character.task_resources_left)
-
-    task_master = await find_nearest_tasks_master(character, TaskType.MONSTER)
-    if not await character.move(task_master):
-        print("Failed to move to task master")
-        return
 
 
 def __is_worth_it(item: Item) -> bool:
