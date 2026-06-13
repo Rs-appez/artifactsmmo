@@ -44,6 +44,7 @@ async def get_food(character: Character, quantity: int):
             item: quantity
             for item, quantity in bank.items.items()
             if item.is_food and item.can_be_used_by(character)
+            if quantity > 0
         }
         if not food_items:
             raise Exception("No food found in bank for character")
