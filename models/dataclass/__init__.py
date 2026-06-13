@@ -1,6 +1,6 @@
-from .npc import NPC
 from .effects import Effect
 from .items import Item
+from .npc import NPC
 from .monsters import Monster
 from .resources import Resource
 from .task import TaskQuest
