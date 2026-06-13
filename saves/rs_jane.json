@@ -1,10 +1,5 @@
 {
     "routine_name": "gather",
     "routine_module": "routines.gather",
-    "routine_args": [
-        [
-            "dead_wood"
-        ],
-        {}
-    ]
+    "routine_args": []
 }
