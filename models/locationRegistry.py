@@ -132,10 +132,13 @@ class LocationRegistry:
                                     )
                                     cls.__drop_locations[resource].add(map)
                                 case "monster":
-                                    resource = await Encyclopedia.get_monster_by_code(
-                                        content["code"]
-                                    )
-                                    cls.__drop_locations[resource].add(map)
+                                    if content["code"]:
+                                        resource = (
+                                            await Encyclopedia.get_monster_by_code(
+                                                content["code"]
+                                            )
+                                        )
+                                        cls.__drop_locations[resource].add(map)
                                 case "bank":
                                     cls.__bank_locations.add(map)
                                 case "workshop":
