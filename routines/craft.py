@@ -94,54 +94,58 @@ async def craft(character: Character, item: Item, quantity: int):
     reserved_ingredients = {
         ingredient: qty * quantity for ingredient, qty in ingredients.items()
     }
-    try:
-        async with Bank.reserve_items(
-            reserved_ingredients, inventory=character.inventory
-        ) as bank_token:
-            (
-                nb_trips,
-                (nb_craft_per_trip, ingredients_for_trip),
+    retry = True
+    while retry:
+        retry = False
+        try:
+            async with Bank.reserve_items(
+                reserved_ingredients, inventory=character.inventory
+            ) as bank_token:
                 (
-                    nb_craft_last_trip,
-                    ingredients_for_last_trip,
-                ),
-            ) = await __get_trips_info(
-                ingredients, quantity, character.inventory_max_items
-            )
-            print(
-                f"⚒️ {character.surname} needs to make {nb_trips} trips to craft {quantity}x {item.name}"
-            )
+                    nb_trips,
+                    (nb_craft_per_trip, ingredients_for_trip),
+                    (
+                        nb_craft_last_trip,
+                        ingredients_for_last_trip,
+                    ),
+                ) = await __get_trips_info(
+                    ingredients, quantity, character.inventory_max_items
+                )
+                print(
+                    f"⚒️ {character.surname} needs to make {nb_trips} trips to craft {quantity}x {item.name}"
+                )
 
-            if character.will_gain_xp_with(item):
-                wisdom = await Encyclopedia.get_effect_by_code("wisdom")
-                await character.maximaze_stats(wisdom)
+                if character.will_gain_xp_with(item):
+                    wisdom = await Encyclopedia.get_effect_by_code("wisdom")
+                    await character.maximaze_stats(wisdom)
 
-            for _ in range(nb_trips - 1):
+                for _ in range(nb_trips - 1):
+                    async with Bank.get_reserved_items_partial(
+                        bank_token, ingredients_for_trip
+                    ) as trip_token:
+                        await __make_trip(
+                            character,
+                            nearest_workshop,
+                            trip_token,
+                            item,
+                            nb_craft_per_trip,
+                        )
                 async with Bank.get_reserved_items_partial(
-                    bank_token, ingredients_for_trip
-                ) as trip_token:
+                    bank_token, ingredients_for_last_trip
+                ) as last_trip_token:
                     await __make_trip(
                         character,
                         nearest_workshop,
-                        trip_token,
+                        last_trip_token,
                         item,
-                        nb_craft_per_trip,
+                        nb_craft_last_trip,
                     )
-            async with Bank.get_reserved_items_partial(
-                bank_token, ingredients_for_last_trip
-            ) as last_trip_token:
-                await __make_trip(
-                    character,
-                    nearest_workshop,
-                    last_trip_token,
-                    item,
-                    nb_craft_last_trip,
-                )
 
-        print(f"⚒️ {character.surname} finished crafting {quantity}x {item.name}")
-    except NotEnoughInBankException:
-        await generate_missing_items(character, reserved_ingredients)
+            print(f"⚒️ {character.surname} finished crafting {quantity}x {item.name}")
+        except NotEnoughInBankException:
+            await generate_missing_items(character, reserved_ingredients)
+            retry = True
 
-    except Exception as e:
-        print(f"❌ {character.surname} {e}")
-        return
+        except Exception as e:
+            print(f"❌ {character.surname} {e}")
+            return
