@@ -21,7 +21,7 @@ class NPC:
         sell_items = {}
 
         for item_data in data["items"]:
-            item = await Encyclopedia.get_item_by_code(item_data["item"]["code"])
+            item = await Encyclopedia.get_item_by_code(item_data["code"])
             currency = (
                 await Encyclopedia.get_item_by_code(item_data["currency"])
                 if item_data["currency"] != "gold"
