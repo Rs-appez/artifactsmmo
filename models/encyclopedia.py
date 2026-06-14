@@ -45,27 +45,10 @@ class Encyclopedia:
             _ = await asyncio.sleep(1)
 
     @staticmethod
-    async def get_item_by_code(code: str) -> Item:
+    async def get_item_by_code(code: str) -> Item | None:
         await Encyclopedia.wait_item()
 
-        item = Encyclopedia._items.get(code)
-        if not item:
-            print(f"❌ Item with code '{code}' not found.")
-            return Item(
-                name="Missing Item",
-                code="missing_item",
-                level=0,
-                type="",
-                subtype="",
-                description="",
-                conditions=[],
-                effects={},
-                job=JobType.NO_JOB,
-                craft_level=0,
-                craft_ingredients=[],
-                craft_quantity=0,
-                tradeable=False,
-            )
+        item = Encyclopedia._items.get(code, None)
 
         return item
 
