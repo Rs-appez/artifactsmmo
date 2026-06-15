@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING
-from models.dataclass import Map, Monster, Resource
+from models.dataclass import NPC, Map, Monster, Resource
 from models.enums import JobType, Layer, TaskType
 from models.locationRegistry import LocationRegistry
 
@@ -65,3 +65,8 @@ async def find_nearest_transition(postion: Map, layer: Layer) -> Map:
         {location for location in transition_locations if location.layer != layer},
         postion,
     )
+
+
+async def find_nearest_npc(character: Character, npc: NPC) -> Map:
+    npc_locations = await LocationRegistry.get_npc_locations(npc)
+    return __find_nearest_location(npc_locations, character.location)
