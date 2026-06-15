@@ -90,6 +90,7 @@ async def craft(character: Character, item: Item, quantity: int):
             ingredient["quantity"]
         )
         for ingredient in item.craft_ingredients
+        if ingredient
     }
     reserved_ingredients = {
         ingredient: qty * quantity for ingredient, qty in ingredients.items()
