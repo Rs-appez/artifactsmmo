@@ -12,7 +12,10 @@ if TYPE_CHECKING:
 
 class BankMixin(Protocol):
     async def deposit_all_in_bank(
-        self: "Character", with_gold: bool = True, comeback: bool = False
+        self: "Character",
+        with_gold: bool = True,
+        comeback: bool = False,
+        items_to_ignore: set[Item] | None = None,
     ):
         if with_gold and self.gold > 0:
             if not await self.deposit_gold_in_bank(self.gold, comeback=comeback):
@@ -22,7 +25,11 @@ class BankMixin(Protocol):
         if self.inventory:
             if not await self.deposit_item_in_bank(
                 comeback=comeback,
-                items=self.inventory,
+                items={
+                    item: quantity
+                    for item, quantity in self.inventory.items()
+                    if not items_to_ignore or item not in items_to_ignore
+                },
             ):
                 print("❌ Failed to deposit items in bank")
                 return
