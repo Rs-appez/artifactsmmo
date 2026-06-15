@@ -86,11 +86,9 @@ async def craft(character: Character, item: Item, quantity: int):
     nearest_workshop = await find_nearest_workshop(character, item.job)
 
     ingredients = {
-        await Encyclopedia.get_item_by_code(str(ingredient["code"])): int(
-            ingredient["quantity"]
-        )
+        item_in_ing: int(ingredient["quantity"])
         for ingredient in item.craft_ingredients
-        if ingredient
+        if (item_in_ing := await Encyclopedia.get_item_by_code(str(ingredient["code"])))
     }
     reserved_ingredients = {
         ingredient: qty * quantity for ingredient, qty in ingredients.items()
