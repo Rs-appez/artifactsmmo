@@ -9,6 +9,7 @@ from .taskMixin import TaskMixin
 from .stuffMixin import StuffMixin
 from .saveMixin import SaveMixin
 from .inventoryMixin import InventoryMixin
+from .npcMixin import NpcMixin
 
 __all__ = [
     "BankMixin",
@@ -22,4 +23,5 @@ __all__ = [
     "InventoryMixin",
     "SaveMixin",
     "JobMixin",
+    "NpcMixin",
 ]

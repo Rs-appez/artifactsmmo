@@ -24,6 +24,7 @@ from .mixin import (
     StuffMixin,
     SaveMixin,
     InventoryMixin,
+    NpcMixin,
 )
 
 
@@ -40,6 +41,7 @@ class Character(
     TaskMixin,
     StuffMixin,
     SaveMixin,
+    NpcMixin,
 ):
     _: KW_ONLY
     _name: str
