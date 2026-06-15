@@ -3,7 +3,7 @@
     "routine_module": "routines.gather",
     "routine_args": [
         [
-            "copper_ore"
+            "ash_wood"
         ],
         {}
     ]
