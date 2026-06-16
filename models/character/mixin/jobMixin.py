@@ -7,7 +7,7 @@ from models.enums import JobType
 if TYPE_CHECKING:
     from models.character import Character
 
-JOB_WITH_DROP = {JobType.FIGHTING, JobType.MINING, JobType.WOODCUTTING}
+JOB_WITH_DROP = {JobType.FISHING, JobType.MINING, JobType.WOODCUTTING}
 
 
 @dataclass
