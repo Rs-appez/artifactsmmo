@@ -6,12 +6,14 @@ from models.dataclass.bank import Bank
 async def __get_pre_travel_items(character: Character) -> None:
 
     tp_potion = await Encyclopedia.get_item_by_code("forest_bank_potion")
-    async with Bank.reserve_items({tp_potion: 1}) as bank_token:
-        if not await character.withdraw_item_from_bank(bank_token):
-            raise Exception(f"Failed to withdraw {tp_potion.name} from bank")
+    if not character.has_in_inventory({tp_potion: 1}):
+        async with Bank.reserve_items({tp_potion: 1}) as bank_token:
+            if not await character.withdraw_item_from_bank(bank_token):
+                raise Exception(f"Failed to withdraw {tp_potion.name} from bank")
 
-    if not await character.withdraw_gold_from_bank(1000):
-        raise Exception("Failed to withdraw 1000 gold from bank")
+    if character.gold < 1000:
+        if not await character.withdraw_gold_from_bank(1000):
+            raise Exception("Failed to withdraw 1000 gold from bank")
 
 
 async def __handle_sandwhisper_travel(character: Character) -> None:
