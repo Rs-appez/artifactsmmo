@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Protocol
 
+from models.character.decorators import request_action, refresh_after
 from models.dataclass import Item
 
 if TYPE_CHECKING:
@@ -60,3 +61,39 @@ class InventoryMixin(Protocol):
             if self._inventory.get(item, 0) < quantity:
                 return False
         return True
+
+    @request_action
+    @refresh_after
+    async def use_item(
+        self: "Character", item: Item, quantity: int = 1
+    ) -> tuple[bool, dict | None]:
+        try:
+            if item.type != "consumable":
+                raise Exception(f"{item.name} is not a consumable item")
+            if quantity <= 0:
+                raise Exception(
+                    f"Cannot use non-positive quantity of {item.name}: {quantity}"
+                )
+            if self._inventory.get(item, 0) < quantity:
+                raise Exception(
+                    f"Not enough {item.name} in inventory to use (have: {self._inventory.get(item, 0)}, need: {quantity})"
+                )
+            response = await self.client.post(
+                "/use",
+                json={
+                    "code": item.code,
+                    "quantity": quantity,
+                },
+            )
+            data = response.json()
+
+            if "error" in data:
+                print("data : ", data)
+                raise Exception(data["error"]["message"])
+
+            character_data = data["data"]["character"]
+
+            return True, character_data
+        except Exception as e:
+            print(f"❌ {self.surname} use_item : {e}")
+            return False, None

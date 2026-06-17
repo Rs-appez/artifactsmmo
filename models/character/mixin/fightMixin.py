@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Protocol
 
 from exceptions import ImpossibleCombatException
 from models.character.decorators import refresh_after, request_action
-from models.dataclass import Item, Monster
+from models.dataclass import Monster
 from models.enums import Element
 from utils.math_fight import damage_on
 
@@ -124,35 +124,6 @@ class FightMixin(Protocol):
             print(f"❌ {self.surname} Rest : {e}")
             return False, None
 
-    @request_action
-    @refresh_after
-    async def eat(
-        self: "Character", item: Item, quantity: int
-    ) -> tuple[bool, dict | None]:
-        try:
-            if item.type != "consumable":
-                raise Exception(f"{item.name} is not a consumable item")
-            if quantity <= 0:
-                raise Exception(
-                    f"Cannot eat non-positive quantity of {item.name}: {quantity}"
-                )
-            response = await self.client.post(
-                "/use",
-                json={"quantity": quantity, "code": item.code},
-            )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
-            return True, character_data
-        except Exception as e:
-            print(f"❌ {self.surname} Eat : {e}")
-            return False, None
-
     async def regenerate_hp(self: "Character") -> None:
         food = self.get_food
         if not food:
@@ -165,7 +136,7 @@ class FightMixin(Protocol):
         ):
             qty_to_eat = min(quantity, missing_hp // item.heal)
             if qty_to_eat > 0:
-                if not await self.eat(item, qty_to_eat):
+                if not await self.use_item(item, qty_to_eat):
                     print(f"❌ Failed to eat {item.name} x{qty_to_eat}")
                     continue
                 missing_hp -= item.heal * qty_to_eat
@@ -173,7 +144,7 @@ class FightMixin(Protocol):
                 if missing_hp <= 0:
                     break
             elif i == 0:
-                _ = await self.eat(item, 1)
+                _ = await self.use_item(item, 1)
             else:
                 raise Exception(
                     f"{item.name} cannot heal any more hp for {self.surname}"
