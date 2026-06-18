@@ -72,9 +72,7 @@ async def get_tool(character: Character, job: JobType):
         tool_items = {
             item
             for item in bank.items
-            if item.is_for_job(job)
-            and item.level <= character.level
-            and item.can_be_used_by(character)
+            if item.is_for_job(job) and item.can_be_used_by(character)
         }
         if not tool_items:
             raise Exception(f"No tool found for job {job.value} in bank")
