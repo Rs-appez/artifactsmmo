@@ -32,8 +32,7 @@ async def main():
     try:
         await gathered
     except asyncio.CancelledError:
-        for character in manager.characters.values():
-            character.save()
+        manager.save_characters()
         print("All character routines saved...")
         raise
 

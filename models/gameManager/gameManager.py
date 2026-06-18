@@ -43,6 +43,10 @@ class GameManager:
         tasks = [char.start() for char in self.characters.values()]
         return tasks
 
+    def save_characters(self):
+        for character in self.characters.values():
+            character.save()
+
     async def __asign_boss(self):
         boss = await Encyclopedia.get_monster_by_code("king_slime")
         john = self.characters.get("john")
