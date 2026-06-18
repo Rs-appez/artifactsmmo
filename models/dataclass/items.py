@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from models.character.character import Character
 
 NOT_TO_EAT_FOOD = {"apple", "coconut"}
+_OPS = {"eq": int.__eq__, "ne": int.__ne__, "gt": int.__gt__, "lt": int.__lt__}
 
 
 @dataclass(frozen=True)
@@ -116,46 +117,25 @@ class Item:
         for condition in self.conditions:
             value = int(condition["value"])
             operator = str(condition["operator"])
+            op = _OPS.get(operator)
+            if op is None:
+                raise ValueError(f"Unknown operator {operator} in item conditions")
             match condition["code"]:
                 case "level":
-                    return self.__check_conditions(
-                        character.level,
-                        value,
-                        operator,
-                    )
+                    if not op(character.level, value):
+                        return False
                 case "hp":
-                    return self.__check_conditions(
-                        character.hp,
-                        value,
-                        operator,
-                    )
+                    if not op(character.hp, value):
+                        return False
                 case str(job) if job.endswith("_level"):
-                    return self.__check_conditions(
-                        character.get_job_level(job[:-6]),
-                        value,
-                        operator,
-                    )
+                    if not op(character.get_job_level(job[:-6]), value):
+                        return False
                 case _:
                     raise ValueError(
                         f"Unknown condition code {condition['code']} in item conditions"
                     )
 
         return True
-
-    def __check_conditions(
-        self, character_values: int, condition_values: int, operator: str
-    ) -> bool:
-        match operator:
-            case "eq":
-                return character_values == condition_values
-            case "ne":
-                return character_values != condition_values
-            case "gt":
-                return character_values > condition_values
-            case "lt":
-                return character_values < condition_values
-            case _:
-                raise ValueError(f"Unknown operator {operator} in item conditions")
 
     @override
     def __hash__(self):
