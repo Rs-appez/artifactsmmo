@@ -3,7 +3,7 @@
     "routine_module": "routines.gather",
     "routine_args": [
         [
-            "adamantite_ore"
+            "gold_ore"
         ],
         {}
     ]
