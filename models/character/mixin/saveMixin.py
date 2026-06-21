@@ -26,6 +26,8 @@ class SaveMixin(Protocol):
                 module = importlib.import_module(routine_module)
                 func = getattr(module, routine_name)
 
-                return WorkRoutine(func, *routine_args, **routine_kwargs)
+                return WorkRoutine(
+                    func, *routine_args, is_routine=True, **routine_kwargs
+                )
             else:
                 raise Exception("No routine found in save file")

@@ -13,15 +13,35 @@ async def seeking_the_meaning_of_life(character: "Character"):
 
 
 class WorkRoutine:
-    def __init__(self, task: Callable, *args, **kwargs):
+    def __init__(self, task: Callable, *args, is_routine: bool = False, **kwargs):
         self.name = task.__name__
         self.module = task.__module__
         self.args = args
         self.kwargs = kwargs
+        self._is_routine = is_routine
+        self._is_paused = False
         self._task = task
 
     def __call__(self, character: "Character") -> asyncio.Future:
         return self._task(character, *self.args, **self.kwargs)
+
+    @property
+    def is_pauseable(self) -> bool:
+        return self._is_routine
+
+    @property
+    def is_paused(self) -> bool:
+        return self._is_paused
+
+    def pause(self):
+        if not self.is_pauseable:
+            raise Exception("This routine cannot be paused")
+        self._is_paused = True
+
+    def resume(self):
+        if not self.is_pauseable:
+            raise Exception("This routine cannot be resumed")
+        self._is_paused = False
 
 
 class WorkMixin(Protocol):
@@ -29,7 +49,6 @@ class WorkMixin(Protocol):
     _previous_routine: WorkRoutine | None = None
     _work_task: asyncio.Task | None = None
     _interrupted: bool = False
-    _is_on_routine: bool = False
     _priority_tasks: deque[WorkRoutine]
     _character_lock: asyncio.Lock
 
@@ -80,11 +99,11 @@ class WorkMixin(Protocol):
             while True:
                 try:
                     if self._priority_tasks:
-                        self._is_on_routine = False
+                        self._routine.pause()
                         priority = self._priority_tasks.popleft()
                         await priority(self)
                     else:
-                        self._is_on_routine = True
+                        self._routine.resume()
                         await self._routine(self)
                 except asyncio.CancelledError:
                     if not self._interrupted:
@@ -93,9 +112,9 @@ class WorkMixin(Protocol):
                     self._interrupted = False
                 except Exception as e:
                     print(f"❌ {self.surname} work error : {e}")
-                    if self._is_on_routine:
-                        self._is_on_routine = False
+                    if not self._routine.is_paused:
                         self.seek_the_meaning_of_life()
+
         except asyncio.CancelledError:
             pass
         finally:
@@ -104,22 +123,26 @@ class WorkMixin(Protocol):
     def do_one_time_task(self: "Character", task: Callable, *args, **kwargs):
         mission = WorkRoutine(task, *args, **kwargs)
         self._priority_tasks.append(mission)
-        if self._is_on_routine:
+        if not self._routine.is_paused:
             self._interrupt_routine()
 
     def seek_the_meaning_of_life(self: "Character"):
-        self._routine = WorkRoutine(seeking_the_meaning_of_life)
+        self._routine = WorkRoutine(seeking_the_meaning_of_life, is_routine=True)
 
     def stop(self: "Character"):
         self._previous_routine = self._routine
-        self.seek_the_meaning_of_life()
+        if not self._routine.is_paused and self.is_working:
+            self.seek_the_meaning_of_life()
         self._interrupt_routine()
+        print("previous routine was:")
+        print(self._previous_routine.name)
 
     async def resume(self: "Character"):
         if self.is_working:
             print("❌ Character is already working on a routine")
             return
-        if not self._is_on_routine:
+        if self._routine.is_paused:
+            print("❌ Current routine is not a valid routine, cannot resume")
             self._priority_tasks.clear()
             self._interrupt_routine()
             return
@@ -127,6 +150,7 @@ class WorkMixin(Protocol):
         if self._previous_routine is None:
             print("❌ No previous routine to resume")
             return
+        print(f"Resuming previous routine: {self._previous_routine.name}")
         self._routine = self._previous_routine
         self._interrupt_routine()
 
@@ -138,4 +162,4 @@ class WorkMixin(Protocol):
     def assign_routine(self: "Character", task: Callable, *args, **kwargs):
 
         self._interrupt_routine()
-        self._routine = WorkRoutine(task, *args, **kwargs)
+        self._routine = WorkRoutine(task, *args, is_routine=True, **kwargs)
