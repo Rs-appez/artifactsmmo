@@ -33,9 +33,6 @@ async def initialize_characters():
 def __restet_saves():
     save_folder = "saves"
     for character_name in CHARACTERS.keys():
-        save_file_path = f"{save_folder}/rs_{character_name}.json"
-        if os.path.exists(save_file_path):
-            os.remove(save_file_path)
-            print(f"Deleted save file for {character_name}.")
-        else:
-            print(f"No save file found for {character_name}.")
+        save_file_path = f"{save_folder}/rs_{character_name}{SUFFIX}.json"
+        with open(save_file_path, "w") as f:
+            _ = f.write("{}")
