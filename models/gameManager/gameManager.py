@@ -6,6 +6,7 @@ import httpx
 from config import ARTIFACTSMMO_URL, HEADERS
 from models import Character, Encyclopedia, EventHandler, LocationRegistry
 from routines.monster_farm import boss_farm
+from utils.initialize import initialize_characters
 
 
 class GameManager:
@@ -43,6 +44,15 @@ class GameManager:
         # await self.__asign_boss()
         tasks = [char.start() for char in self.characters.values()]
         return tasks
+
+    async def create_characters(self):
+        try:
+            await self.__load_characters()
+            if self.characters:
+                raise Exception("Characters already exist. No need to create new ones.")
+            await initialize_characters()
+        except Exception as e:
+            print(f"Error loading characters: {e}")
 
     def save_characters(self):
         for character in self.characters.values():

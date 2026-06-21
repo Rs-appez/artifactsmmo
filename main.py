@@ -7,8 +7,11 @@ from config import LOCAL
 from models import GameManager
 
 
-async def main():
+async def main(first_run=False):
     manager = GameManager()
+
+    if first_run:
+        await manager.create_characters()
 
     loop = asyncio.get_event_loop()
 
@@ -38,8 +41,12 @@ async def main():
 
 
 if __name__ == "__main__":
+    args = sys.argv[1:]
     try:
-        asyncio.run(main())
+        if args and args[0] == "new":
+            asyncio.run(main(first_run=True))
+        else:
+            asyncio.run(main())
     except asyncio.CancelledError:
         print("Program terminated.")
         sys.exit(0)
