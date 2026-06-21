@@ -11,17 +11,20 @@ def _check_freshness(function):
             if not character.is_working:
                 try:
                     await character.refresh()
-                except Exception:
-                    print(f"❌ Failed to refresh {character.surname}")
+                except Exception as e:
+                    print(f"❌ Failed to refresh {character.surname} : {e}")
                     return
 
         elif isinstance(character, list) and all(
             isinstance(char, Character) for char in character
         ):
             for char in character:
-                if not char.is_working and not await char.refresh():
-                    print(f"❌ Failed to refresh {char.surname}")
-                    return
+                if not char.is_working:
+                    try:
+                        await char.refresh()
+                    except Exception as e:
+                        print(f"❌ Failed to refresh {char.surname} : {e}")
+                        return
         return await function(*args, **kwargs)
 
     return wrapper
