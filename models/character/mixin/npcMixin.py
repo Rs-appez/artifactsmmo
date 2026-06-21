@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from models.character.decorators import request_action, refresh_after
@@ -8,7 +7,6 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
-@dataclass
 class NpcMixin(Protocol):
     @request_action
     @refresh_after
