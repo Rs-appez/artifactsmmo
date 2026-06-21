@@ -39,6 +39,8 @@ async def handle_travel(character: Character, resource_map: Map) -> None:
 
 async def handle_return_travel(character: Character) -> None:
     tp_potion = await Encyclopedia.get_item_by_code("forest_bank_potion")
+    if not tp_potion:
+        raise Exception("Failed to find forest_bank_potion in encyclopedia")
 
     if "Sandwhisper" in character.location.name:
         if not await character.use_item(tp_potion):
