@@ -1,12 +1,35 @@
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
+import httpx
+
+from config import ARTIFACTSMMO_URL, HEADERS
 from models.character.decorators import refresh_after, request_action
 
 if TYPE_CHECKING:
     from models.character import Character
 
 
+@dataclass
 class ApiMixin(Protocol):
+    _client: httpx.AsyncClient | None = None
+
+    def __init_api_mixin__(self: "Character"):
+        self._client = httpx.AsyncClient(
+            timeout=30.0,
+            follow_redirects=True,
+            headers=HEADERS,
+            base_url=f"{ARTIFACTSMMO_URL}/my/{self.name}/action",
+        )
+
+    @property
+    def client(self):
+        if self._client is None:
+            raise Exception(
+                "Client is not initialized. Call __init_api_mixin__() first."
+            )
+        return self._client
+
     @request_action
     @refresh_after
     async def post_api(

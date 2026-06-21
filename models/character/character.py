@@ -3,7 +3,6 @@ from dataclasses import KW_ONLY, dataclass
 from datetime import datetime
 from typing import override
 
-import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
 from models import Encyclopedia, LocationRegistry
@@ -55,13 +54,7 @@ class Character(
     _level: int
 
     def __post_init__(self):
-        self.__client = httpx.AsyncClient(
-            timeout=30.0,
-            follow_redirects=True,
-            headers=HEADERS,
-            base_url=f"{ARTIFACTSMMO_URL}/my/{self.name}/action",
-        )
-
+        self.__init_api_mixin__()
         self.__init_work_mixin__()
 
     @property
@@ -71,10 +64,6 @@ class Character(
     @property
     def surname(self):
         return self._surname
-
-    @property
-    def client(self):
-        return self.__client
 
     @property
     def cooldown(self) -> float:
@@ -102,9 +91,7 @@ class Character(
 
     @refresh_after
     async def refresh(self) -> dict:
-        response = await self.__client.get(
-            f"{ARTIFACTSMMO_URL}/characters/{self.name}", headers=HEADERS
-        )
+        response = await self.client.get(f"{ARTIFACTSMMO_URL}/characters/{self.name}")
         data = response.json()
         if "error" in data:
             print("data : ", data)
