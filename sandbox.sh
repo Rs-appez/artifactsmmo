@@ -1,4 +1,4 @@
 #! /usr/bin/bash
 
 export SANDBOX=True
-exec ./main.py
+exec ./main.py "$@"
