@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
-from models.character.decorators import refresh_after, request_action
 from models.dataclass import Item, TaskQuest
 from models.encyclopedia import Encyclopedia
 
@@ -23,112 +22,62 @@ class TaskMixin(Protocol):
             return 0
         return self.task.quantity_left
 
-    @request_action
-    @refresh_after
-    async def accept_task(self: "Character") -> tuple[bool, dict | None]:
+    async def accept_task(self: "Character") -> bool:
         try:
-            response = await self.client.post(
-                "/task/new",
-            )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
-            return True, character_data
+            await self.post_api("/task/new")
+            return True
         except Exception as e:
             print(f"❌ {self.surname} Accept task : {e}")
-            return False, None
+            return False
 
-    @request_action
-    @refresh_after
-    async def complete_task(self: "Character") -> tuple[bool, dict | None]:
+    async def complete_task(self: "Character") -> bool:
         try:
-            response = await self.client.post(
-                "/task/complete",
-            )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
-            return True, character_data
+            await self.post_api("/task/complete")
+            return True
         except Exception as e:
             print(f"❌ {self.surname} Complete task : {e}")
-            return False, None
+            return False
 
-    @request_action
-    @refresh_after
     async def trade_with_task_master(
         self: "Character", item: Item, quantity: int
-    ) -> tuple[bool, dict | None]:
+    ) -> bool:
         try:
-            response = await self.client.post(
+            await self.post_api(
                 "/task/trade",
                 json={"quantity": quantity, "code": item.code},
             )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
-            return True, character_data
+            return True
         except Exception as e:
             print(f"❌ {self.surname} Trade with task master : {e}")
-            return False, None
+            return False
 
-    @request_action
-    @refresh_after
-    async def give_up_task(self: "Character") -> tuple[bool, dict | None]:
+    async def give_up_task(self: "Character") -> bool:
         try:
             if not self.task:
                 raise Exception("No active task to give up")
             if await Encyclopedia.get_item_by_code("tasks_coin") not in self.inventory:
                 raise Exception("Cannot give up task without a tasks coin in inventory")
-            response = await self.client.post(
+
+            await self.post_api(
                 "/task/cancel",
             )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
-            return True, character_data
+            return True
         except Exception as e:
             print(f"❌ {self.surname} Give up task : {e}")
-            return False, None
+            return False
 
-    @request_action
-    @refresh_after
-    async def exchange_task_coin(self: "Character") -> tuple[bool, dict | None]:
+    async def exchange_task_coin(self: "Character") -> bool:
         try:
             task_coin = await Encyclopedia.get_item_by_code("tasks_coin")
+            if not task_coin:
+                raise Exception("Task coin not found in encyclopedia")
             if not self.has_in_inventory({task_coin: 6}):
-                return False, None
-            response = await self.client.post(
+                return False
+
+            await self.post_api(
                 "/task/exchange",
             )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
-            return True, character_data
+            return True
         except Exception as e:
             print(f"❌ {self.surname} Exchange task coin : {e}")
-            return False, None
+            return False

@@ -4,7 +4,7 @@ from math import ceil, floor
 from typing import TYPE_CHECKING, Protocol
 
 from exceptions import ImpossibleCombatException
-from models.character.decorators import refresh_after, request_action
+from models.character.decorators import request_action
 from models.dataclass import Monster
 from models.enums import Element
 from utils.math_fight import damage_on
@@ -65,13 +65,10 @@ class FightMixin(Protocol):
     async def set_ready_to_fight(self: "Character"):
         self._ready_to_fight_boss = True
 
-    @request_action
-    @refresh_after
-    async def fight(
-        self: "Character", teammate: list[Character] | None = None
-    ) -> tuple[bool, dict | None]:
+    async def fight(self: "Character", teammate: list[Character] | None = None) -> bool:
         try:
-            response = await self.client.post(
+            pos = self.location
+            await self.post_api(
                 "/fight",
                 json={
                     "participants": [
@@ -81,48 +78,27 @@ class FightMixin(Protocol):
                 if teammate
                 else None,
             )
-            data = response.json()["data"]
 
-            fight = data["fight"]
-            characters = data["characters"]
-            character_data = None
-            for character in characters:
-                if character["name"] == self.name:
-                    character_data = character
-                    break
-
-            result = True if fight["result"] == "win" else False
+            result = True if self.location == pos else False
             participants = [mate.surname for mate in teammate] if teammate else []
             print(
-                f"{'󰓥 ' if result else ' '} {','.join(participants) if participants else self.surname} Fought and {'won' if result else 'lost'} against {fight['opponent']}"
+                f"{'󰓥 ' if result else ' '} {','.join(participants) if participants else self.surname} Fought and {'won' if result else 'lost'}"
             )
 
-            return result, character_data
+            return result
         except Exception as e:
             print(f"❌ {self.surname} fight : {e}")
-            return False, None
+            return False
         finally:
             self._ready_to_fight_boss = False
 
-    @request_action
-    @refresh_after
-    async def rest(self: "Character") -> tuple[bool, dict | None]:
+    async def rest(self: "Character") -> bool:
         try:
-            response = await self.client.post(
-                "/rest",
-            )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
-            return True, character_data
+            await self.post_api("/rest")
+            return True
         except Exception as e:
             print(f"❌ {self.surname} Rest : {e}")
-            return False, None
+            return False
 
     async def regenerate_hp(self: "Character") -> None:
         food = self.get_food

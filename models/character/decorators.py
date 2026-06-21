@@ -33,14 +33,13 @@ P = ParamSpec("P")
 
 
 def refresh_after(
-    func: Callable[P, Awaitable[tuple[bool, dict | None]]],
-) -> Callable[P, Awaitable[bool]]:
-    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> bool:
-        result, character_data = await func(*args, **kwargs)
+    func: Callable[P, Awaitable[dict]],
+) -> Callable[P, Awaitable[None]]:
+    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
+        character_data = await func(*args, **kwargs)
         if character_data is not None:
             character_class = args[0]
             if hasattr(character_class, "update_from_dict"):
                 await character_class.update_from_dict(character_data)
-        return result
 
     return wrapper

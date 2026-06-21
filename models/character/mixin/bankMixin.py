@@ -4,7 +4,7 @@ import uuid
 from models.dataclass import Item
 from models.dataclass.bank import Bank, lock_bank
 
-from ..decorators import need_bank, refresh_after, request_action
+from ..decorators import need_bank
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -35,129 +35,85 @@ class BankMixin(Protocol):
                 return
 
     @need_bank
-    @request_action
-    @refresh_after
     @lock_bank
     async def deposit_gold_in_bank(
         self: "Character", quantity: int, comeback: bool = False
-    ) -> tuple[bool, dict | None]:
+    ) -> bool:
         if quantity > self.gold:
             print(f"❌ Cannot deposit {quantity} gold, only {self.gold} available")
-            return False, None
+            return False
         if quantity <= 0:
             print(f"❌ Cannot deposit non-positive quantity of gold: {quantity}")
-            return False, None
+            return False
         try:
-            response = await self.client.post(
-                "/bank/deposit/gold",
-                json={"quantity": quantity},
-            )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
+            await self.post_api("/bank/deposit/gold", json={"quantity": quantity})
 
             print(f"󱉏  {self.surname} Deposited {quantity} gold in bank")
-            return True, character_data
+            return True
         except Exception as e:
-            print(f"❌ {e}")
-            return False, None
+            print(f"❌ {self.surname} deposit gold : {e}")
+            return False
 
     @need_bank
-    @request_action
-    @refresh_after
     @lock_bank
     async def deposit_item_in_bank(
         self: "Character", items: dict[Item, int], comeback: bool = False
-    ) -> tuple[bool, dict | None]:
+    ) -> bool:
         try:
-            response = await self.client.post(
+            await self.post_api(
                 "/bank/deposit/item",
                 json=[
                     {"code": item.code, "quantity": int(quantity)}
                     for item, quantity in items.items()
                 ],
             )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
             print(
                 f"📥 {self.surname} Deposited {', '.join([f'{quantity}x {item.name}' for item, quantity in items.items()])} in bank"
             )
-            return True, character_data
+            return True
         except Exception as e:
-            print(f"❌ {e}")
-            return False, None
+            print(f"❌ {self.surname} deposit item : {e}")
+            return False
 
     @need_bank
-    @request_action
-    @refresh_after
     @lock_bank
     async def withdraw_item_from_bank(
         self: "Character",
         bank_token: uuid.UUID,
         comeback: bool = False,
-    ) -> tuple[bool, dict | None]:
+    ) -> bool:
         try:
             items = Bank._get_reserved_items(bank_token)  # pyright: ignore[reportPrivateUsage]
-            response = await self.client.post(
+            await self.post_api(
                 "/bank/withdraw/item",
                 json=[
                     {"code": item.code, "quantity": quantity}
                     for item, quantity in items.items()
                 ],
             )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
             print(
                 f"📤 {self.surname} Withdrew {', '.join([f'{item[1]}x {item[0].code}' for item in items.items()])} from bank"
             )
-            return True, character_data
+            return True
         except Exception as e:
-            print(f"❌ {e}")
-            return False, None
+            print(f"❌ {self.surname} withdraw item : {e}")
+            return False
         finally:
             Bank._unreserve_items(bank_token)  # pyright: ignore[reportPrivateUsage]
 
     @need_bank
-    @request_action
-    @refresh_after
     @lock_bank
     async def withdraw_gold_from_bank(
         self: "Character", quantity: int, comeback: bool = False
-    ) -> tuple[bool, dict | None]:
+    ) -> bool:
         if quantity <= 0:
             print(f"❌ Cannot withdraw non-positive quantity of gold: {quantity}")
-            return False, None
+            return False
         try:
-            response = await self.client.post(
-                "/bank/withdraw/gold",
-                json={"quantity": quantity},
-            )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
+            await self.post_api("/bank/withdraw/gold", json={"quantity": quantity})
 
             print(f"💰 {self.surname} Withdrew {quantity} gold from bank")
-            return True, character_data
+            return True
         except Exception as e:
-            print(f"❌ {e}")
-            return False, None
+            print(f"❌ {self.surname} withdraw gold : {e}")
+            return False

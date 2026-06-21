@@ -5,8 +5,6 @@ from models.dataclass import Map
 from models.enums import Layer
 from utils.find_nearest import find_nearest_transition
 
-from ..decorators import refresh_after, request_action
-
 if TYPE_CHECKING:
     from models.character import Character
 
@@ -21,64 +19,40 @@ class MoveMixin(Protocol):
             raise Exception("Location is not set for this character")
         return self._location
 
-    @request_action
-    @refresh_after
-    async def move(self: "Character", destination: Map) -> tuple[bool, dict | None]:
+    async def move(self: "Character", destination: Map) -> bool:
         if destination == self.location:
-            return True, None
+            return True
 
         if destination.layer != self.location.layer:
             await self._change_layer(destination)
             await self.available
             if destination == self.location:
-                return True, None
+                return True
         try:
-            response = await self.client.post(
-                "/move",
-                json={"map_id": destination.map_id},
-            )
-            data = response.json()
+            await self.post_api("/move", json={"map_id": destination.map_id})
 
-            if "error" in data:
-                print("data : ", data)
-                if data["error"]["code"] == 490:
-                    return True, None
-                raise Exception(data["error"]["message"])
-
-            arrived = data["data"]["destination"]
-            character_data = data["data"]["character"]
+            arrived = self.location
 
             print(
-                f"🏃 {self.surname} Moved to ({arrived['x']}, {arrived['y']}) on {arrived['name']}"
+                f"🏃 {self.surname} Moved to ({arrived.x}, {arrived.y}) on {arrived.name} (layer : {arrived.layer.value})"
             )
-            return True, character_data
+            return True
         except Exception as e:
-            print(f"❌ {e}")
-            return False, None
+            print(f"❌ {self.surname} move : {e}")
+            return False
 
-    @request_action
-    @refresh_after
-    async def transition(self: "Character") -> tuple[bool, dict | None]:
+    async def transition(self: "Character") -> bool:
         try:
-            response = await self.client.post(
-                "/transition",
-            )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            destination = data["data"]["destination"]
-            character_data = data["data"]["character"]
+            await self.post_api("/transition")
+            destination = self.location
 
             print(
-                f"󰓡 {self.surname} Transitioned to ({destination['x']}, {destination['y']}) on {destination['name']} layer : {destination['layer']}"
+                f"󰓡 {self.surname} Transitioned to ({destination.x}, {destination.y}) on {destination.name} (layer : {destination.layer.value})"
             )
-            return True, character_data
+            return True
         except Exception as e:
-            print(f"❌ {e}")
-            return False, None
+            print(f"❌ {self.surname} transition : {e}")
+            return False
 
     async def _change_layer(self: "Character", destination: Map) -> None:
         if destination.layer == self.location.layer:

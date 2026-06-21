@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Protocol
 
 from models import Encyclopedia
-from models.character.decorators import refresh_after, request_action
 from models.dataclass import Effect, Item
 from models.dataclass.bank import Bank, get_tool
 from models.dataclass.bank.get_in_bank import get_best_stat_item
@@ -40,13 +39,11 @@ class StuffMixin(Protocol):
     def get_equipped_item_by_slot(self, slot: EquipentType) -> Item | None:
         return self._equipped_items.get(slot, None)
 
-    @request_action
-    @refresh_after
     async def equip(
         self: "Character", item: Item, quantity: int = 1, slot: str | None = None
-    ) -> tuple[bool, dict | None]:
+    ) -> bool:
         try:
-            response = await self.client.post(
+            await self.post_api(
                 "/equip",
                 json={
                     "code": item.code,
@@ -54,41 +51,22 @@ class StuffMixin(Protocol):
                     "quantity": quantity,
                 },
             )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
-            return True, character_data
+            return True
         except Exception as e:
             print(f"❌ {self.surname} equip : {e}")
-            return False, None
+            return False
 
-    @request_action
-    @refresh_after
-    async def unequip(
-        self: "Character", slot: str, quantity: int = 1
-    ) -> tuple[bool, dict | None]:
+    async def unequip(self: "Character", slot: str, quantity: int = 1) -> bool:
         try:
-            response = await self.client.post(
+            await self.post_api(
                 "/unequip",
                 json={"slot": slot, "quantity": quantity},
             )
-            data = response.json()
 
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
-            return True, character_data
+            return True
         except Exception as e:
             print(f"❌ {self.surname} unequip : {e}")
-            return False, None
+            return False
 
     async def weaponize(self: "Character") -> None:
         if self.weapon is not None and self.weapon.is_weapon:

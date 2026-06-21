@@ -1,29 +1,14 @@
 from typing import Protocol, TYPE_CHECKING
 
-from config import HEADERS
-from models.character.decorators import refresh_after, request_action
-
 if TYPE_CHECKING:
     from models.character import Character
 
 
 class GatherMixin(Protocol):
-    @request_action
-    @refresh_after
-    async def gather(self: "Character") -> tuple[bool, dict | None]:
+    async def gather(self: "Character") -> bool:
         try:
-            response = await self.client.post(
-                "/gathering",
-            )
-            data = response.json()
-
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-
-            character_data = data["data"]["character"]
-
-            return True, character_data
+            await self.post_api("/gathering")
+            return True
         except Exception as e:
-            print(f"❌ {self.surname} {e}")
-            return False, None
+            print(f"❌ {self.surname} gather : {e}")
+            return False

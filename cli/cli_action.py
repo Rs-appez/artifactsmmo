@@ -8,9 +8,12 @@ def _check_freshness(function):
     async def wrapper(*args, **kwargs):
         character = args[0]
         if isinstance(character, Character):
-            if not character.is_working and not await character.refresh():
-                print(f"❌ Failed to refresh {character.surname}")
-                return
+            if not character.is_working:
+                try:
+                    await character.refresh()
+                except Exception:
+                    print(f"❌ Failed to refresh {character.surname}")
+                    return
 
         elif isinstance(character, list) and all(
             isinstance(char, Character) for char in character

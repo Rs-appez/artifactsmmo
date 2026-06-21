@@ -13,6 +13,7 @@ from utils.math_fight import calc_attack
 
 from .decorators import refresh_after
 from .mixin import (
+    ApiMixin,
     BankMixin,
     CraftMixin,
     JobMixin,
@@ -30,6 +31,7 @@ from .mixin import (
 
 @dataclass
 class Character(
+    ApiMixin,
     MoveMixin,
     JobMixin,
     InventoryMixin,
@@ -99,21 +101,16 @@ class Character(
         return self._level
 
     @refresh_after
-    async def refresh(self) -> tuple[bool, dict | None]:
-        try:
-            response = await self.__client.get(
-                f"{ARTIFACTSMMO_URL}/characters/{self.name}", headers=HEADERS
-            )
-            data = response.json()
-            if "error" in data:
-                print("data : ", data)
-                raise Exception(data["error"]["message"])
-            character_data = data["data"]
-            return True, character_data
-
-        except Exception as e:
-            print(f"❌ {e}")
-            return False, None
+    async def refresh(self) -> dict:
+        response = await self.__client.get(
+            f"{ARTIFACTSMMO_URL}/characters/{self.name}", headers=HEADERS
+        )
+        data = response.json()
+        if "error" in data:
+            print("data : ", data)
+            raise Exception(data["error"]["message"])
+        character_data = data["data"]
+        return character_data
 
     @override
     def __str__(self):
