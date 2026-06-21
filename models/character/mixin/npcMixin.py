@@ -33,7 +33,7 @@ class NpcMixin(Protocol):
                 raise Exception(data["error"]["message"])
 
             print(f"🛒 Bought {quantity}x {item.name} from NPC")
-            return True, data["data"]
+            return True, data["data"]["character"]
         except Exception as e:
             print(f"❌ {self.surname} buy_from_npc : {e}")
             return False, None
@@ -61,7 +61,7 @@ class NpcMixin(Protocol):
                 raise Exception(data["error"]["message"])
 
             print(f"💰 Sold {quantity}x {item.name} to NPC")
-            return True, data["data"]
+            return True, data["data"]["character"]
         except Exception as e:
             print(f"❌ {self.surname} sell_to_npc : {e}")
             return False, None
