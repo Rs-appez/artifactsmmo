@@ -10,7 +10,7 @@ CHARACTERS = {
     "dave": "men3",
     "eve": "women3",
 }
-SUFFIX = "_T" if SANDBOX else ""
+SUFFIX = "_t" if SANDBOX else ""
 
 
 async def initialize_characters():
