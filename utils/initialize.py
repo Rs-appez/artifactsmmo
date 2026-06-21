@@ -1,6 +1,6 @@
 import httpx
 
-from config import ARTIFACTSMMO_URL, HEADERS
+from config import ARTIFACTSMMO_URL, HEADERS, SANDBOX
 import os
 
 CHARACTERS = {
@@ -10,6 +10,7 @@ CHARACTERS = {
     "dave": "men3",
     "eve": "women3",
 }
+SUFFIX = "_T" if SANDBOX else ""
 
 
 async def initialize_characters():
@@ -18,7 +19,7 @@ async def initialize_characters():
             response = await client.post(
                 f"{ARTIFACTSMMO_URL}/characters/create",
                 headers=HEADERS,
-                json={"name": f"rs_{name}", "skin": skin},
+                json={"name": f"rs_{name}{SUFFIX}", "skin": skin},
             )
             if response.status_code != 200:
                 raise Exception(
