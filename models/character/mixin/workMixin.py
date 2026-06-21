@@ -30,7 +30,7 @@ class WorkMixin(Protocol):
     _work_task: asyncio.Task | None = None
     _interrupted: bool = False
     _is_on_routine: bool = False
-    _priority_tasks: deque[Callable]
+    _priority_tasks: deque[WorkRoutine]
     _character_lock: asyncio.Lock
 
     def __init_work_mixin__(self: "Character"):
@@ -54,7 +54,7 @@ class WorkMixin(Protocol):
 
     @property
     def priority_tasks(self) -> list[str]:
-        return [task.__name__ for task in self._priority_tasks]
+        return [task.name for task in self._priority_tasks]
 
     @property
     def is_interrupted(self) -> bool:
@@ -102,9 +102,7 @@ class WorkMixin(Protocol):
             self._work_task = None
 
     def do_one_time_task(self: "Character", task: Callable, *args, **kwargs):
-        def mission(char):
-            return task(char, *args, **kwargs)
-
+        mission = WorkRoutine(task, *args, **kwargs)
         self._priority_tasks.append(mission)
         if self._is_on_routine:
             self._interrupt_routine()
