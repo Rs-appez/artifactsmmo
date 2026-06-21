@@ -12,10 +12,21 @@ async def seeking_the_meaning_of_life(character: "Character"):
     await asyncio.sleep(float("inf"))
 
 
+class WorkRoutine:
+    def __init__(self, task: Callable, *args, **kwargs):
+        self.name = task.__name__
+        self.module = task.__module__
+        self.args = args
+        self.kwargs = kwargs
+        self._task = task
+
+    def __call__(self, character: "Character") -> asyncio.Future:
+        return self._task(character, *self.args, **self.kwargs)
+
+
 class WorkMixin(Protocol):
-    _routine: Callable
-    _routine_info: list | None = None
-    _previous_routine: Callable | None = None
+    _routine: WorkRoutine
+    _previous_routine: WorkRoutine | None = None
     _work_task: asyncio.Task | None = None
     _interrupted: bool = False
     _is_on_routine: bool = False
@@ -39,7 +50,7 @@ class WorkMixin(Protocol):
 
     @property
     def work_on(self) -> str:
-        return self._routine.__name__
+        return self._routine.name
 
     @property
     def priority_tasks(self) -> list[str]:
@@ -48,6 +59,15 @@ class WorkMixin(Protocol):
     @property
     def is_interrupted(self) -> bool:
         return self._interrupted
+
+    @property
+    def get_routine_data(self) -> dict:
+        return {
+            "routine_name": self._routine.name,
+            "routine_module": self._routine.module,
+            "routine_args": self._routine.args or [],
+            "routine_kwargs": self._routine.kwargs or {},
+        }
 
     async def start(self: "Character"):
         async with self._character_lock:
@@ -90,8 +110,7 @@ class WorkMixin(Protocol):
             self._interrupt_routine()
 
     def seek_the_meaning_of_life(self: "Character"):
-        self._routine = seeking_the_meaning_of_life
-        self._routine_info = []
+        self._routine = WorkRoutine(seeking_the_meaning_of_life)
 
     def stop(self: "Character"):
         self._previous_routine = self._routine
@@ -119,12 +138,6 @@ class WorkMixin(Protocol):
             _ = self._work_task.cancel()
 
     def assign_routine(self: "Character", task: Callable, *args, **kwargs):
-        def routine(char):
-            return task(char, *args, **kwargs)
-
-        routine.__name__ = f"{task.__name__}"
-        self._routine_info = [list(args), kwargs]
-        routine.__module__ = task.__module__
 
         self._interrupt_routine()
-        self._routine = routine
+        self._routine = WorkRoutine(task, *args, **kwargs)
