@@ -1,3 +1,4 @@
+from .apiMixin import ApiMixin
 from .jobMixin import JobMixin
 from .bankMixin import BankMixin
 from .fightMixin import FightMixin
@@ -24,4 +25,5 @@ __all__ = [
     "SaveMixin",
     "JobMixin",
     "NpcMixin",
+    "ApiMixin",
 ]
