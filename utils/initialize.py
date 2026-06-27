@@ -5,7 +5,7 @@ import os
 
 CHARACTERS = {
     "alice": "women2",
-    "bob": "goblin1",
+    "bob": "goblin",
     "charlie": "men1",
     "dave": "men3",
     "eve": "women3",
