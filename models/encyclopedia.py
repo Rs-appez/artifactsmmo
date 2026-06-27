@@ -69,7 +69,7 @@ class Encyclopedia:
                 response = await client.get(
                     f"{ARTIFACTSMMO_URL}/items",
                     headers=HEADERS,
-                    params={"size": 500, "page": page},
+                    params={"size": 600, "page": page},
                     timeout=30.0,
                 )
                 if response.status_code != 200:
