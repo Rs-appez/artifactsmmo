@@ -45,11 +45,13 @@ class StuffMixin(Protocol):
         try:
             await self.post_api(
                 "/equip",
-                json={
-                    "code": item.code,
-                    "slot": item.type if slot is None else slot,
-                    "quantity": quantity,
-                },
+                json=[
+                    {
+                        "code": item.code,
+                        "slot": item.type if slot is None else slot,
+                        "quantity": quantity,
+                    }
+                ],
             )
             return True
         except Exception as e:
@@ -60,7 +62,9 @@ class StuffMixin(Protocol):
         try:
             await self.post_api(
                 "/unequip",
-                json={"slot": slot, "quantity": quantity},
+                json=[
+                    {"slot": slot, "quantity": quantity},
+                ],
             )
 
             return True
