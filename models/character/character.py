@@ -231,7 +231,7 @@ class Character(
         )
 
     @classmethod
-    def __get_jobs(cls, data: dict) -> dict[str, int]:
+    def __get_jobs(cls, data: dict) -> dict[JobType, int]:
         jobs = {}
         jobs[JobType.MINING] = data.get("mining_level", 0)
         jobs[JobType.WOODCUTTING] = data.get("woodcutting_level", 0)
