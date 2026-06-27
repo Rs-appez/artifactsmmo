@@ -157,6 +157,8 @@ class LocationRegistry:
                                         content["code"]
                                     )
                                     cls.__npc_locations[npc].add(map)
+                                case "raid":
+                                    pass
                                 case _:
                                     raise Exception(
                                         f"Unknown interaction type: {interaction['content']['type']}"
