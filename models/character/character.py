@@ -101,7 +101,7 @@ class Character(
 
     @override
     def __str__(self):
-        return f"{self.surname:8}: position={str(self.location):<9} - working={self.is_working} - task={self.work_on}"
+        return f"{self.surname:8}: position={str(self.location):<9} - working={self.is_working} - task={self.work_on} - cooldown={self.cooldown:.2f}s"
 
     async def update_from_dict(self, data: dict) -> None:
         data_dict = await self._parse_dict(data)
