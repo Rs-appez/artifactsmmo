@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import override
 
 
-from config import ARTIFACTSMMO_URL, HEADERS, TIMEZONE
+from config import ARTIFACTSMMO_URL, TIMEZONE
 from models import Encyclopedia, LocationRegistry
 from models.dataclass import TaskQuest
 from models.enums import Element, EquipentType, JobType
