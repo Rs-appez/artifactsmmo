@@ -1,6 +1,6 @@
 import importlib
 import json
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from models.character.mixin.workMixin import WorkRoutine
 
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
-class SaveMixin(Protocol):
+class SaveMixin:
     _save_folder = "saves"
 
     def save(self: "Character"):

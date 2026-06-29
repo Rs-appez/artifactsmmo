@@ -1,10 +1,10 @@
-from typing import Protocol, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from models.character import Character
 
 
-class GatherMixin(Protocol):
+class GatherMixin:
     async def gather(self: "Character") -> bool:
         try:
             await self.post_api("/gathering")

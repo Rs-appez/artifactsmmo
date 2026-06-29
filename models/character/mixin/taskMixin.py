@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class TaskMixin(Protocol):
+class TaskMixin:
     _task: TaskQuest | None = None
 
     @property

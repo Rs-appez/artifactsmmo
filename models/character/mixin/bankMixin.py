@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 import uuid
 
 from models.dataclass import Item
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
-class BankMixin(Protocol):
+class BankMixin:
     async def deposit_all_in_bank(
         self: "Character",
         with_gold: bool = True,

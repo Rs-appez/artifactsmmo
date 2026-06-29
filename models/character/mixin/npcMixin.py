@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from models.dataclass import Item
 
@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
-class NpcMixin(Protocol):
+class NpcMixin:
     async def buy_from_npc(self: "Character", item: Item, quantity: int) -> bool:
         try:
             if quantity <= 0:
