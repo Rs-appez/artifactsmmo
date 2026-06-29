@@ -1,6 +1,7 @@
 import importlib
 import json
 from typing import TYPE_CHECKING, Protocol
+from config import SANDBOX
 
 from models.character.mixin.workMixin import WorkRoutine
 
@@ -12,10 +13,16 @@ class SaveMixin(Protocol):
     _save_folder = "saves"
 
     def save(self: "Character"):
+        if SANDBOX:
+            return
+
         with open(f"{self._save_folder}/{self.name}.json", "w") as f:
             json.dump(self.get_routine_data, f, ensure_ascii=False, indent=4)
 
     def load_routine(self: "Character") -> WorkRoutine:
+        if SANDBOX:
+            raise Exception("Skip loading routine in sandbox mode")
+
         with open(f"{self._save_folder}/{self.name}.json", "r") as f:
             save_data = json.load(f)
             routine_name = save_data.get("routine_name")
