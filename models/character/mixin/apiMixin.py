@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 import httpx
 
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class ApiMixin(Protocol):
+class ApiMixin:
     _client: httpx.AsyncClient | None = None
 
     def __init_api_mixin__(self: "Character"):

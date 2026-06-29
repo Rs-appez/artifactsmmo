@@ -1,7 +1,7 @@
 import asyncio
 from dataclasses import dataclass, field
 from math import ceil, floor
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from exceptions import ImpossibleCombatException
 from models.character.decorators import request_action
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class FightMixin(Protocol):
+class FightMixin:
     _hp: int = 0
     _max_hp: int = 0
     _initiative: int = 0
