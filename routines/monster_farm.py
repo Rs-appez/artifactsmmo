@@ -37,7 +37,7 @@ async def mob_farm(character: Character, mob: Monster | str, nb: int | str = -1)
     except ImpossibleCombatException as e:
         raise e
     except Exception as e:
-        print(f"❌ {character.surname} {e}")
+        print(f"❌ {character.surname} failed to combat : {e}")
 
 
 async def boss_farm(
@@ -69,7 +69,7 @@ async def boss_farm(
             await character.waiting_for_fight
 
     except Exception as e:
-        print(f"❌ {character.surname} {e}")
+        print(f"❌ {character.surname} failed to combat boss : {e}")
     finally:
         character._ready_to_fight_boss = False  # pyright: ignore[reportPrivateUsage]
 

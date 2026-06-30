@@ -146,5 +146,5 @@ async def craft(character: Character, item: Item, quantity: int):
             retry = True
 
         except Exception as e:
-            print(f"❌ {character.surname} {e}")
+            print(f"❌ {character.surname} failed to craft : {e}")
             return
