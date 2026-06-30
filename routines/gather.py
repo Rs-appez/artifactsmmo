@@ -38,4 +38,4 @@ async def gather(character: Character, item: Item | str, nb: int | str = -1) -> 
             if not await character.gather():
                 raise Exception(f"Failed to gather {item.name}")
     except Exception as e:
-        print(f"❌ {character.surname} {e}")
+        print(f"❌ {character.surname} failed to gather : {e}")
