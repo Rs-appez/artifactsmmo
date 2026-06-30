@@ -228,7 +228,8 @@ class Bank:
                                 item["code"]
                             )
                         )
-                        and (qty := item.get("quantity", 0) > 0)
+                        and (qty := item.get("quantity", 0))
+                        and qty > 0
                     }
                     page += 1
                     max_pages = data["pages"]
