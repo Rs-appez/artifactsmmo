@@ -1,6 +1,7 @@
+from types import FunctionType
 import asyncio
 from collections import deque
-from collections.abc import Callable
+
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
@@ -13,7 +14,7 @@ async def seeking_the_meaning_of_life(character: "Character"):
 
 
 class WorkRoutine:
-    def __init__(self, task: Callable, *args, is_routine: bool = False, **kwargs):
+    def __init__(self, task: FunctionType, *args, is_routine: bool = False, **kwargs):
         self.name = task.__name__
         self.module = task.__module__
         self.args = args
@@ -120,7 +121,7 @@ class WorkMixin(Protocol):
         finally:
             self._work_task = None
 
-    def do_one_time_task(self: "Character", task: Callable, *args, **kwargs):
+    def do_one_time_task(self: "Character", task: FunctionType, *args, **kwargs):
         mission = WorkRoutine(task, *args, **kwargs)
         self._priority_tasks.append(mission)
         if not self._routine.is_paused:
@@ -159,7 +160,7 @@ class WorkMixin(Protocol):
             self._interrupted = True
             _ = self._work_task.cancel()
 
-    def assign_routine(self: "Character", task: Callable, *args, **kwargs):
+    def assign_routine(self: "Character", task: FunctionType, *args, **kwargs):
 
         self._interrupt_routine()
         self._routine = WorkRoutine(task, *args, is_routine=True, **kwargs)
