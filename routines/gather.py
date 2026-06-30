@@ -9,12 +9,17 @@ from utils.find_nearest import find_nearest_lootable
 async def gather(character: Character, item: Item | str, nb: int | str = -1) -> None:
     try:
         if isinstance(item, str):
-            item = await Encyclopedia.get_item_by_code(item)
+            get_item = await Encyclopedia.get_item_by_code(item)
+            if not get_item:
+                print(f"❌ {character.surname} Invalid item code : {item}")
+                return
+            else:
+                item = get_item
         if isinstance(nb, str):
             try:
                 nb = int(nb)
             except ValueError:
-                print(f"❌ Invalid number of iterations : {nb}")
+                print(f"❌ {character.surname} Invalid number of iterations : {nb}")
                 return
         if not isinstance(item, Item):
             print(f"❌ {character.surname} Invalid item : {item}")
