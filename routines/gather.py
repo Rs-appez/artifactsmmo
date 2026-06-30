@@ -16,6 +16,9 @@ async def gather(character: Character, item: Item | str, nb: int | str = -1) -> 
             except ValueError:
                 print(f"❌ Invalid number of iterations : {nb}")
                 return
+        if not isinstance(item, Item):
+            print(f"❌ {character.surname} Invalid item : {item}")
+            return
         await character.toolize(item.job)
 
         if character.will_gain_xp_with(item):
