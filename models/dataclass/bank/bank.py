@@ -214,7 +214,6 @@ class Bank:
             async with AsyncClient() as client:
                 page = 1
                 max_pages = 2
-                list_items = {}
                 while page <= max_pages:
                     response = await client.get(
                         f"{cls.__url}/items",
@@ -225,14 +224,16 @@ class Bank:
                     if "error" in data:
                         raise Exception(data["error"]["message"])
                     items_data = data["data"]
-                    list_items.update(
-                        {
-                            await Encyclopedia.get_item_by_code(item["code"]): item[
-                                "quantity"
-                            ]
-                            for item in items_data
-                        }
-                    )
+                    list_items = {
+                        item_obj: qty
+                        for item in items_data
+                        if (
+                            item_obj := await Encyclopedia.get_item_by_code(
+                                item["code"]
+                            )
+                        )
+                        and (qty := item.get("quantity", 0) > 0)
+                    }
                     page += 1
                     max_pages = data["pages"]
                 return list_items
