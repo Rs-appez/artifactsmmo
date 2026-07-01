@@ -1,3 +1,5 @@
+import functools
+from datetime import datetime
 import asyncio
 import uuid
 from asyncio import Lock
@@ -18,6 +20,7 @@ if TYPE_CHECKING:
 
 
 def lock_bank(func):
+    @functools.wraps(func)
     async def wrapper(self, *args, **kwargs):
         async with Bank.locked():
             return await func(self, *args, **kwargs)
@@ -82,6 +85,7 @@ class Bank:
     ) -> uuid.UUID:
         if bank is None:
             bank = await cls.__check_bank()
+
         missing_items = bank.__get_missing_items(items, inventory=inventory)
 
         if imediately_needed and missing_items:
@@ -119,14 +123,14 @@ class Bank:
 
     @classmethod
     async def __check_bank(cls) -> "Bank":
-
+        print(f"🔍 Checking bank details... at {datetime.now().strftime('%H:%M:%S')}")
         load = asyncio.gather(
             cls.__get_details(),
             cls.__get_items(),
         )
 
         details, items = await load
-
+        print(f"💰 Bank retrieved at {datetime.now().strftime('%H:%M:%S')}")
         return cls(
             _gold=details["gold"],
             _slots=details["slots"],

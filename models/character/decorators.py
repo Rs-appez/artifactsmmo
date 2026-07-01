@@ -1,45 +1,114 @@
+import functools
 from collections.abc import Awaitable, Callable
-from typing import ParamSpec
+from typing import TYPE_CHECKING, Concatenate, ParamSpec, TypeVar
 
 from utils.find_nearest import find_nearest_bank
 
+if TYPE_CHECKING:
+    from models.character import Character
 
-def request_action(func):
-    async def wrapper(self, *args, **kwargs):
+P = ParamSpec("P")
+R = TypeVar("R")
+SelfT = TypeVar("SelfT", bound="Character")
+
+
+# --------------------------------------------------------------------------- #
+# Exceptions
+# --------------------------------------------------------------------------- #
+class ActionError(Exception):
+    """Base class for *expected* in-game action failures (API rejections, etc.)."""
+
+
+class BankUnreachableError(ActionError):
+    """Raised when the character cannot reach the bank."""
+
+
+# --------------------------------------------------------------------------- #
+# Cooldown / availability
+# --------------------------------------------------------------------------- #
+def request_action(
+    func: Callable[Concatenate[SelfT, P], Awaitable[R]],
+) -> Callable[Concatenate[SelfT, P], Awaitable[R]]:
+    """Wait until the character is off cooldown before running the action."""
+
+    @functools.wraps(func)
+    async def wrapper(self: SelfT, *args: P.args, **kwargs: P.kwargs) -> R:
         await self.available
         return await func(self, *args, **kwargs)
 
     return wrapper
 
 
-def need_bank(func):
-    async def wrapper(self, *args, **kwargs):
+# --------------------------------------------------------------------------- #
+# Bank movement
+# --------------------------------------------------------------------------- #
+def need_bank(
+    func: Callable[Concatenate[SelfT, P], Awaitable[R]],
+) -> Callable[Concatenate[SelfT, P], Awaitable[R]]:
+    """Move to the nearest bank before the action; optionally return afterward.
+
+    `comeback` is read at *call time* from the method's kwargs, so each
+    invocation can decide whether to return to the origin location.
+    """
+
+    @functools.wraps(func)
+    async def wrapper(self: SelfT, *args: P.args, **kwargs: P.kwargs) -> R:
+        origin = self.location
         bank_location = await find_nearest_bank(self.location)
-        current_location = self.location
+        comeback = kwargs.pop("comeback", False)
         if not await self.move(bank_location):
-            print("❌ Failed to move to bank")
-            return
+            raise BankUnreachableError(
+                f"{self.surname} could not reach bank at {bank_location}"
+            )
+
         result = await func(self, *args, **kwargs)
-        if "comeback" in kwargs and kwargs["comeback"]:
-            if not await self.move(current_location):
-                print("❌ Failed to move back to original location")
+
+        if comeback:
+            await self.move(origin)
 
         return result
 
     return wrapper
 
 
-P = ParamSpec("P")
-
-
+# --------------------------------------------------------------------------- #
+# State refresh
+# --------------------------------------------------------------------------- #
 def refresh_after(
-    func: Callable[P, Awaitable[dict]],
-) -> Callable[P, Awaitable[None]]:
-    async def wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
-        character_data = await func(*args, **kwargs)
+    func: Callable[Concatenate[SelfT, P], Awaitable[dict]],
+) -> Callable[Concatenate[SelfT, P], Awaitable[None]]:
+    """Refresh the character from the dict the wrapped API call returns."""
+
+    @functools.wraps(func)
+    async def wrapper(self: SelfT, *args: P.args, **kwargs: P.kwargs) -> None:
+        character_data = await func(self, *args, **kwargs)
         if character_data is not None:
-            character_class = args[0]
-            if hasattr(character_class, "update_from_dict"):
-                await character_class.update_from_dict(character_data)
+            await self.update_from_dict(character_data)
 
     return wrapper
+
+
+# --------------------------------------------------------------------------- #
+# Uniform error handling for action methods
+# --------------------------------------------------------------------------- #
+def safe_action(action_name: str):
+    """Catch *expected* action failures, log them, and return False.
+
+    Only catches `ActionError` — programming errors propagate so real bugs
+    are never silently swallowed as "failed actions".
+    """
+
+    def decorator(
+        func: Callable[Concatenate[SelfT, P], Awaitable[bool]],
+    ) -> Callable[Concatenate[SelfT, P], Awaitable[bool]]:
+        @functools.wraps(func)
+        async def wrapper(self: SelfT, *args: P.args, **kwargs: P.kwargs) -> bool:
+            try:
+                return await func(self, *args, **kwargs)
+            except ActionError as e:
+                print(f"❌ {self.surname} {action_name}: {e}")
+                return False
+
+        return wrapper
+
+    return decorator
