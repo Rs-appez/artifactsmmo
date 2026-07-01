@@ -149,6 +149,14 @@ class Item:
 
         return True
 
+    async def is_better_for_job_than(self, other: "Item") -> bool:
+        if not self.is_for_job(other.job):
+            raise ValueError(f"{self.name} is not a tool for job {other.job.value}")
+
+        return self.effects.get(other.job.value, 0) > other.effects.get(
+            other.job.value, 0
+        )
+
     @override
     def __hash__(self):
         return hash(self.code)
