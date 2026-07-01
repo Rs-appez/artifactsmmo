@@ -77,7 +77,7 @@ async def get_tool(character: Character, job: JobType):
         if not tool_items:
             raise Exception(f"No tool found for job {job.value} in bank")
 
-        best_tool = max(tool_items, key=lambda item: item.level)
+        best_tool = max(tool_items, key=lambda item: item.effects.get(job.value, 0))
         token = await _reserve_items({best_tool: 1}, bank=bank)
     try:
         yield token, best_tool
