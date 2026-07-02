@@ -1,5 +1,3 @@
-import functools
-from datetime import datetime
 import asyncio
 import functools
 import uuid
@@ -7,7 +5,6 @@ from asyncio import Lock
 from collections import defaultdict
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from datetime import datetime
 from typing import TYPE_CHECKING
 
 from httpx import AsyncClient
@@ -126,14 +123,12 @@ class Bank:
 
     @classmethod
     async def __check_bank(cls) -> "Bank":
-        print(f"🔍 Checking bank details... at {datetime.now().strftime('%H:%M:%S')}")
         load = asyncio.gather(
             cls.__get_details(),
             cls.__get_items(),
         )
 
         details, items = await load
-        print(f"💰 Bank retrieved at {datetime.now().strftime('%H:%M:%S')}")
         return cls(
             _gold=details["gold"],
             _slots=details["slots"],
