@@ -200,7 +200,7 @@ class Bank:
     async def __get_details(cls) -> dict:
         try:
             async with AsyncClient() as client:
-                response = await client.get(cls.__url, headers=HEADERS)
+                response = await client.get(cls.__url, headers=HEADERS, timeout=1.0)
                 data = response.json()
                 if "error" in data:
                     raise Exception(data["error"]["message"])
@@ -220,6 +220,7 @@ class Bank:
                         f"{cls.__url}/items",
                         headers=HEADERS,
                         params={"size": 100, "page": page},
+                        timeout=1.0,
                     )
                     data = response.json()
                     if "error" in data:
