@@ -3,9 +3,10 @@ import functools
 import uuid
 from asyncio import Lock
 from collections import defaultdict
+from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Concatenate, ParamSpec, TypeVar
 
 from httpx import AsyncClient
 
@@ -18,8 +19,17 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
-def lock_bank(func):
-    async def wrapper(self, *args, **kwargs):
+P = ParamSpec("P")
+R = TypeVar("R")
+C = TypeVar("C", bound="Character")
+
+
+def lock_bank(
+    func: Callable[Concatenate[C, P], Awaitable[R]],
+) -> Callable[Concatenate[C, P], Awaitable[R]]:
+    @functools.wraps(func)
+    async def wrapper(self: C, *args: P.args, **kwargs: P.kwargs) -> R:
+        await self.available
         async with Bank.locked():
             return await func(self, *args, **kwargs)
 
