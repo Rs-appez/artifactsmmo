@@ -58,11 +58,12 @@ class Character(
         self.__init_work_mixin__()
 
     @property
-    def name(self):
+    def name(self) -> str:
+
         return self._name
 
     @property
-    def surname(self):
+    def surname(self) -> str:
         return self._surname
 
     @property
@@ -70,7 +71,7 @@ class Character(
         return (self._cooldown - datetime.now(TIMEZONE)).total_seconds()
 
     @property
-    async def available(self):
+    async def available(self) -> None:
         while True:
             remaining = self.cooldown
             if remaining <= 0:

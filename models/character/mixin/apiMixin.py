@@ -23,7 +23,7 @@ class ApiMixin:
         )
 
     @property
-    def client(self):
+    def client(self) -> httpx.AsyncClient:
         if self._client is None:
             raise Exception(
                 "Client is not initialized. Call __init_api_mixin__() first."
