@@ -18,7 +18,8 @@ if TYPE_CHECKING:
 
 
 def lock_bank(func):
-    async def wrapper(self, *args, **kwargs):
+    async def wrapper(self: Character, *args, **kwargs):
+        await self.available
         async with Bank.locked():
             return await func(self, *args, **kwargs)
 
