@@ -99,7 +99,7 @@ class BankMixin:
             print(f"❌ {self.surname} withdraw item : {e}")
             return False
         finally:
-            Bank._unreserve_items(bank_token)  # pyright: ignore[reportPrivateUsage]
+            Bank._unreserve_items(bank_token)
 
     @need_bank
     @lock_bank
