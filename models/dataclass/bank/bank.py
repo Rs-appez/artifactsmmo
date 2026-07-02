@@ -19,9 +19,7 @@ if TYPE_CHECKING:
 
 
 def lock_bank(func):
-    @functools.wraps(func)
-    async def wrapper(self: Character, *args, **kwargs):
-        await self.available
+    async def wrapper(self, *args, **kwargs):
         async with Bank.locked():
             return await func(self, *args, **kwargs)
 
@@ -85,7 +83,6 @@ class Bank:
     ) -> uuid.UUID:
         if bank is None:
             bank = await cls.__check_bank()
-
         missing_items = bank.__get_missing_items(items, inventory=inventory)
 
         if imediately_needed and missing_items:

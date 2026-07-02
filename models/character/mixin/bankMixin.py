@@ -36,7 +36,9 @@ class BankMixin:
 
     @need_bank
     @lock_bank
-    async def deposit_gold_in_bank(self: "Character", quantity: int) -> bool:
+    async def deposit_gold_in_bank(
+        self: "Character", quantity: int, comeback: bool = False
+    ) -> bool:
         if quantity > self.gold:
             print(f"❌ Cannot deposit {quantity} gold, only {self.gold} available")
             return False
