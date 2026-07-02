@@ -124,6 +124,16 @@ class Item:
 
         return False
 
+    def get_jobs(self) -> list[JobType]:
+        jobs = []
+        for effect in self.effects:
+            try:
+                job = JobType(effect.code)
+                jobs.append(job)
+            except ValueError:
+                continue
+        return jobs
+
     def can_be_used_by(self, character: Character) -> bool:
 
         for condition in self.conditions:
@@ -150,7 +160,10 @@ class Item:
         return True
 
     async def is_better_for_job_than(self, other: "Item") -> bool:
-        if not self.is_for_job(other.job):
+        jobs = self.get_jobs()
+        if not jobs:
+            raise ValueError(f"{self.name} is not a tool for any job")
+        if not any(other.is_for_job(job) for job in jobs):
             raise ValueError(f"{self.name} is not a tool for job {other.job.value}")
 
         return self.effects.get(other.job.value, 0) > other.effects.get(
