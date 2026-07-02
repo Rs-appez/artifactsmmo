@@ -1,11 +1,11 @@
-import functools
-from datetime import datetime
 import asyncio
+import functools
 import uuid
 from asyncio import Lock
 from collections import defaultdict
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from httpx import AsyncClient
@@ -21,7 +21,8 @@ if TYPE_CHECKING:
 
 def lock_bank(func):
     @functools.wraps(func)
-    async def wrapper(self, *args, **kwargs):
+    async def wrapper(self: Character, *args, **kwargs):
+        await self.available
         async with Bank.locked():
             return await func(self, *args, **kwargs)
 
