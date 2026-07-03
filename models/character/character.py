@@ -210,6 +210,9 @@ class Character(
             _critical_strike=data.get("critical_strike", 0),
             _initiative=data.get("initiative", 0),
             _effects=effects,
+            _bag=await Encyclopedia.get_item_by_code(data["bag_slot"])
+            if data.get("bag_slot")
+            else None,
             _weapon=await Encyclopedia.get_item_by_code(data["weapon_slot"])
             if data.get("weapon_slot")
             else None,

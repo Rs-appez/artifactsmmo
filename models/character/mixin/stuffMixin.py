@@ -17,6 +17,7 @@ class StuffMixin:
 
     _equipped_items: dict[EquipentType, Item] = field(default_factory=dict)
 
+    _bag: Item | None = None
     _weapon: Item | None = None
     _ring_1: Item | None = None
     _ring_2: Item | None = None
