@@ -1,6 +1,7 @@
+from types import FunctionType
 import asyncio
 from collections import deque
-from types import FunctionType
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

@@ -1,7 +1,8 @@
 {
-  "routine_name": "gather",
-  "routine_module": "routines.gather",
-  "routine_args": ["coal"],
-  "routine_kwargs": {}
+    "routine_name": "gather",
+    "routine_module": "routines.gather",
+    "routine_args": [
+        "coal"
+    ],
+    "routine_kwargs": {}
 }
-
