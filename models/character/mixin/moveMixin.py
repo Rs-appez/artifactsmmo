@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from models.dataclass import Map
 from models.enums import Layer
@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class MoveMixin(Protocol):
+class MoveMixin:
     _location: Map | None = None
 
     @property

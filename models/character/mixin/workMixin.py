@@ -2,7 +2,7 @@ from types import FunctionType
 import asyncio
 from collections import deque
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -45,7 +45,7 @@ class WorkRoutine:
         self._is_paused = False
 
 
-class WorkMixin(Protocol):
+class WorkMixin:
     _routine: WorkRoutine
     _previous_routine: WorkRoutine | None = None
     _work_task: asyncio.Task | None = None

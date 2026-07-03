@@ -1,4 +1,4 @@
-from typing import Protocol, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from models.dataclass import Item
 
@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
-class CraftMixin(Protocol):
+class CraftMixin:
     async def craft(self: "Character", item: Item, quantity: int) -> bool:
         if not self.has_job(item.job, item.craft_level):
             print(

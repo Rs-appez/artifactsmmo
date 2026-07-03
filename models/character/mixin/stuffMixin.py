@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from models import Encyclopedia
 from models.dataclass import Effect, Item
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class StuffMixin(Protocol):
+class StuffMixin:
     _effects: dict[Effect, int] = field(default_factory=dict)
 
     _equipped_items: dict[EquipentType, Item] = field(default_factory=dict)
