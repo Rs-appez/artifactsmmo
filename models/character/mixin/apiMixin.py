@@ -39,16 +39,11 @@ class ApiMixin:
         attempt = 0
         while attempt < 3:
             try:
-                response = await self.client.post(endpoint, json=json, timeout=2.0)
+                response = await self.client.post(endpoint, json=json, timeout=5.0)
                 data = response.json()
 
                 if "error" in data:
                     match data["error"]["code"]:
-                        case 499:
-                            await self.refresh()
-                            raise httpx.RequestError(
-                                "Cooldown desynchronization detected. Refreshing character data..."
-                            )
                         case _:
                             print("data : ", data)
                             raise Exception(data["error"]["message"])
@@ -65,6 +60,15 @@ class ApiMixin:
                     character_data = data["character"]
 
                 break
+
+            except httpx.TimeoutException:
+                print(f"Attempt {attempt} failed: Timeout occurred. Retrying...")
+                await self.refresh()
+                if self.cooldown > 0:
+                    print("Request timeout but succeded")
+                    break
+                raise httpx.RequestError("Request timed out and not succeed")
+
             except httpx.RequestError as e:
                 print(f"Attempt {attempt} failed: {e}. Retrying...")
                 await asyncio.sleep(2**attempt)
