@@ -43,8 +43,15 @@ class ApiMixin:
                 data = response.json()
 
                 if "error" in data:
-                    print("data : ", data)
-                    raise Exception(data["error"]["message"])
+                    match data["error"]["code"]:
+                        case 499:
+                            await self.refresh()
+                            raise httpx.RequestError(
+                                "Cooldown desynchronization detected. Refreshing character data..."
+                            )
+                        case _:
+                            print("data : ", data)
+                            raise Exception(data["error"]["message"])
 
                 data = data["data"]
                 character_data = {}
