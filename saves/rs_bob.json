@@ -2,7 +2,11 @@
     "routine_name": "gather",
     "routine_module": "routines.gather",
     "routine_args": [
-        "spruce_wood"
+<<<<<<<< HEAD:saves/rs_alice.json
+        "iron_ore"
+========
+        "coal"
+>>>>>>>> master:saves/rs_bob.json
     ],
     "routine_kwargs": {}
 }
