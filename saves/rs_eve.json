@@ -2,7 +2,7 @@
     "routine_name": "gather",
     "routine_module": "routines.gather",
     "routine_args": [
-        "spruce_wood"
+        "birch_wood"
     ],
     "routine_kwargs": {}
 }
