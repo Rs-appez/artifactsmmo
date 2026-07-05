@@ -111,3 +111,12 @@ def reserved_bank(_):
 async def refresh_events(gm: GameManager):
 
     await gm.event_handler.refresh_current_events()
+
+
+@_check_freshness
+async def bagize(character: Character):
+    async def bagize_routine(character: Character):
+        await character.bagize()
+
+    character.do_one_time_task(bagize_routine)
+    print(f"👜 {character.surname} will bagize")

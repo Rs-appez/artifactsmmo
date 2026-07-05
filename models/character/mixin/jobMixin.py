@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from models.dataclass import Item
 from models.enums import JobType
@@ -11,7 +11,7 @@ JOB_WITH_DROP = {JobType.FISHING, JobType.MINING, JobType.WOODCUTTING}
 
 
 @dataclass
-class JobMixin(Protocol):
+class JobMixin:
     _jobs: dict[JobType, int] = field(default_factory=dict)
 
     def get_job_level(self: "Character", job_name: str | JobType) -> int:

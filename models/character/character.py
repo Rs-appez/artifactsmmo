@@ -58,11 +58,12 @@ class Character(
         self.__init_work_mixin__()
 
     @property
-    def name(self):
+    def name(self) -> str:
+
         return self._name
 
     @property
-    def surname(self):
+    def surname(self) -> str:
         return self._surname
 
     @property
@@ -70,7 +71,7 @@ class Character(
         return (self._cooldown - datetime.now(TIMEZONE)).total_seconds()
 
     @property
-    async def available(self):
+    async def available(self) -> None:
         while True:
             remaining = self.cooldown
             if remaining <= 0:
@@ -209,6 +210,9 @@ class Character(
             _critical_strike=data.get("critical_strike", 0),
             _initiative=data.get("initiative", 0),
             _effects=effects,
+            _bag=await Encyclopedia.get_item_by_code(data["bag_slot"])
+            if data.get("bag_slot")
+            else None,
             _weapon=await Encyclopedia.get_item_by_code(data["weapon_slot"])
             if data.get("weapon_slot")
             else None,

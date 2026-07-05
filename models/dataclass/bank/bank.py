@@ -1,10 +1,12 @@
 import asyncio
+import functools
 import uuid
 from asyncio import Lock
 from collections import defaultdict
+from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Concatenate, ParamSpec, TypeVar
 
 from httpx import AsyncClient
 
@@ -17,8 +19,17 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
-def lock_bank(func):
-    async def wrapper(self, *args, **kwargs):
+P = ParamSpec("P")
+R = TypeVar("R")
+C = TypeVar("C", bound="Character")
+
+
+def lock_bank(
+    func: Callable[Concatenate[C, P], Awaitable[R]],
+) -> Callable[Concatenate[C, P], Awaitable[R]]:
+    @functools.wraps(func)
+    async def wrapper(self: C, *args: P.args, **kwargs: P.kwargs) -> R:
+        await self.available
         async with Bank.locked():
             return await func(self, *args, **kwargs)
 
@@ -119,14 +130,12 @@ class Bank:
 
     @classmethod
     async def __check_bank(cls) -> "Bank":
-
         load = asyncio.gather(
             cls.__get_details(),
             cls.__get_items(),
         )
 
         details, items = await load
-
         return cls(
             _gold=details["gold"],
             _slots=details["slots"],
@@ -195,7 +204,7 @@ class Bank:
     async def __get_details(cls) -> dict:
         try:
             async with AsyncClient() as client:
-                response = await client.get(cls.__url, headers=HEADERS)
+                response = await client.get(cls.__url, headers=HEADERS, timeout=5.0)
                 data = response.json()
                 if "error" in data:
                     raise Exception(data["error"]["message"])
@@ -215,6 +224,7 @@ class Bank:
                         f"{cls.__url}/items",
                         headers=HEADERS,
                         params={"size": 100, "page": page},
+                        timeout=5.0,
                     )
                     data = response.json()
                     if "error" in data:

@@ -1,5 +1,6 @@
+from exceptions import TimeoutButSuccessException
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from models.dataclass import Map
 from models.enums import Layer
@@ -10,7 +11,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class MoveMixin(Protocol):
+class MoveMixin:
     _location: Map | None = None
 
     @property
@@ -37,6 +38,11 @@ class MoveMixin(Protocol):
                 f"🏃 {self.surname} Moved to ({arrived.x}, {arrived.y}) on {arrived.name} (layer : {arrived.layer.value})"
             )
             return True
+        except TimeoutButSuccessException:
+            print(
+                f"🏃 {self.surname} Moved to ({destination.x}, {destination.y}) on {destination.name} (layer : {destination.layer.value}) (timeout but success)"
+            )
+            return True
         except Exception as e:
             print(f"❌ {self.surname} move : {e}")
             return False
@@ -48,6 +54,12 @@ class MoveMixin(Protocol):
 
             print(
                 f"󰓡 {self.surname} Transitioned to ({destination.x}, {destination.y}) on {destination.name} (layer : {destination.layer.value})"
+            )
+            return True
+        except TimeoutButSuccessException:
+            destination = self.location
+            print(
+                f"󰓡 {self.surname} Transitioned to ({destination.x}, {destination.y}) on {destination.name} (layer : {destination.layer.value}) (timeout but success)"
             )
             return True
         except Exception as e:

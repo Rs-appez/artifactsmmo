@@ -1,13 +1,16 @@
-from typing import Protocol, TYPE_CHECKING
+from exceptions import TimeoutButSuccessException
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from models.character import Character
 
 
-class GatherMixin(Protocol):
+class GatherMixin:
     async def gather(self: "Character") -> bool:
         try:
             await self.post_api("/gathering")
+            return True
+        except TimeoutButSuccessException:
             return True
         except Exception as e:
             print(f"❌ {self.surname} gather : {e}")

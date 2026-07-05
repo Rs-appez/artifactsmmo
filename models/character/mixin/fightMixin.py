@@ -1,9 +1,9 @@
 import asyncio
 from dataclasses import dataclass, field
 from math import ceil, floor
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
-from exceptions import ImpossibleCombatException
+from exceptions import ImpossibleCombatException, TimeoutButSuccessException
 from models.character.decorators import request_action
 from models.dataclass import Monster
 from models.enums import Element
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class FightMixin(Protocol):
+class FightMixin:
     _hp: int = 0
     _max_hp: int = 0
     _initiative: int = 0
@@ -96,6 +96,8 @@ class FightMixin(Protocol):
         try:
             await self.post_api("/rest")
             return True
+        except TimeoutButSuccessException:
+            return True
         except Exception as e:
             print(f"❌ {self.surname} Rest : {e}")
             return False
@@ -154,7 +156,7 @@ class FightMixin(Protocol):
         if monster.initiative > self.initiative:
             nb_turns_to_kill += 1
         elif monster.initiative == self.initiative:
-            if monster.hp > self.max_hp:
+            if monster.hp > self.hp:
                 nb_turns_to_kill += 1
 
         return ceil(nb_turns_to_kill)

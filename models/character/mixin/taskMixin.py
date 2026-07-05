@@ -1,3 +1,4 @@
+from exceptions import TimeoutButSuccessException
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
@@ -9,7 +10,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class TaskMixin(Protocol):
+class TaskMixin:
     _task: TaskQuest | None = None
 
     @property
@@ -26,6 +27,8 @@ class TaskMixin(Protocol):
         try:
             await self.post_api("/task/new")
             return True
+        except TimeoutButSuccessException:
+            return True
         except Exception as e:
             print(f"❌ {self.surname} Accept task : {e}")
             return False
@@ -33,6 +36,8 @@ class TaskMixin(Protocol):
     async def complete_task(self: "Character") -> bool:
         try:
             await self.post_api("/task/complete")
+            return True
+        except TimeoutButSuccessException:
             return True
         except Exception as e:
             print(f"❌ {self.surname} Complete task : {e}")
@@ -46,6 +51,8 @@ class TaskMixin(Protocol):
                 "/task/trade",
                 json={"quantity": quantity, "code": item.code},
             )
+            return True
+        except TimeoutButSuccessException:
             return True
         except Exception as e:
             print(f"❌ {self.surname} Trade with task master : {e}")
@@ -62,6 +69,8 @@ class TaskMixin(Protocol):
                 "/task/cancel",
             )
             return True
+        except TimeoutButSuccessException:
+            return True
         except Exception as e:
             print(f"❌ {self.surname} Give up task : {e}")
             return False
@@ -77,6 +86,8 @@ class TaskMixin(Protocol):
             await self.post_api(
                 "/task/exchange",
             )
+            return True
+        except TimeoutButSuccessException:
             return True
         except Exception as e:
             print(f"❌ {self.surname} Exchange task coin : {e}")

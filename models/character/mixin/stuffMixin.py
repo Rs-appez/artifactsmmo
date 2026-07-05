@@ -1,10 +1,9 @@
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING
 
 from models import Encyclopedia
 from models.dataclass import Effect, Item
-from models.dataclass.bank import Bank, get_tool
-from models.dataclass.bank.get_in_bank import get_best_stat_item
+from models.dataclass.bank import Bank, get_tool, get_best_stat_item, get_bag
 from models.enums import EquipentType, JobType
 
 if TYPE_CHECKING:
@@ -12,11 +11,12 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class StuffMixin(Protocol):
+class StuffMixin:
     _effects: dict[Effect, int] = field(default_factory=dict)
 
     _equipped_items: dict[EquipentType, Item] = field(default_factory=dict)
 
+    _bag: Item | None = None
     _weapon: Item | None = None
     _ring_1: Item | None = None
     _ring_2: Item | None = None
@@ -97,7 +97,6 @@ class StuffMixin(Protocol):
 
     async def toolize(self: "Character", job: JobType) -> None:
         try:
-            current_better_tool = None
             if self.weapon is not None and self.weapon.is_for_job(job):
                 current_better_tool = self.weapon
 
@@ -133,12 +132,65 @@ class StuffMixin(Protocol):
                 print(f"❌ {self.surname} has no tool for job {job.value}")
                 return
 
-            if not await self.equip(current_better_tool):
-                print(f"❌ {self.surname} failed to equip {job.value}_tool")
-            _ = await self.deposit_all_in_bank()
+            for item in self.inventory:
+                if item.is_for_job(job):
+                    if not await self.equip(item):
+                        print(
+                            f"❌ {self.surname} failed to equip {item.name} to gather"
+                        )
+                    print(f"🛠️  {self.surname} equipped {item.name} to gather")
+                    return
+
+            async with get_tool(self, job) as (bank_token, best_tool):
+                if not self.is_inventory_full and self.weapon is not None:
+                    _ = await self.unequip("weapon")
+                _ = await self.deposit_all_in_bank()
+                if await self.withdraw_item_from_bank(bank_token):
+                    if not await self.equip(best_tool):
+                        print(f"❌ {self.surname} failed to equip {job.value}_tool")
+                    _ = await self.deposit_all_in_bank()
 
         except Exception as e:
             print(f"❌ {self.surname} Toolize : {e}")
+
+    async def bagize(self: "Character") -> None:
+        try:
+            bag_effect = await Encyclopedia.get_effect_by_code("inventory_space")
+            best_bag = max(
+                [
+                    item
+                    for item in self.inventory
+                    if item.type == EquipentType.BAG.value
+                ],
+                key=lambda item: item.effects.get(bag_effect, 0),
+                default=None,
+            )
+            async with get_bag(self) as (bank_token, best_bag_in_bank):
+                if best_bag is None or (
+                    best_bag_in_bank.effects.get(bag_effect, 0)
+                    > best_bag.effects.get(bag_effect, 0)
+                ):
+                    best_bag = best_bag_in_bank
+                    if self.is_inventory_full:
+                        _ = await self.deposit_all_in_bank(with_gold=False)
+
+                    if not await self.withdraw_item_from_bank(bank_token):
+                        print(
+                            f"❌ {self.surname} failed to withdraw bag from bank for bagize"
+                        )
+                        return
+
+            if best_bag is not None and (
+                self._bag is None
+                or self._bag.effects.get(bag_effect, 0)
+                < best_bag.effects.get(bag_effect, 0)
+            ):
+                if not await self.equip(best_bag):
+                    print(f"❌ {self.surname} failed to equip bag")
+                await self.deposit_all_in_bank(with_gold=False)
+
+        except Exception as e:
+            print(f"❌ {self.surname} Bagize : {e}")
 
     async def maximaze_stats(self: "Character", stats: Effect) -> None:
         # TODO : handle artifacts

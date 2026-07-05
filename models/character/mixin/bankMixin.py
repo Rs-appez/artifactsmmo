@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Protocol
+from exceptions import TimeoutButSuccessException
+from typing import TYPE_CHECKING
 import uuid
 
 from models.dataclass import Item
@@ -10,7 +11,7 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
-class BankMixin(Protocol):
+class BankMixin:
     async def deposit_all_in_bank(
         self: "Character",
         with_gold: bool = True,
@@ -50,6 +51,11 @@ class BankMixin(Protocol):
 
             print(f"󱉏  {self.surname} Deposited {quantity} gold in bank")
             return True
+        except TimeoutButSuccessException:
+            print(
+                f"󱉏  {self.surname} Deposited {quantity} gold in bank (timeout but success)"
+            )
+            return True
         except Exception as e:
             print(f"❌ {self.surname} deposit gold : {e}")
             return False
@@ -69,6 +75,11 @@ class BankMixin(Protocol):
             )
             print(
                 f"📥 {self.surname} Deposited {', '.join([f'{quantity}x {item.name}' for item, quantity in items.items()])} in bank"
+            )
+            return True
+        except TimeoutButSuccessException:
+            print(
+                f"📥 {self.surname} Deposited {', '.join([f'{quantity}x {item.name}' for item, quantity in items.items()])} in bank (timeout but success)"
             )
             return True
         except Exception as e:
@@ -95,11 +106,16 @@ class BankMixin(Protocol):
                 f"📤 {self.surname} Withdrew {', '.join([f'{item[1]}x {item[0].code}' for item in items.items()])} from bank"
             )
             return True
+        except TimeoutButSuccessException:
+            print(
+                f"📤 {self.surname} Withdrew {', '.join([f'{item[1]}x {item[0].code}' for item in items.items()])} from bank (timeout but success)"
+            )
+            return True
         except Exception as e:
             print(f"❌ {self.surname} withdraw item : {e}")
             return False
         finally:
-            Bank._unreserve_items(bank_token)  # pyright: ignore[reportPrivateUsage]
+            Bank._unreserve_items(bank_token)
 
     @need_bank
     @lock_bank
@@ -113,6 +129,11 @@ class BankMixin(Protocol):
             await self.post_api("/bank/withdraw/gold", json={"quantity": quantity})
 
             print(f"💰 {self.surname} Withdrew {quantity} gold from bank")
+            return True
+        except TimeoutButSuccessException:
+            print(
+                f"💰 {self.surname} Withdrew {quantity} gold from bank (timeout but success)"
+            )
             return True
         except Exception as e:
             print(f"❌ {self.surname} withdraw gold : {e}")

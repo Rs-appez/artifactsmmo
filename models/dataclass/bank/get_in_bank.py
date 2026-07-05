@@ -1,3 +1,4 @@
+from models import Encyclopedia
 import heapq
 from collections import defaultdict
 from contextlib import asynccontextmanager
@@ -160,5 +161,36 @@ async def get_best_stat_item(character: Character, wanted_effect: Effect):
         token = await _reserve_items(better_items_in_bank, bank=bank)
     try:
         yield token, better_items_in_bank
+    finally:
+        _unreserve_items(token)
+
+
+@asynccontextmanager
+async def get_bag(character: Character):
+    inventory_bag_effect = await Encyclopedia.get_effect_by_code("inventory_space")
+    current_bag = character.get_equipped_item_by_slot(EquipentType.BAG)
+    async with Bank.locked():
+        bank = await _check_bank()
+        bag_items = {
+            item
+            for item in bank.items
+            if item.type == "bag"
+            and (
+                current_bag is None
+                or item.effects.get(inventory_bag_effect, 0)
+                > current_bag.effects.get(inventory_bag_effect, 0)
+            )
+        }
+
+        if not bag_items:
+            raise Exception("No bag found in bank for character")
+
+    best_bag = max(
+        bag_items,
+        key=lambda item: item.effects.get(inventory_bag_effect, 0),
+    )
+    token = await _reserve_items({best_bag: 1}, bank=bank)
+    try:
+        yield token, best_bag
     finally:
         _unreserve_items(token)
