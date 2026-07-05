@@ -1,3 +1,4 @@
+from exceptions import TimeoutButSuccessException
 import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -66,7 +67,7 @@ class ApiMixin:
                 await self.refresh()
                 if self.cooldown > 0:
                     print("Request timeout but succeded")
-                    break
+                    raise TimeoutButSuccessException("Request timeout but succeded")
                 raise httpx.RequestError("Request timed out and not succeed")
 
             except httpx.RequestError as e:
