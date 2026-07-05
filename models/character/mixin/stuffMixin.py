@@ -97,58 +97,53 @@ class StuffMixin:
 
     async def toolize(self: "Character", job: JobType) -> None:
         try:
-            if self.weapon is not None and self.weapon.is_for_job(job):
-                current_better_tool = self.weapon
+            best_tool = (
+                self.weapon
+                if self.weapon is not None and self.weapon.is_for_job(job)
+                else None
+            )
 
-            for item in self.inventory:
-                if item.is_for_job(job) and item.can_be_used_by(self):
-                    if current_better_tool is None or await item.is_better_for_job_than(
-                        current_better_tool, job
-                    ):
-                        current_better_tool = item
+            best_tool_in_inventory = max(
+                [
+                    item
+                    for item in self.inventory
+                    if item.is_for_job(job) and item.can_be_used_by(self)
+                ],
+                key=lambda item: item.effects.get(job.value, 0),
+                default=None,
+            )
+            if best_tool is not None and best_tool_in_inventory is not None:
+                if not await best_tool.is_better_for_job_than(
+                    best_tool_in_inventory, job
+                ):
+                    best_tool = best_tool_in_inventory
 
-            try:
-                async with get_tool(self, job) as (bank_token, best_tool_in_bank):
-                    print(
-                        f"🛠️  {self.surname} is going to search {job.value}_tool in bank"
-                    )
-                    if not self.is_inventory_full and self.weapon is not None:
-                        _ = await self.unequip("weapon")
-                    _ = await self.deposit_all_in_bank()
+            elif best_tool_in_inventory is not None:
+                best_tool = best_tool_in_inventory
+
+            has_go_to_bank = False
+            async with get_tool(self, job) as (bank_token, best_tool_in_bank):
+                if best_tool is None or (
+                    best_tool_in_bank is not None
+                    and await best_tool_in_bank.is_better_for_job_than(best_tool, job)
+                ):
+                    best_tool = best_tool_in_bank
+                    if self.inventory_free_slots < 1:
+                        _ = await self.deposit_all_in_bank(with_gold=False)
+
                     if not await self.withdraw_item_from_bank(bank_token):
-                        raise Exception(
-                            f"❌ {self.surname} failed to withdraw {job.value}_tool from bank"
-                        )
-            except Exception:
-                best_tool_in_bank = None
-
-            if current_better_tool is not None and best_tool_in_bank is not None:
-                if await best_tool_in_bank.is_better_for_job_than(current_better_tool):
-                    current_better_tool = best_tool_in_bank
-            elif best_tool_in_bank is not None:
-                current_better_tool = best_tool_in_bank
-
-            if current_better_tool is None:
-                print(f"❌ {self.surname} has no tool for job {job.value}")
-                return
-
-            for item in self.inventory:
-                if item.is_for_job(job):
-                    if not await self.equip(item):
                         print(
-                            f"❌ {self.surname} failed to equip {item.name} to gather"
+                            f"❌ {self.surname} failed to withdraw tool from bank for toolize"
                         )
-                    print(f"🛠️  {self.surname} equipped {item.name} to gather")
-                    return
+                        return
+                    has_go_to_bank = True
 
-            async with get_tool(self, job) as (bank_token, best_tool):
-                if not self.is_inventory_full and self.weapon is not None:
-                    _ = await self.unequip("weapon")
-                _ = await self.deposit_all_in_bank()
-                if await self.withdraw_item_from_bank(bank_token):
-                    if not await self.equip(best_tool):
-                        print(f"❌ {self.surname} failed to equip {job.value}_tool")
-                    _ = await self.deposit_all_in_bank()
+            if best_tool is not None and best_tool != self.weapon:
+                if not await self.equip(best_tool):
+                    print(f"❌ {self.surname} failed to equip tool")
+
+            if has_go_to_bank:
+                await self.deposit_all_in_bank(with_gold=False)
 
         except Exception as e:
             print(f"❌ {self.surname} Toolize : {e}")
