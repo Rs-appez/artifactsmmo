@@ -104,7 +104,7 @@ class StuffMixin(Protocol):
             for item in self.inventory:
                 if item.is_for_job(job) and item.can_be_used_by(self):
                     if current_better_tool is None or await item.is_better_for_job_than(
-                        current_better_tool
+                        current_better_tool, job
                     ):
                         current_better_tool = item
 

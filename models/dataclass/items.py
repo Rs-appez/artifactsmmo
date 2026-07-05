@@ -159,16 +159,20 @@ class Item:
 
         return True
 
-    async def is_better_for_job_than(self, other: "Item") -> bool:
-        jobs = self.get_jobs()
-        if not jobs:
-            raise ValueError(f"{self.name} is not a tool for any job")
-        if not any(other.is_for_job(job) for job in jobs):
-            raise ValueError(f"{self.name} is not a tool for job {other.job.value}")
+    async def is_better_for_job_than(self, other: "Item", job: JobType) -> bool:
+        from models import Encyclopedia
 
-        return self.effects.get(other.job.value, 0) > other.effects.get(
-            other.job.value, 0
-        )
+        self_jobs = self.get_jobs()
+        other_jobs = other.get_jobs()
+
+        if not any(job in self_jobs for job in other_jobs):
+            raise ValueError(
+                f"Cannot compare items {self.name} and {other.name} for job {job.value}"
+            )
+
+        job_effect = await Encyclopedia.get_effect_by_code(job.value)
+
+        return self.effects.get(job_effect, 0) > other.effects.get(job_effect, 0)
 
     @override
     def __hash__(self):
