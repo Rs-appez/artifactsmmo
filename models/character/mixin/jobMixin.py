@@ -7,8 +7,6 @@ from models.enums import JobType
 if TYPE_CHECKING:
     from models.character import Character
 
-JOB_WITH_DROP = {JobType.FISHING, JobType.MINING, JobType.WOODCUTTING}
-
 
 @dataclass
 class JobMixin:
@@ -35,6 +33,3 @@ class JobMixin:
         if job_level > item_level + 10:
             return False
         return True
-
-    def job_has_drop(self: "Character", job: JobType) -> bool:
-        return job in JOB_WITH_DROP

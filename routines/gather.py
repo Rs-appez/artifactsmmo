@@ -29,7 +29,7 @@ async def gather(character: Character, item: Item | str, nb: int | str = -1) -> 
         if character.will_gain_xp_with(item):
             wisdom = await Encyclopedia.get_effect_by_code("wisdom")
             await character.maximaze_stats(wisdom)
-        elif character.job_has_drop(item.job):
+        elif item.job.has_drop:
             prospection = await Encyclopedia.get_effect_by_code("prospecting")
             await character.maximaze_stats(prospection)
 
