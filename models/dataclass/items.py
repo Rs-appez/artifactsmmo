@@ -172,7 +172,7 @@ class Item:
 
         job_effect = await Encyclopedia.get_effect_by_code(job.value)
 
-        return self.effects.get(job_effect, 0) > other.effects.get(job_effect, 0)
+        return self.effects.get(job_effect, 0) < other.effects.get(job_effect, 0)
 
     @override
     def __hash__(self):
