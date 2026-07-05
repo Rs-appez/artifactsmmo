@@ -124,6 +124,16 @@ class Item:
 
         return False
 
+    def get_jobs(self) -> list[JobType]:
+        jobs = []
+        for effect in self.effects:
+            try:
+                job = JobType(effect.code)
+                jobs.append(job)
+            except ValueError:
+                continue
+        return jobs
+
     def can_be_used_by(self, character: Character) -> bool:
 
         for condition in self.conditions:
@@ -149,13 +159,20 @@ class Item:
 
         return True
 
-    async def is_better_for_job_than(self, other: "Item") -> bool:
-        if not self.is_for_job(other.job):
-            raise ValueError(f"{self.name} is not a tool for job {other.job.value}")
+    async def is_better_for_job_than(self, other: "Item", job: JobType) -> bool:
+        from models import Encyclopedia
 
-        return self.effects.get(other.job.value, 0) > other.effects.get(
-            other.job.value, 0
-        )
+        self_jobs = self.get_jobs()
+        other_jobs = other.get_jobs()
+
+        if not any(job in self_jobs for job in other_jobs):
+            raise ValueError(
+                f"Cannot compare items {self.name} and {other.name} for job {job.value}"
+            )
+
+        job_effect = await Encyclopedia.get_effect_by_code(job.value)
+
+        return self.effects.get(job_effect, 0) < other.effects.get(job_effect, 0)
 
     @override
     def __hash__(self):
