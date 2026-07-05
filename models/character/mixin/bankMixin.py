@@ -1,3 +1,4 @@
+from exceptions import TimeoutButSuccessException
 from typing import TYPE_CHECKING
 import uuid
 
@@ -50,6 +51,11 @@ class BankMixin:
 
             print(f"󱉏  {self.surname} Deposited {quantity} gold in bank")
             return True
+        except TimeoutButSuccessException:
+            print(
+                f"󱉏  {self.surname} Deposited {quantity} gold in bank (timeout but success)"
+            )
+            return True
         except Exception as e:
             print(f"❌ {self.surname} deposit gold : {e}")
             return False
@@ -69,6 +75,11 @@ class BankMixin:
             )
             print(
                 f"📥 {self.surname} Deposited {', '.join([f'{quantity}x {item.name}' for item, quantity in items.items()])} in bank"
+            )
+            return True
+        except TimeoutButSuccessException:
+            print(
+                f"📥 {self.surname} Deposited {', '.join([f'{quantity}x {item.name}' for item, quantity in items.items()])} in bank (timeout but success)"
             )
             return True
         except Exception as e:
@@ -95,6 +106,11 @@ class BankMixin:
                 f"📤 {self.surname} Withdrew {', '.join([f'{item[1]}x {item[0].code}' for item in items.items()])} from bank"
             )
             return True
+        except TimeoutButSuccessException:
+            print(
+                f"📤 {self.surname} Withdrew {', '.join([f'{item[1]}x {item[0].code}' for item in items.items()])} from bank (timeout but success)"
+            )
+            return True
         except Exception as e:
             print(f"❌ {self.surname} withdraw item : {e}")
             return False
@@ -113,6 +129,11 @@ class BankMixin:
             await self.post_api("/bank/withdraw/gold", json={"quantity": quantity})
 
             print(f"💰 {self.surname} Withdrew {quantity} gold from bank")
+            return True
+        except TimeoutButSuccessException:
+            print(
+                f"💰 {self.surname} Withdrew {quantity} gold from bank (timeout but success)"
+            )
             return True
         except Exception as e:
             print(f"❌ {self.surname} withdraw gold : {e}")

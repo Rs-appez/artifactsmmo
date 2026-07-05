@@ -1,3 +1,4 @@
+from exceptions import TimeoutButSuccessException
 from typing import TYPE_CHECKING
 
 from models.dataclass import Item
@@ -16,6 +17,9 @@ class NpcMixin:
             )
             print(f"🛒 Bought {quantity}x {item.name} from NPC")
             return True
+        except TimeoutButSuccessException:
+            print(f"🛒 Bought {quantity}x {item.name} from NPC (timeout but success)")
+            return True
         except Exception as e:
             print(f"❌ {self.surname} buy_from_npc : {e}")
             return False
@@ -30,6 +34,9 @@ class NpcMixin:
             )
             print(f"💰 Sold {quantity}x {item.name} to NPC")
 
+            return True
+        except TimeoutButSuccessException:
+            print(f"💰 Sold {quantity}x {item.name} to NPC (timeout but success)")
             return True
         except Exception as e:
             print(f"❌ {self.surname} sell_to_npc : {e}")

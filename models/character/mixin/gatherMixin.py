@@ -1,3 +1,4 @@
+from exceptions import TimeoutButSuccessException
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -8,6 +9,8 @@ class GatherMixin:
     async def gather(self: "Character") -> bool:
         try:
             await self.post_api("/gathering")
+            return True
+        except TimeoutButSuccessException:
             return True
         except Exception as e:
             print(f"❌ {self.surname} gather : {e}")

@@ -1,3 +1,4 @@
+from exceptions import TimeoutButSuccessException
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -37,6 +38,11 @@ class MoveMixin:
                 f"🏃 {self.surname} Moved to ({arrived.x}, {arrived.y}) on {arrived.name} (layer : {arrived.layer.value})"
             )
             return True
+        except TimeoutButSuccessException:
+            print(
+                f"🏃 {self.surname} Moved to ({destination.x}, {destination.y}) on {destination.name} (layer : {destination.layer.value}) (timeout but success)"
+            )
+            return True
         except Exception as e:
             print(f"❌ {self.surname} move : {e}")
             return False
@@ -48,6 +54,12 @@ class MoveMixin:
 
             print(
                 f"󰓡 {self.surname} Transitioned to ({destination.x}, {destination.y}) on {destination.name} (layer : {destination.layer.value})"
+            )
+            return True
+        except TimeoutButSuccessException:
+            destination = self.location
+            print(
+                f"󰓡 {self.surname} Transitioned to ({destination.x}, {destination.y}) on {destination.name} (layer : {destination.layer.value}) (timeout but success)"
             )
             return True
         except Exception as e:

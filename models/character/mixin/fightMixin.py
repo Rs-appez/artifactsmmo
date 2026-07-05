@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from math import ceil, floor
 from typing import TYPE_CHECKING
 
-from exceptions import ImpossibleCombatException
+from exceptions import ImpossibleCombatException, TimeoutButSuccessException
 from models.character.decorators import request_action
 from models.dataclass import Monster
 from models.enums import Element
@@ -95,6 +95,8 @@ class FightMixin:
     async def rest(self: "Character") -> bool:
         try:
             await self.post_api("/rest")
+            return True
+        except TimeoutButSuccessException:
             return True
         except Exception as e:
             print(f"❌ {self.surname} Rest : {e}")
