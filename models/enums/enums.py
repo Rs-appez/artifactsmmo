@@ -19,19 +19,6 @@ class Element(Enum):
     AIR = "air"
 
 
-class JobType(Enum):
-    NO_JOB = "no_job"
-    FIGHTING = ""
-    MINING = "mining"
-    WOODCUTTING = "woodcutting"
-    FISHING = "fishing"
-    WEAPONCRAFTING = "weaponcrafting"
-    GEARCRAFTING = "gearcrafting"
-    JEWELRYCRAFTING = "jewelrycrafting"
-    COOKING = "cooking"
-    ALCHEMY = "alchemy"
-
-
 class EquipentType(Enum):
     HELMET = "helmet"
     SHIELD = "shield"
