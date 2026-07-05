@@ -12,3 +12,28 @@ class JobType(Enum):
     JEWELRYCRAFTING = "jewelrycrafting"
     COOKING = "cooking"
     ALCHEMY = "alchemy"
+
+    @property
+    def is_crafting(self) -> bool:
+        return self in {
+            JobType.WEAPONCRAFTING,
+            JobType.GEARCRAFTING,
+            JobType.JEWELRYCRAFTING,
+        }
+
+    @property
+    def is_gathering(self) -> bool:
+        return self in {
+            JobType.MINING,
+            JobType.WOODCUTTING,
+            JobType.FISHING,
+            JobType.ALCHEMY,
+        }
+
+    @property
+    def has_drop(self) -> bool:
+        return self in {
+            JobType.MINING,
+            JobType.WOODCUTTING,
+            JobType.FISHING,
+        }
