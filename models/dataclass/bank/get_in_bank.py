@@ -1,8 +1,9 @@
+import uuid
 from models import Encyclopedia
 import heapq
 from collections import defaultdict
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, AsyncGenerator
 
 from models.dataclass import Effect, Item
 from models.dataclass.bank import Bank
@@ -19,7 +20,7 @@ _unreserve_items = Bank._unreserve_items  # pyright: ignore[reportPrivateUsage]
 @asynccontextmanager
 async def get_max_items(
     character: Character, item: Item, keep_free_slots: int = 0, per_stack: int = 1
-):
+) -> AsyncGenerator[tuple[uuid.UUID, int], None]:
     async with Bank.locked():
         bank = await _check_bank()
         item_quantity = min(
@@ -38,7 +39,9 @@ async def get_max_items(
 
 
 @asynccontextmanager
-async def get_food(character: Character, quantity: int):
+async def get_food(
+    character: Character, quantity: int
+) -> AsyncGenerator[uuid.UUID, None]:
     async with Bank.locked():
         bank = await _check_bank()
         food_items = {
@@ -67,7 +70,9 @@ async def get_food(character: Character, quantity: int):
 
 
 @asynccontextmanager
-async def get_tool(character: Character, job: JobType):
+async def get_tool(
+    character: Character, job: JobType
+) -> AsyncGenerator[tuple[uuid.UUID, Item], None]:
     async with Bank.locked():
         bank = await _check_bank()
         tool_items = {
@@ -87,7 +92,9 @@ async def get_tool(character: Character, job: JobType):
 
 
 @asynccontextmanager
-async def get_best_stat_item(character: Character, wanted_effect: Effect):
+async def get_best_stat_item(
+    character: Character, wanted_effect: Effect
+) -> AsyncGenerator[tuple[uuid.UUID, dict[Item, int]], None]:
     async with Bank.locked():
         bank = await _check_bank()
         better_items_in_bank = defaultdict(int)
@@ -166,7 +173,7 @@ async def get_best_stat_item(character: Character, wanted_effect: Effect):
 
 
 @asynccontextmanager
-async def get_bag(character: Character):
+async def get_bag(character: Character) -> AsyncGenerator[tuple[uuid.UUID, Item], None]:
     inventory_bag_effect = await Encyclopedia.get_effect_by_code("inventory_space")
     current_bag = character.get_equipped_item_by_slot(EquipentType.BAG)
     async with Bank.locked():
