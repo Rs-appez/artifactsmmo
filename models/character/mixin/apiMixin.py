@@ -35,12 +35,12 @@ class ApiMixin:
     @request_action
     @refresh_after
     async def post_api(
-        self: "Character", endpoint: str, json: dict | list[dict] | None = None
+        self: "Character", endpoint: str, json_data: dict | list[dict] | None = None
     ) -> dict:
         attempt = 0
         while attempt < 3:
             try:
-                response = await self.client.post(endpoint, json=json, timeout=5.0)
+                response = await self.client.post(endpoint, json=json_data, timeout=5.0)
                 data = response.json()
 
                 if "error" in data:

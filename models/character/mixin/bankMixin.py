@@ -47,7 +47,7 @@ class BankMixin:
             print(f"❌ Cannot deposit non-positive quantity of gold: {quantity}")
             return False
         try:
-            await self.post_api("/bank/deposit/gold", json={"quantity": quantity})
+            await self.post_api("/bank/deposit/gold", json_data={"quantity": quantity})
 
             print(f"󱉏  {self.surname} Deposited {quantity} gold in bank")
             return True
@@ -68,7 +68,7 @@ class BankMixin:
         try:
             await self.post_api(
                 "/bank/deposit/item",
-                json=[
+                json_data=[
                     {"code": item.code, "quantity": int(quantity)}
                     for item, quantity in items.items()
                 ],
@@ -97,7 +97,7 @@ class BankMixin:
             items = Bank._get_reserved_items(bank_token)  # pyright: ignore[reportPrivateUsage]
             await self.post_api(
                 "/bank/withdraw/item",
-                json=[
+                json_data=[
                     {"code": item.code, "quantity": quantity}
                     for item, quantity in items.items()
                 ],
@@ -126,7 +126,7 @@ class BankMixin:
             print(f"❌ Cannot withdraw non-positive quantity of gold: {quantity}")
             return False
         try:
-            await self.post_api("/bank/withdraw/gold", json={"quantity": quantity})
+            await self.post_api("/bank/withdraw/gold", json_data={"quantity": quantity})
 
             print(f"💰 {self.surname} Withdrew {quantity} gold from bank")
             return True

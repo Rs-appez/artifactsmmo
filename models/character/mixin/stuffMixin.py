@@ -45,7 +45,7 @@ class StuffMixin:
         try:
             await self.post_api(
                 "/equip",
-                json=[
+                json_data=[
                     {
                         "code": item.code,
                         "slot": item.type if slot is None else slot,
@@ -62,7 +62,7 @@ class StuffMixin:
         try:
             await self.post_api(
                 "/unequip",
-                json=[
+                json_data=[
                     {"slot": slot, "quantity": quantity},
                 ],
             )

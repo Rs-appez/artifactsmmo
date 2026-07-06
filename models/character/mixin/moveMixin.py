@@ -30,7 +30,7 @@ class MoveMixin:
             if destination == self.location:
                 return True
         try:
-            await self.post_api("/move", json={"map_id": destination.map_id})
+            await self.post_api("/move", json_data={"map_id": destination.map_id})
 
             arrived = self.location
 

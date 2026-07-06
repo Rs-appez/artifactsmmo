@@ -70,7 +70,7 @@ class FightMixin:
             pos = self.location
             await self.post_api(
                 "/fight",
-                json={
+                json_data={
                     "participants": [
                         mate.name for mate in teammate if mate.name != self.name
                     ]

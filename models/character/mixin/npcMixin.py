@@ -13,7 +13,7 @@ class NpcMixin:
             if quantity <= 0:
                 raise ValueError("Quantity must be greater than 0")
             await self.post_api(
-                "/npc/buy", json={"code": item.code, "quantity": quantity}
+                "/npc/buy", json_data={"code": item.code, "quantity": quantity}
             )
             print(f"🛒 Bought {quantity}x {item.name} from NPC")
             return True
@@ -30,7 +30,7 @@ class NpcMixin:
                 raise ValueError("Quantity must be greater than 0")
 
             await self.post_api(
-                "/npc/sell", json={"code": item.code, "quantity": quantity}
+                "/npc/sell", json_data={"code": item.code, "quantity": quantity}
             )
             print(f"💰 Sold {quantity}x {item.name} to NPC")
 

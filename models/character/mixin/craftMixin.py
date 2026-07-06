@@ -19,7 +19,7 @@ class CraftMixin:
 
         try:
             await self.post_api(
-                "/crafting", json={"code": item.code, "quantity": quantity}
+                "/crafting", json_data={"code": item.code, "quantity": quantity}
             )
             print(f"󱤲 {self.surname} Crafted {quantity}x {item.name}")
             return True
@@ -38,7 +38,7 @@ class CraftMixin:
 
         try:
             await self.post_api(
-                "/recycling", json={"code": item.code, "quantity": quantity}
+                "/recycling", json_data={"code": item.code, "quantity": quantity}
             )
             print(f"󰑌 {self.surname} Decrafted {quantity}x {item.name}")
             return True

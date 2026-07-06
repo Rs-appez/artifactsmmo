@@ -76,7 +76,7 @@ class InventoryMixin:
 
             await self.post_api(
                 "/use",
-                json={
+                json_data={
                     "code": item.code,
                     "quantity": quantity,
                 },

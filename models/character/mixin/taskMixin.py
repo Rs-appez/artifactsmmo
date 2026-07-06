@@ -49,7 +49,7 @@ class TaskMixin:
         try:
             await self.post_api(
                 "/task/trade",
-                json={"quantity": quantity, "code": item.code},
+                json_data={"quantity": quantity, "code": item.code},
             )
             return True
         except TimeoutButSuccessException:
