@@ -62,19 +62,22 @@ class ApiMixin:
 
                 break
 
-            except httpx.TimeoutException:
+            except httpx.TimeoutException as e:
                 print(f"Attempt {attempt} failed: Timeout occurred. Retrying...")
                 await self.refresh()
                 if self.cooldown > 0:
                     print("Request timeout but succeded")
                     raise TimeoutButSuccessException("Request timeout but succeded")
-                raise httpx.RequestError("Request timed out and not succeed")
+                attempt = await self._retry(attempt, e)
 
             except httpx.RequestError as e:
-                print(f"Attempt {attempt} failed: {e}. Retrying...")
-                await asyncio.sleep(2**attempt)
-                attempt += 1
+                attempt = await self._retry(attempt, e)
         else:
             raise Exception("Failed to post API after 3 attempts.")
 
         return character_data
+
+    async def _retry(self, attempt: int, e: Exception) -> int:
+        print(f"Attempt {attempt} failed: {e}. Retrying...")
+        await asyncio.sleep(2**attempt)
+        return attempt + 1
