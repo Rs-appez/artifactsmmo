@@ -1,7 +1,7 @@
 from .encyclopedia import Encyclopedia
 from .locationRegistry import LocationRegistry
 from .character import Character
-from .event.eventHandler import EventHandler
+from .characterManager import CharacterManager
 from .gameManager import GameManager
 
 __all__ = [
@@ -9,5 +9,5 @@ __all__ = [
     "GameManager",
     "Encyclopedia",
     "LocationRegistry",
-    "EventHandler",
+    "CharacterManager",
 ]
