@@ -9,9 +9,15 @@ ARTIFACTSMMO_URL = (
     if not SANDBOX
     else "https://api.sandbox.artifactsmmo.com"
 )
+ARTIFACTSMMO_WS_URL = (
+    "wss://realtime.artifactsmmo.com"
+    if not SANDBOX
+    else "wss://realtime.sandbox.artifactsmmo.com"
+)
+ARTIFACTSMMO_API_KEY = config("ARTIFACTSMMO_API_KEY")
 HEADERS = {
     "Accept": "application/json",
     "Content-Type": "application/json",
-    "Authorization": f"Bearer {config('ARTIFACTSMMO_API_KEY')}",
+    "Authorization": f"Bearer {ARTIFACTSMMO_API_KEY}",
 }
 TIMEZONE = ZoneInfo("Europe/Brussels")
