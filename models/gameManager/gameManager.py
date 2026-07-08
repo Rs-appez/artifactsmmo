@@ -4,20 +4,24 @@ from collections.abc import Coroutine, Sequence
 import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS
-from models import Character, Encyclopedia, EventHandler, LocationRegistry
+from models import Character, CharacterManager, Encyclopedia, LocationRegistry
+from models.event import EventHandler, EventListener
 from routines.monster_farm import boss_farm
 from utils.initialize import initialize_characters
 
 
 class GameManager:
     characters: dict[str, Character] = {}
-    event_handler = EventHandler()
+    character_manager = CharacterManager(characters)
+    event_handler = EventHandler(character_manager)
+    event_listener = EventListener(event_handler)
 
     def __init__(self):
         _ = asyncio.ensure_future(
             asyncio.gather(
                 Encyclopedia.initialize(),
                 LocationRegistry.initialize(),
+                self.event_listener.connect(),
                 self.event_handler.refresh_current_events(),
             )
         )
@@ -33,7 +37,7 @@ class GameManager:
                 )
 
             characters_data = response.json()["data"]
-            self.characters = {}
+            self.characters.clear()
             for char_data in characters_data:
                 character = await Character.from_dict(char_data)
                 self.characters[character.surname] = character
