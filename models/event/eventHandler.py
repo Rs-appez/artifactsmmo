@@ -1,11 +1,14 @@
 from models.dataclass import Map, Event
-from models import LocationRegistry
+from models import LocationRegistry, CharacterManager
 from httpx import AsyncClient
 from config import ARTIFACTSMMO_URL, HEADERS
 
 
 class EventHandler:
     current_events: list[tuple[Event, Map]] = []
+
+    def __init__(self, CharacterManager: CharacterManager):
+        self.character_manager = CharacterManager
 
     async def refresh_current_events(self) -> None:
         for event in self.current_events:
@@ -38,3 +41,14 @@ class EventHandler:
         except Exception as e:
             print(f"Error fetching current events: {e}")
             return []
+
+    async def add_event(self, event: Event, map: Map) -> None:
+        self.current_events.append((event, map))
+        LocationRegistry.add_event_location(map, event)
+        self.character_manager.new_event_occurred(event)
+
+    async def remove_event(self, event: Event, map: Map) -> None:
+        self.current_events = [
+            (e, m) for e, m in self.current_events if not (e == event and m == map)
+        ]
+        LocationRegistry.remove_event_location(map, event)
