@@ -1,11 +1,11 @@
-from models import Encyclopedia, LocationRegistry
-import json
 import asyncio
+import json
 
 import websockets
 from websockets import ClientConnection
 
 from config import ARTIFACTSMMO_API_KEY, ARTIFACTSMMO_WS_URL
+from models import Encyclopedia, LocationRegistry
 from models.event import EventHandler
 
 from .subscriptionsType import SubscriptionsType

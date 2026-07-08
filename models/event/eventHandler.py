@@ -1,7 +1,8 @@
-from models.dataclass import Map, Event
-from models import LocationRegistry, CharacterManager
 from httpx import AsyncClient
+
 from config import ARTIFACTSMMO_URL, HEADERS
+from models import CharacterManager, LocationRegistry
+from models.dataclass import Event, Map
 
 
 class EventHandler:
