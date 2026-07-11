@@ -2,7 +2,9 @@ import functools
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Concatenate, ParamSpec, TypeVar
 
+from config import SANDBOX
 from utils.find_nearest import find_nearest_bank
+from utils.reset_cooldown import reset_cooldown
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -17,6 +19,8 @@ def request_action(
 ) -> Callable[Concatenate[C, P], Awaitable[R]]:
     @functools.wraps(func)
     async def wrapper(self: C, *args: P.args, **kwargs: P.kwargs) -> R:
+        if SANDBOX:
+            await reset_cooldown(self)
         await self.available
         return await func(self, *args, **kwargs)
 
