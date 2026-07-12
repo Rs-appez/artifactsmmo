@@ -1,7 +1,11 @@
+from typing import TYPE_CHECKING
+
 import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS
-from models import Character
+
+if TYPE_CHECKING:
+    from models import Character
 
 
 async def reset_cooldown(character: "Character") -> None:
