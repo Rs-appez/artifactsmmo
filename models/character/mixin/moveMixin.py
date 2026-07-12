@@ -1,10 +1,12 @@
-from exceptions import TimeoutButSuccessException
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from config import SANDBOX
+from exceptions import TimeoutButSuccessException
 from models.dataclass import Map
 from models.enums import Layer
 from utils.find_nearest import find_nearest_transition
+from utils.reset_cooldown import reset_cooldown
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -26,6 +28,8 @@ class MoveMixin:
 
         if destination.layer != self.location.layer:
             await self._change_layer(destination)
+            if SANDBOX:
+                await reset_cooldown(self)
             await self.available
             if destination == self.location:
                 return True

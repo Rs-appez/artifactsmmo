@@ -10,10 +10,11 @@ from typing import TYPE_CHECKING, Concatenate, ParamSpec, TypeVar
 
 from httpx import AsyncClient
 
-from config import ARTIFACTSMMO_URL, HEADERS
+from config import ARTIFACTSMMO_URL, HEADERS, SANDBOX
 from exceptions import NotEnoughInBankException
 from models.dataclass import Item
 from models.encyclopedia import Encyclopedia
+from utils.reset_cooldown import reset_cooldown
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -29,6 +30,8 @@ def lock_bank(
 ) -> Callable[Concatenate[C, P], Awaitable[R]]:
     @functools.wraps(func)
     async def wrapper(self: C, *args: P.args, **kwargs: P.kwargs) -> R:
+        if SANDBOX:
+            await reset_cooldown(self)
         await self.available
         async with Bank.locked():
             return await func(self, *args, **kwargs)
