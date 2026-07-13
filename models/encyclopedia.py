@@ -57,6 +57,15 @@ class Encyclopedia:
         await Encyclopedia.wait_item()
         return list(Encyclopedia._items)
 
+    @staticmethod
+    async def get_all_items_by_job(job: JobType, level: int = -1) -> set[Item]:
+        await Encyclopedia.wait_item()
+        return {
+            item
+            for item in Encyclopedia._items.values()
+            if item.job == job and (item.level <= level or level == -1)
+        }
+
     @classmethod
     async def __load_items(cls):
         if cls.__items_loaded:
