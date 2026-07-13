@@ -31,7 +31,7 @@ async def _xp_gather_skill(character: Character, job: JobType, target_level):
             [
                 item
                 for item in await Encyclopedia.get_all_items_by_job(job, current_level)
-                if item.is_gatherable_resource
+                if item.is_gatherable_resource and not await item.is_event_item
             ],
             key=lambda item: item.level,
         )
