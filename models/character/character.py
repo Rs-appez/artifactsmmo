@@ -235,14 +235,16 @@ class Character(
         )
 
     @classmethod
-    def __get_jobs(cls, data: dict) -> dict[JobType, int]:
+    def __get_jobs(cls, data: dict) -> dict[JobType, dict[str, int]]:
+
+        def get_job_level(job_type: JobType) -> dict[str, int]:
+            return {
+                "level": data.get(f"{job_type.value}_level", 0),
+                "xp": data.get(f"{job_type.value}_xp", 0),
+                "next_level_xp": data.get(f"{job_type.value}_max_xp", 0),
+            }
+
         jobs = {}
-        jobs[JobType.MINING] = data.get("mining_level", 0)
-        jobs[JobType.WOODCUTTING] = data.get("woodcutting_level", 0)
-        jobs[JobType.FISHING] = data.get("fishing_level", 0)
-        jobs[JobType.WEAPONCRAFTING] = data.get("weaponcrafting_level", 0)
-        jobs[JobType.GEARCRAFTING] = data.get("gearcrafting_level", 0)
-        jobs[JobType.JEWELRYCRAFTING] = data.get("jewelrycrafting_level", 0)
-        jobs[JobType.COOKING] = data.get("cooking_level", 0)
-        jobs[JobType.ALCHEMY] = data.get("alchemy_level", 0)
+        for job_type in JobType.character_job_types():
+            jobs[job_type] = get_job_level(job_type)
         return jobs
