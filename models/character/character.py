@@ -54,7 +54,7 @@ class Character(
     _level: int
 
     _wisdom: int
-    _protecting: int
+    _prospecting: int
 
     def __post_init__(self):
         self.__init_api_mixin__()
@@ -98,8 +98,8 @@ class Character(
         return self._wisdom
 
     @property
-    def protecting(self) -> int:
-        return self._protecting
+    def prospecting(self) -> int:
+        return self._prospecting
 
     @refresh_after
     async def refresh(self) -> dict:
@@ -208,7 +208,7 @@ class Character(
             _max_xp=data["max_xp"],
             _level=data["level"],
             _wisdom=data["wisdom"],
-            _protecting=data["protecting"],
+            _prospecting=data["prospecting"],
             _gold=data["gold"],
             _inventory={
                 await Encyclopedia.get_item_by_code(item["code"]): item["quantity"]
