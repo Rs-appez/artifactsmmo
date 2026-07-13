@@ -50,3 +50,24 @@ class JobType(Enum):
             JobType.COOKING,
             JobType.ALCHEMY,
         ]
+
+    @staticmethod
+    def get_base_xp(level: int) -> int:
+        if level < 1:
+            raise ValueError("Level must be greater than or equal to 1.")
+        if level < 10:
+            return 5
+        elif level < 20:
+            return 10
+        elif level < 30:
+            return 13
+        elif level < 35:
+            return 16
+        elif level < 40:
+            return 20
+        elif level < 45:
+            return 28
+        elif level < 50:
+            return 36
+        else:
+            return 0
