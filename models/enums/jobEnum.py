@@ -37,3 +37,16 @@ class JobType(Enum):
             JobType.WOODCUTTING,
             JobType.FISHING,
         }
+
+    @staticmethod
+    def character_job_types() -> list["JobType"]:
+        return [
+            JobType.MINING,
+            JobType.WOODCUTTING,
+            JobType.FISHING,
+            JobType.WEAPONCRAFTING,
+            JobType.GEARCRAFTING,
+            JobType.JEWELRYCRAFTING,
+            JobType.COOKING,
+            JobType.ALCHEMY,
+        ]
