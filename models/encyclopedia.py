@@ -269,6 +269,11 @@ class Encyclopedia:
 
         return event
 
+    @staticmethod
+    async def get_all_events() -> set[Event]:
+        await Encyclopedia.wait_event()
+        return set(Encyclopedia._events.values())
+
     @classmethod
     async def __load_events(cls):
         if cls.__events_loaded:
