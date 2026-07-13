@@ -59,7 +59,7 @@ class FightMixin:
     @property
     async def waiting_for_fight(self: "Character"):
         while self._ready_to_fight_boss:
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.2)
 
     @request_action
     async def set_ready_to_fight(self: "Character"):
