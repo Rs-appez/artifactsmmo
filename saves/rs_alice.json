@@ -1,8 +1,8 @@
 {
-    "routine_name": "gather",
-    "routine_module": "routines.gather",
+    "routine_name": "xp_skill",
+    "routine_module": "routines.level_up_skill",
     "routine_args": [
-        "shrimp"
+        "fishing"
     ],
     "routine_kwargs": {}
 }
