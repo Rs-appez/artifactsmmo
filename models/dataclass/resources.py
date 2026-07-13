@@ -48,3 +48,11 @@ class Resource:
     @staticmethod
     def from_drop_item(item: Item) -> set["Resource"]:
         return Resource._drop_item[item]
+
+    @property
+    async def is_event_resource(self) -> bool:
+        from models import Encyclopedia
+
+        return any(
+            self == event.content for event in await Encyclopedia.get_all_events()
+        )
