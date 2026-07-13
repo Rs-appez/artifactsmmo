@@ -71,3 +71,7 @@ class JobType(Enum):
             return 36
         else:
             return 0
+
+    @staticmethod
+    def get_wisdom_bonus(wisdom: int) -> float:
+        return 1 + (wisdom / 1000)
