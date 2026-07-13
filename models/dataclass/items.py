@@ -87,6 +87,17 @@ class Item:
         return self.type == "resource" and self.subtype in JobType
 
     @property
+    async def is_event_item(self) -> bool:
+        from models import Encyclopedia
+        from models.dataclass import Resource
+
+        resources = Resource.from_drop_item(self)
+
+        return any(
+            event.content in resources for event in await Encyclopedia.get_all_events()
+        )
+
+    @property
     def is_dropable_resource(self) -> bool:
         return self.type == "resource" and self.subtype == "mob"
 
