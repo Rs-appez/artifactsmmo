@@ -57,7 +57,7 @@ async def boss_farm(
             for mate in teammate:
                 mate.do_one_time_task(empty_farm)
 
-        if character.hp < 200:
+        if character.hp < 500:
             _ = await __regenerate_hp(character)
         _ = await character.move(mob_position)
         await character.set_ready_to_fight()
