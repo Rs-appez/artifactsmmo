@@ -220,6 +220,15 @@ class Encyclopedia:
 
         return resource
 
+    @staticmethod
+    async def get_all_resources_by_job(job: JobType, level: int = -1) -> set[Resource]:
+        await Encyclopedia.wait_resource()
+        return {
+            resource
+            for resource in Encyclopedia._resources.values()
+            if resource.skill == job and (resource.level <= level or level == -1)
+        }
+
     @classmethod
     async def __load_resources(cls):
         if cls.__resources_loaded:
