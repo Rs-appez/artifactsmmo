@@ -56,6 +56,10 @@ class FightMixin:
     def is_ready_to_fight_boss(self: "Character"):
         return self._ready_to_fight_boss
 
+    @is_ready_to_fight_boss.setter
+    def is_ready_to_fight_boss(self: "Character", value: bool):
+        self._ready_to_fight_boss = value
+
     @property
     async def waiting_for_fight(self: "Character"):
         while self._ready_to_fight_boss:
