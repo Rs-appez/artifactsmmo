@@ -65,6 +65,10 @@ async def boss_farm(
             while any(not mate.is_ready_to_fight_boss for mate in teammate):
                 await asyncio.sleep(0.2)
             _ = await character.fight(teammate)
+            for mate in teammate or []:
+                if mate != character:
+                    await mate.refresh()
+                mate.is_ready_to_fight_boss = False
         else:
             await character.waiting_for_fight
 
