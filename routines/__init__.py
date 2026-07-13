@@ -6,6 +6,7 @@ from .craft import craft
 from .complete_task import complete_task
 from .exchange_coin import exchange_task_coin
 from .npc_trade import buy_from_npc
+from .level_up_skill import xp_skill
 
 __all__ = [
     "mob_farm",
@@ -18,4 +19,5 @@ __all__ = [
     "handle_travel",
     "handle_return_travel",
     "buy_from_npc",
+    "xp_skill",
 ]
