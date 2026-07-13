@@ -89,8 +89,6 @@ class FightMixin:
         except Exception as e:
             print(f"❌ {self.surname} fight : {e}")
             return False
-        finally:
-            self._ready_to_fight_boss = False
 
     async def rest(self: "Character") -> bool:
         try:
