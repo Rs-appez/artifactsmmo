@@ -27,13 +27,20 @@ async def _xp_gather_skill(character: Character, job: JobType, target_level):
 
     while target_level == -1 or character.get_job_level(job) < target_level:
         current_level = character.get_job_level(job)
-        item_target = max(
+        resource_target = max(
             [
-                item
-                for item in await Encyclopedia.get_all_items_by_job(job, current_level)
-                if item.is_gatherable_resource and not await item.is_event_item
+                resource
+                for resource in await Encyclopedia.get_all_resources_by_job(
+                    job, current_level
+                )
+                if not await resource.is_event_resource
             ],
             key=lambda item: item.level,
+        )
+
+        item_target = min(
+            resource_target.drops,
+            key=lambda item_id: resource_target.drops[item_id]["rate"],
         )
 
         need_for_level_up = character.nb_gather_needed_for_level_up(item_target)
