@@ -82,18 +82,18 @@ class StuffMixin:
                     print(f"❌ {self.surname} failed to equip {item.name} to fight")
                 print(f"⚔️  {self.surname} equipped {item.name} to fight")
                 return
-        return
 
         # temporary need refactor
-        better_weapon = await Encyclopedia.get_item_by_code("sticky_sword")
-        bank_token = await Bank.reserve_items({better_weapon: 1})
-        try:
+        better_weapon = await Encyclopedia.get_item_by_code("king_slime_sword")
+        if better_weapon is None:
+            print(f"❌ {self.surname} failed to find better weapon in encyclopedia")
+            return
+        async with Bank.reserve_items({better_weapon: 1}) as bank_token:
             _ = await self.deposit_all_in_bank()
-            if await self.withdraw_item_from_bank(bank_token):
-                if not await self.equip(better_weapon):
-                    print(f"❌ {self.surname} failed to equip sticky sword")
-        except Exception as e:
-            await Bank.unreserve_items(bank_token)
+            await self.withdraw_item_from_bank(bank_token)
+
+        if not await self.equip(better_weapon):
+            print(f"❌ {self.surname} failed to equip king slime sword")
 
     async def toolize(self: "Character", job: JobType) -> None:
         try:
