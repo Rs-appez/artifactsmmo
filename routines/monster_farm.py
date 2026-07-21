@@ -8,7 +8,12 @@ from utils.find_nearest import find_nearest_lootable
 from routines import empty_farm
 
 
-async def mob_farm(character: Character, mob: Monster | str, nb: int | str = -1):
+async def mob_farm(
+    character: Character,
+    mob: Monster | str,
+    nb: int | str = -1,
+    force: bool | str = False,
+):
     try:
         if isinstance(mob, str):
             mob = await Encyclopedia.get_monster_by_code(mob)
@@ -20,14 +25,23 @@ async def mob_farm(character: Character, mob: Monster | str, nb: int | str = -1)
                 print(f"❌ Invalid number of iterations : {nb}")
                 return
 
+        if isinstance(force, str):
+            force = force.lower() in ("true", "force")
+
         await character.weaponize()
         iterations = range(nb) if nb > 0 else count()
         for _ in iterations:
             if character.is_inventory_full:
                 deposit_gold = True if character.gold > 10000 else False
                 _ = await character.deposit_all_in_bank(with_gold=deposit_gold)
-            while not character.will_win_against(mob):
-                await __regenerate_hp(character)
+            try:
+                while not character.will_win_against(mob):
+                    await __regenerate_hp(character)
+            except ImpossibleCombatException as e:
+                if force:
+                    await __regenerate_hp(character, full=True)
+                else:
+                    raise e
             mob_position = await find_nearest_lootable(character, {mob})
             if not await character.move(mob_position):
                 raise Exception(f"Failed to move to {mob_position.name}")
@@ -78,7 +92,7 @@ async def boss_farm(
         character.is_ready_to_fight_boss = False
 
 
-async def __regenerate_hp(character: Character):
+async def __regenerate_hp(character: Character, full: bool = False):
     try:
         if not character.has_food:
             print(f"󰜎 {character.surname} will search for food in bank")
@@ -88,6 +102,9 @@ async def __regenerate_hp(character: Character):
                 if not await character.withdraw_item_from_bank(food_token):
                     raise Exception("Failed to withdraw food from bank")
         await character.regenerate_hp()
+        if full and character.missing_hp > 0:
+            await character.regenerate_hp()
+
     except Exception:
         _ = await character.rest()
         print(f"󰻝  {character.surname} rests to recover hp before fighting")
