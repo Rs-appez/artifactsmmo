@@ -65,9 +65,9 @@ class JobMixin:
         current_xp = self.get_job_xp(item.job)
         target_xp = self.get_job_next_level_xp(item.job)
 
-        xp_per_gather = self.nb_xp_per_action(item)
+        xp_per_action = self.nb_xp_per_action(item)
 
-        if xp_per_gather == 0:
+        if xp_per_action == 0:
             return 0
 
-        return ceil((target_xp - current_xp) / xp_per_gather)
+        return ceil((target_xp - current_xp) / xp_per_action)
