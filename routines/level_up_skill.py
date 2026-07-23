@@ -43,6 +43,6 @@ async def _xp_gather_skill(character: Character, job: JobType, target_level):
             key=lambda item_id: resource_target.drops[item_id]["rate"],
         )
 
-        need_for_level_up = character.nb_gather_needed_for_level_up(item_target)
+        need_for_level_up = character.nb_action_needed_for_level_up(item_target)
 
         await gather(character, item_target, need_for_level_up)

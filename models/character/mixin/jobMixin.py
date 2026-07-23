@@ -42,25 +42,30 @@ class JobMixin:
             return False
         return True
 
-    def nb_xp_per_gather(self: "Character", item: Item) -> int:
+    def nb_xp_per_action(self: "Character", item: Item) -> int:
         if not self.will_gain_xp_with(item):
             return 0
 
         job_level = self.get_job_level(item.job)
         item_level = item.craft_level or item.level
+        xp_multiplier = item.job.job_xp_multiplier if item.craft_level else 1
 
         return floor(
-            (item.job.get_base_xp(item_level) + (item_level / job_level) * 8)
+            (
+                item.job.get_base_xp(item_level)
+                + (item_level / job_level) * item.job.get_xp_coefficient(item_level)
+            )
+            * xp_multiplier
             * JobType.get_wisdom_bonus(self.wisdom)
             + 0.5
         )
 
-    def nb_gather_needed_for_level_up(self: "Character", item: Item) -> int:
+    def nb_action_needed_for_level_up(self: "Character", item: Item) -> int:
 
         current_xp = self.get_job_xp(item.job)
         target_xp = self.get_job_next_level_xp(item.job)
 
-        xp_per_gather = self.nb_xp_per_gather(item)
+        xp_per_gather = self.nb_xp_per_action(item)
 
         if xp_per_gather == 0:
             return 0
