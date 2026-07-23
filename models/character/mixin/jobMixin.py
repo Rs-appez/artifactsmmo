@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
-from math import ceil, floor
 from typing import TYPE_CHECKING
 
 from models.dataclass import Item
 from models.enums import JobType
+from utils.xp_craft_calculator import nb_action_needed_for_level_up, nb_xp_per_action
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -21,10 +21,6 @@ class JobMixin:
         job = JobType(job_name) if isinstance(job_name, str) else job_name
         return self._jobs.get(job, {}).get("xp", 0)
 
-    def get_job_next_level_xp(self: "Character", job_name: str | JobType) -> int:
-        job = JobType(job_name) if isinstance(job_name, str) else job_name
-        return self._jobs.get(job, {}).get("next_level_xp", 0)
-
     def has_job(self: "Character", job_name: str | JobType, level=1) -> bool:
         return self.get_job_level(job_name) >= level
 
@@ -34,40 +30,14 @@ class JobMixin:
         return job_level >= item_level
 
     def will_gain_xp_with(self: "Character", item: Item) -> bool:
-        job_level = self.get_job_level(item.job)
-        if job_level == 50:
-            return False
-        item_level = item.craft_level or item.level
-        if job_level > item_level + 10:
-            return False
-        return True
-
-    def nb_xp_per_action(self: "Character", item: Item) -> int:
-        if not self.will_gain_xp_with(item):
-            return 0
-
-        job_level = self.get_job_level(item.job)
-        item_level = item.craft_level or item.level
-        xp_multiplier = item.job.job_xp_multiplier if item.craft_level else 1
-
-        return floor(
-            (
-                item.job.get_base_xp(item_level)
-                + (item_level / job_level) * item.job.get_xp_coefficient(item_level)
-            )
-            * xp_multiplier
-            * JobType.get_wisdom_bonus(self.wisdom)
-            + 0.5
-        )
+        return nb_xp_per_action(self.get_job_level(item.job), self.wisdom, item) > 0
 
     def nb_action_needed_for_level_up(self: "Character", item: Item) -> int:
 
-        current_xp = self.get_job_xp(item.job)
-        target_xp = self.get_job_next_level_xp(item.job)
-
-        xp_per_action = self.nb_xp_per_action(item)
-
-        if xp_per_action == 0:
-            return 0
-
-        return ceil((target_xp - current_xp) / xp_per_action)
+        return nb_action_needed_for_level_up(
+            self.get_job_level(item.job),
+            self.get_job_xp(item.job),
+            JobType.get_next_level_xp(self.get_job_level(item.job)),
+            self.wisdom,
+            item,
+        )[0]

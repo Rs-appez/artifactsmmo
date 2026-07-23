@@ -254,7 +254,6 @@ class Character(
             return {
                 "level": data.get(f"{job_type.value}_level", 0),
                 "xp": data.get(f"{job_type.value}_xp", 0),
-                "next_level_xp": data.get(f"{job_type.value}_max_xp", 0),
             }
 
         jobs = {}

@@ -1,5 +1,18 @@
 from enum import Enum
 
+_XP_RANGES = [
+    (1, 150, 100),
+    (4, 450, 250),
+    (9, 1700, 400),
+    (14, 3700, 700),
+    (19, 7200, 1000),
+    (24, 12200, 1200),
+    (29, 18200, 1500),
+    (34, 25700, 1800),
+    (40, 36500, 2100),
+    (45, 47000, 1800),
+]
+
 
 class JobType(Enum):
     NO_JOB = "no_job"
@@ -162,3 +175,11 @@ class JobType(Enum):
     @staticmethod
     def get_wisdom_bonus(wisdom: int) -> float:
         return 1 + (wisdom / 1000)
+
+    @staticmethod
+    def get_next_level_xp(level: int) -> int:
+        if not (1 <= level <= 49):
+            raise ValueError("Level must be between 1 and 49")
+
+        l_start, xp_base, delta = max(r for r in _XP_RANGES if r[0] <= level)
+        return xp_base + delta * (level - l_start)
