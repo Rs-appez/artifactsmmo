@@ -38,6 +38,10 @@ class JobType(Enum):
             JobType.FISHING,
         }
 
+    @property
+    def max_level(self) -> int:
+        return 50
+
     @staticmethod
     def character_job_types() -> list["JobType"]:
         return [
