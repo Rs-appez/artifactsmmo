@@ -1,11 +1,18 @@
-from models import Character
+from models import Character, Encyclopedia
+
 from models.dataclass import Item
 from models.enums import JobType
 
 
-def nb_craft_needed_for_level_up(
-    character: Character, item: Item, target_level: int | None = None
+async def nb_craft_needed_for_level_up(
+    character: Character, item: Item | str, target_level: int | None = None
 ) -> int:
+
+    if isinstance(item, str):
+        if item_object := await Encyclopedia.get_item_by_code(item):
+            item = item_object
+        else:
+            raise ValueError(f"Item with code {item} not found.")
 
     if item.job == JobType.NO_JOB:
         raise ValueError("Item has no job associated with it.")
