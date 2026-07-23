@@ -109,6 +109,40 @@ class JobType(Enum):
         else:
             return 0
 
+    def get_xp_coefficient(self, level: int) -> int:
+        if self.is_gathering:
+            return 8
+        elif not self.is_crafting:
+            raise ValueError(
+                f"JobType {self.value} does not have an XP coefficient defined."
+            )
+
+        if level < 1:
+            raise ValueError("Level must be greater than or equal to 1.")
+
+        if level < 5:
+            return 25
+        elif level < 10:
+            return 30
+        elif level < 15:
+            return 35
+        elif level < 20:
+            return 40
+        elif level < 25:
+            return 45
+        elif level < 30:
+            return 50
+        elif level < 35:
+            return 55
+        elif level < 40:
+            return 60
+        elif level < 45:
+            return 65
+        elif level < 50:
+            return 70
+        else:
+            return 0
+
     @staticmethod
     def get_wisdom_bonus(wisdom: int) -> float:
         return 1 + (wisdom / 1000)
