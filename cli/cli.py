@@ -131,8 +131,8 @@ async def cli(game_manager: GameManager):
     _ = asyncio.create_task(load_items())
 
     with patch_stdout():
-        try:
-            while True:
+        while True:
+            try:
                 try:
                     command = await session.prompt_async()
                 except EOFError, KeyboardInterrupt:
@@ -183,5 +183,5 @@ async def cli(game_manager: GameManager):
                     )(character)
                     if asyncio.iscoroutine(result):
                         await result
-        except Exception as e:
-            print(f"❌ {e}")
+            except Exception as e:
+                print(f"❌ {e}")
