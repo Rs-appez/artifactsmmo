@@ -50,7 +50,7 @@ class JobMixin:
         item_level = item.craft_level or item.level
 
         return floor(
-            (JobType.get_base_xp(item_level) + (item_level / job_level) * 8)
+            (item.job.get_base_xp(item_level) + (item_level / job_level) * 8)
             * JobType.get_wisdom_bonus(self.wisdom)
             + 0.5
         )

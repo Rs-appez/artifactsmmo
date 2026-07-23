@@ -55,8 +55,15 @@ class JobType(Enum):
             JobType.ALCHEMY,
         ]
 
-    @staticmethod
-    def get_base_xp(level: int) -> int:
+    def get_base_xp(self, level: int) -> int:
+        if self.is_crafting:
+            return self._get_crafting_base_xp(level)
+        elif self.is_gathering:
+            return self._get_gathering_base_xp(level)
+        else:
+            raise ValueError(f"JobType {self.value} does not have a base XP defined.")
+
+    def _get_gathering_base_xp(self, level: int) -> int:
         if level < 1:
             raise ValueError("Level must be greater than or equal to 1.")
         if level < 10:
@@ -73,6 +80,32 @@ class JobType(Enum):
             return 28
         elif level < 50:
             return 36
+        else:
+            return 0
+
+    def _get_crafting_base_xp(self, level: int) -> int:
+        if level < 1:
+            raise ValueError("Level must be greater than or equal to 1.")
+        if level < 5:
+            return 50
+        elif level < 10:
+            return 100
+        elif level < 15:
+            return 200
+        elif level < 20:
+            return 325
+        elif level < 25:
+            return 450
+        elif level < 30:
+            return 550
+        elif level < 35:
+            return 650
+        elif level < 40:
+            return 750
+        elif level < 45:
+            return 850
+        elif level < 50:
+            return 1000
         else:
             return 0
 
