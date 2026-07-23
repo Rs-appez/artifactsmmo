@@ -1,7 +1,8 @@
-from models.dataclass.bank import Bank
-from models.enums import TaskType
 import routines
 from models import Character, Encyclopedia, GameManager
+from models.dataclass.bank import Bank
+from models.enums import TaskType
+from utils.xp_craft_calculator import nb_craft_needed_for_level_up
 
 
 def _check_freshness(function):
@@ -106,6 +107,18 @@ def reserved_bank(_):
         print(
             f"🔒reserved {', '.join([f'{qty}x {item.name}' for item, qty in reservation.items()])}"
         )
+
+
+@_check_freshness
+async def nb_craft_needed_calculator(
+    character: Character, item_code: str, target_level: str | None = None
+):
+    nb_craft_needed = await nb_craft_needed_for_level_up(
+        character, item_code, int(target_level) if target_level else None
+    )
+    print(
+        f"⚒️ {character.surname} needs {nb_craft_needed} crafts to reach level {target_level} with item {item_code}"
+    )
 
 
 async def refresh_events(gm: GameManager):

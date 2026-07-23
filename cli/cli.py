@@ -23,6 +23,7 @@ dict_actions = {
     "gotask": cli_action.complete_task,
     "goroutine": cli_action.asign_routine,
     "gomission": cli_action.asign_mission,
+    "nbcraft": cli_action.nb_craft_needed_calculator,
 }
 
 dict_all = {
@@ -67,6 +68,7 @@ async def cli(game_manager: GameManager):
                 for name in characters.keys()
             }
         },
+        **{"nbCraft": {name: {} for name in characters.keys()}},
         **{cmd: None for cmd in dict_all},
         **{cmd: None for cmd in dict_special},
     }
@@ -78,6 +80,13 @@ async def cli(game_manager: GameManager):
     async def load_items():
         updated_actions = {
             "craft": {
+                name: {
+                    item_code: None
+                    for item_code in await Encyclopedia.get_all_items_names()
+                }
+                for name in characters.keys()
+            },
+            "nbCraft": {
                 name: {
                     item_code: None
                     for item_code in await Encyclopedia.get_all_items_names()
