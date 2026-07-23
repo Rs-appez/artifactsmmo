@@ -42,6 +42,22 @@ class JobType(Enum):
     def max_level(self) -> int:
         return 50
 
+    @property
+    def job_xp_multiplier(self) -> float:
+        if self in {JobType.MINING, JobType.WOODCUTTING, JobType.FISHING}:
+            return 0.1
+        elif self in {
+            JobType.WEAPONCRAFTING,
+            JobType.GEARCRAFTING,
+            JobType.JEWELRYCRAFTING,
+            JobType.ALCHEMY,
+        }:
+            return 1
+        elif self == JobType.COOKING:
+            return 0.5
+        else:
+            return 1
+
     @staticmethod
     def character_job_types() -> list["JobType"]:
         return [
