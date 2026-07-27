@@ -82,7 +82,9 @@ async def nb_craft_needed_for_level_up(
             item,
         )
         nb_craft_needed += nb_craft
-        current_xp += nb_craft * xp_gained
+        current_xp = (current_xp + nb_craft * xp_gained) % JobType.get_next_level_xp(
+            current_level
+        )
         current_level += 1
 
     return nb_craft_needed
