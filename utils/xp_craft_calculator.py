@@ -44,7 +44,9 @@ def nb_action_needed_for_level_up(
     if xp_per_action == 0:
         return 0, xp_per_action
 
-    return ceil((character_target_xp - character_job_xp) / xp_per_action), xp_per_action
+    return ceil(
+        max(0, character_target_xp - character_job_xp) / xp_per_action
+    ), xp_per_action
 
 
 async def nb_craft_needed_for_level_up(
