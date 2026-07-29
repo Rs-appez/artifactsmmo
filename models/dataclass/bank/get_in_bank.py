@@ -12,30 +12,26 @@ from models.enums import EquipentType, JobType
 if TYPE_CHECKING:
     from models.character import Character
 
-_check_bank = Bank._Bank__check_bank  # pyright: ignore[reportAttributeAccessIssue]
-_reserve_items = Bank._reserve_items  # pyright: ignore[reportPrivateUsage]
-_unreserve_items = Bank._unreserve_items  # pyright: ignore[reportPrivateUsage]
-
 
 @asynccontextmanager
 async def get_max_items(
     character: Character, item: Item, keep_free_slots: int = 0, per_stack: int = 1
 ) -> AsyncGenerator[tuple[uuid.UUID, int], None]:
     async with Bank.locked():
-        bank = await _check_bank()
+        bank = await Bank._check_bank()
         item_quantity = min(
             bank.items.get(item, 0), character.inventory_max_items - keep_free_slots
         )
         item_quantity = (item_quantity // per_stack) * per_stack
         if item_quantity <= 0:
             raise Exception(f"No {item.name} found in bank for character")
-        token = await _reserve_items(
+        token = await Bank._reserve_items(
             {item: item_quantity}, bank=bank, inventory=character.inventory
         )
     try:
         yield token, item_quantity
     finally:
-        _unreserve_items(token)
+        Bank._unreserve_items(token)
 
 
 @asynccontextmanager
@@ -43,7 +39,7 @@ async def get_food(
     character: Character, quantity: int
 ) -> AsyncGenerator[uuid.UUID, None]:
     async with Bank.locked():
-        bank = await _check_bank()
+        bank = await Bank._check_bank()
         food_items = {
             item: quantity
             for item, quantity in bank.items.items()
@@ -62,11 +58,11 @@ async def get_food(
             packed_food[item] = use_quantity
             quantity -= use_quantity
 
-        token = await _reserve_items(packed_food, bank=bank)
+        token = await Bank._reserve_items(packed_food, bank=bank)
     try:
         yield token
     finally:
-        _unreserve_items(token)
+        Bank._unreserve_items(token)
 
 
 @asynccontextmanager
@@ -74,7 +70,7 @@ async def get_tool(
     character: Character, job: JobType
 ) -> AsyncGenerator[tuple[uuid.UUID, Item], None]:
     async with Bank.locked():
-        bank = await _check_bank()
+        bank = await Bank._check_bank()
         tool_items = {
             item
             for item in bank.items
@@ -85,11 +81,11 @@ async def get_tool(
 
         job_effect = await Encyclopedia.get_effect_by_code(job.value)
         best_tool = min(tool_items, key=lambda item: item.effects.get(job_effect, 0))
-        token = await _reserve_items({best_tool: 1}, bank=bank)
+        token = await Bank._reserve_items({best_tool: 1}, bank=bank)
     try:
         yield token, best_tool
     finally:
-        _unreserve_items(token)
+        Bank._unreserve_items(token)
 
 
 @asynccontextmanager
@@ -97,7 +93,7 @@ async def get_best_stat_item(
     character: Character, wanted_effect: Effect
 ) -> AsyncGenerator[tuple[uuid.UUID, dict[Item, int]], None]:
     async with Bank.locked():
-        bank = await _check_bank()
+        bank = await Bank._check_bank()
         better_items_in_bank = defaultdict(int)
 
         best_equipment = {
@@ -166,11 +162,11 @@ async def get_best_stat_item(
             if best_rings[1][0].effects.get(wanted_effect, 0) > current_ring_2_stat:
                 better_items_in_bank[best_rings[1][0]] += 1
 
-        token = await _reserve_items(better_items_in_bank, bank=bank)
+        token = await Bank._reserve_items(better_items_in_bank, bank=bank)
     try:
         yield token, better_items_in_bank
     finally:
-        _unreserve_items(token)
+        Bank._unreserve_items(token)
 
 
 @asynccontextmanager
@@ -178,7 +174,7 @@ async def get_bag(character: Character) -> AsyncGenerator[tuple[uuid.UUID, Item]
     inventory_bag_effect = await Encyclopedia.get_effect_by_code("inventory_space")
     current_bag = character.get_equipped_item_by_slot(EquipentType.BAG)
     async with Bank.locked():
-        bank = await _check_bank()
+        bank = await Bank._check_bank()
         bag_items = {
             item
             for item in bank.items
@@ -197,8 +193,8 @@ async def get_bag(character: Character) -> AsyncGenerator[tuple[uuid.UUID, Item]
         bag_items,
         key=lambda item: item.effects.get(inventory_bag_effect, 0),
     )
-    token = await _reserve_items({best_bag: 1}, bank=bank)
+    token = await Bank._reserve_items({best_bag: 1}, bank=bank)
     try:
         yield token, best_bag
     finally:
-        _unreserve_items(token)
+        Bank._unreserve_items(token)

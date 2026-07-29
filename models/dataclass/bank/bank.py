@@ -95,7 +95,7 @@ class Bank:
         inventory: dict[Item, int] | None = None,
     ) -> uuid.UUID:
         if bank is None:
-            bank = await cls.__check_bank()
+            bank = await cls._check_bank()
         missing_items = bank.__get_missing_items(items, inventory=inventory)
 
         if imediately_needed and missing_items:
@@ -132,7 +132,7 @@ class Bank:
         return Bank.__missing_promises.get(token, {}).copy()
 
     @classmethod
-    async def __check_bank(cls) -> "Bank":
+    async def _check_bank(cls) -> "Bank":
         load = asyncio.gather(
             cls.__get_details(),
             cls.__get_items(),
