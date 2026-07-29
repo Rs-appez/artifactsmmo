@@ -64,13 +64,14 @@ class Monster:
             max_gold=data["max_gold"],
             drops=[
                 {
-                    await Encyclopedia.get_item_by_code(drop_data["code"]): {
+                    item: {
                         "rate": drop_data["rate"],
                         "min_quantity": drop_data["min_quantity"],
                         "max_quantity": drop_data["max_quantity"],
                     }
                 }
                 for drop_data in data.get("drops", [])
+                if (item := await Encyclopedia.get_item_by_code(drop_data["code"]))
             ],
         )
 
