@@ -60,6 +60,9 @@ class Character(
         self.__init_api_mixin__()
         self.__init_work_mixin__()
 
+    def __hash__(self):
+        return hash(self.name)
+
     @property
     def name(self) -> str:
 
