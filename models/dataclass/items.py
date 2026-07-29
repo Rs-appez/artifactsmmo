@@ -3,7 +3,7 @@ from typing import override
 from typing import TYPE_CHECKING
 
 from models.dataclass import Effect
-from models.enums import EquipentType, JobType
+from models.enums import EquipentType, JobType, Element
 
 if TYPE_CHECKING:
     from models.character.character import Character
@@ -124,6 +124,14 @@ class Item:
     @property
     def is_tool(self) -> bool:
         return self.type == "weapon" and self.subtype == "tool"
+
+    @property
+    def atk_element(self) -> set[Element]:
+        elements = set()
+        for effect in self.effects:
+            if element := effect.get_atk_element:
+                elements.add(element)
+        return elements
 
     def is_for_job(self, job: JobType) -> bool:
         if not self.is_tool:
