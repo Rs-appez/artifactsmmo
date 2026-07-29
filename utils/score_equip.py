@@ -1,3 +1,4 @@
+from functools import cache
 from typing import TYPE_CHECKING
 
 from models.enums import Element
@@ -32,6 +33,7 @@ def _damage_multiplier(element: Element, monster: "Monster") -> float:
     return max(0, 100 - monster.resistance.get(element, 0)) / 100
 
 
+@cache
 def score_weapon(weapon: "Item", monster: "Monster") -> float:
     score = 0.0
     for effect, value in weapon.effects.items():
