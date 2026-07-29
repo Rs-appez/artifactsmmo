@@ -1,14 +1,10 @@
 from dataclasses import dataclass
-
 from typing import TYPE_CHECKING, override
 
 from models.enums import Element
-from utils.math_fight import calc_attack
-
 
 if TYPE_CHECKING:
     from models.dataclass import Effect, Item
-    from models.character import Character
 
 
 @dataclass(frozen=True)
