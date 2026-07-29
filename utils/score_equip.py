@@ -2,6 +2,7 @@ from functools import cache
 from typing import TYPE_CHECKING
 
 from models.enums import Element
+from utils.elements import parse_element
 
 if TYPE_CHECKING:
     from models.dataclass import Item, Monster
@@ -20,15 +21,6 @@ WEIGHTS = {
 }
 
 
-def _parse_element(code: str, prefix: str) -> Element | None:
-    if not code.startswith(prefix):
-        return None
-    try:
-        return Element(code.removeprefix(prefix))
-    except ValueError:
-        return None
-
-
 def _damage_multiplier(element: Element, monster: "Monster") -> float:
     return max(0, 100 - monster.resistance.get(element, 0)) / 100
 
@@ -38,7 +30,7 @@ def score_weapon(weapon: "Item", monster: "Monster") -> float:
     score = 0.0
     for effect, value in weapon.effects.items():
         code = effect.code
-        element = _parse_element(code, "attack_")
+        element = parse_element(code, "attack_")
         if element is not None:
             score += value * _damage_multiplier(element, monster)
         elif code in WEIGHTS:
