@@ -7,11 +7,11 @@ if TYPE_CHECKING:
     from models.dataclass import Monster
 
 
-def calc_attack(atk, dmg) -> int:
+def calc_attack(atk: int, dmg: int) -> int:
     return floor(atk * (1 + dmg / 100) + 0.5)
 
 
-def calc_resistance(atk, res) -> int:
+def calc_resistance(atk: int, res: int) -> int:
     return floor(atk * (1 - res / 100) + 0.5)
 
 
