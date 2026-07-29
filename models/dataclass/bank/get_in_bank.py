@@ -1,10 +1,10 @@
-import uuid
-from models import Encyclopedia
 import heapq
+import uuid
 from collections import defaultdict
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, AsyncGenerator
 
+from models import Encyclopedia
 from models.dataclass import Effect, Item
 from models.dataclass.bank import Bank
 from models.enums import EquipentType, JobType
