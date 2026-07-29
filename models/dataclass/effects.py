@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import override
 
+from models.enums import Element
+
 
 @dataclass(frozen=True)
 class Effect:
@@ -23,3 +25,14 @@ class Effect:
     @override
     def __hash__(self):
         return hash(self.code)
+
+    @property
+    def has_element(self) -> bool:
+        """Returns True if the effect has an associated element, False otherwise."""
+        return self.get_element() is not None
+
+    def get_element(self) -> Element | None:
+        """Returns the element associated with the effect, if any."""
+        for element in Element:
+            if self.code.endswith(element.value):
+                return element
