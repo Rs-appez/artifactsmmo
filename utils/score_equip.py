@@ -25,7 +25,7 @@ def _damage_multiplier(element: Element, monster: "Monster") -> float:
 
 
 @cache
-def score_weapon(weapon: "Item", monster: "Monster") -> float:
+def _score_weapon(weapon: "Item", monster: "Monster") -> float:
     if not weapon.is_weapon:
         raise ValueError(f"Item {weapon.name} is not a weapon")
     score = 0.0
@@ -38,9 +38,14 @@ def score_weapon(weapon: "Item", monster: "Monster") -> float:
     return score
 
 
+def score_weapon(weapon: "Item", monster: "Monster") -> float:
+    """Score a weapon against a monster. Higher is better."""
+    return _score_weapon(weapon, monster)
+
+
 @cache
-def score_equipment(
-    equipment: "Item", monster: "Monster", weapon_elems: set[Element]
+def _score_equipment(
+    equipment: "Item", monster: "Monster", weapon_elems: frozenset[Element]
 ) -> float:
     if not equipment.is_equipment:
         raise ValueError(f"Item {equipment.name} is not equipment")
@@ -63,3 +68,10 @@ def score_equipment(
             )
 
     return score
+
+
+def score_equipment(
+    equipment: "Item", monster: "Monster", weapon_elems: frozenset[Element]
+) -> float:
+    """Score a piece of equipment against a monster. Higher is better."""
+    return _score_equipment(equipment, monster, weapon_elems)
