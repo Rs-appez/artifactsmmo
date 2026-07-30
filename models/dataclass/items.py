@@ -28,6 +28,9 @@ class Item:
     craft_quantity: int
     tradeable: bool
 
+    def __str__(self):
+        return f"{self.name} ({self.code})"
+
     @classmethod
     async def from_dict(cls, data):
         from models import Encyclopedia
