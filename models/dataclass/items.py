@@ -49,7 +49,7 @@ class Item:
             effect = await Encyclopedia.get_effect_by_code(effect_data["code"])
             effects[effect] = effect_data["value"]
 
-        # ugly temp (i hope)
+        # TODO : ugly temp (i hope)
         job = JobType(craft_data.get("skill", "no_job"))
         if job == JobType.NO_JOB and data["type"] == "resource":
             try:
