@@ -1,3 +1,4 @@
+from utils.score_equip import best_equips_for_monster
 import heapq
 import uuid
 from collections import defaultdict
@@ -5,7 +6,7 @@ from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, AsyncGenerator
 
 from models import Encyclopedia
-from models.dataclass import Effect, Item
+from models.dataclass import Effect, Item, Monster
 from models.dataclass.bank import Bank
 from models.enums import EquipentType, JobType
 
@@ -196,5 +197,27 @@ async def get_bag(character: Character) -> AsyncGenerator[tuple[uuid.UUID, Item]
     token = await Bank._reserve_items({best_bag: 1}, bank=bank)
     try:
         yield token, best_bag
+    finally:
+        Bank._unreserve_items(token)
+
+
+@asynccontextmanager
+async def get_best_equipment(
+    character: Character, monster: "Monster"
+) -> AsyncGenerator[tuple[uuid.UUID, set[Item]], None]:
+    async with Bank.locked():
+        bank = await Bank._check_bank()
+        items = frozenset(
+            item
+            for item in bank.items
+            if (item.is_equipment or item.is_weapon) and item.can_be_used_by(character)
+        )
+        best_equipment_set = best_equips_for_monster(monster, items)
+
+        token = await Bank._reserve_items(
+            {item: 1 for item in best_equipment_set}, bank=bank
+        )
+    try:
+        yield token, best_equipment_set
     finally:
         Bank._unreserve_items(token)
