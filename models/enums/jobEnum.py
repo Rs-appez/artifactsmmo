@@ -32,6 +32,7 @@ class JobType(Enum):
             JobType.WEAPONCRAFTING,
             JobType.GEARCRAFTING,
             JobType.JEWELRYCRAFTING,
+            JobType.COOKING,
         }
 
     @property
