@@ -12,11 +12,12 @@ WEIGHTS = {
     "dmg": 2.0,
     "elemental_dmg": 2.0,
     "elemental_res": 1.0,
-    "hp": 0.1,
+    "hp": 0.5,
     "critical_strike": 1.0,
-    "haste": 1.0,
-    "initiative": 0.2,
-    "prospecting": 0.05,
+    "haste": 0.05,
+    "initiative": 0.5,
+    "prospecting": 0.1,
+    "inventory_space": 0.01,
 }
 
 
