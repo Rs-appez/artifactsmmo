@@ -42,7 +42,7 @@ class Effect:
     def get_atk_element(self) -> Element | None:
         """Returns the element associated with the effect's attack, if any."""
         for element in Element:
-            if self.code.startswith(f"atk_{element.value}"):
+            if self.code.startswith(f"attack_{element.value}"):
                 return element
 
     @property
