@@ -3,11 +3,12 @@ from collections.abc import Coroutine, Sequence
 
 import httpx
 
-from config import ARTIFACTSMMO_URL, HEADERS
+from config import ARTIFACTSMMO_URL, HEADERS, SANDBOX
 from models import Character, CharacterManager, Encyclopedia, LocationRegistry
 from models.event import EventHandler, EventListener
 from routines.monster_farm import boss_farm
 from utils.initialize import initialize_characters
+from utils.test_sandbox import test
 
 
 class GameManager:
@@ -48,6 +49,8 @@ class GameManager:
         # tmp test boss fight
         # await self.__asign_boss()
         tasks = [char.start() for char in self.characters.values()]
+        if SANDBOX:
+            await test(self)
         return tasks
 
     async def create_characters(self):
