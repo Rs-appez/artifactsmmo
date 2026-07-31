@@ -1,4 +1,8 @@
 from enum import Enum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from models.dataclass import Item
 
 _XP_RANGES = [
     (1, 150, 100),
@@ -85,13 +89,14 @@ class JobType(Enum):
             JobType.ALCHEMY,
         ]
 
-    def get_base_xp(self, level: int) -> int:
-        if self.is_crafting:
+    def get_base_xp(self, item: Item) -> int:
+        level = item.craft_level or item.level
+        if item.is_craftable:
             return self._get_crafting_base_xp(level)
-        elif self.is_gathering:
+        elif item.is_gatherable_resource:
             return self._get_gathering_base_xp(level)
         else:
-            raise ValueError(f"JobType {self.value} does not have a base XP defined.")
+            raise ValueError(f"Item {item.name} is neither craftable nor gatherable.")
 
     def _get_gathering_base_xp(self, level: int) -> int:
         if level < 1:
@@ -139,10 +144,11 @@ class JobType(Enum):
         else:
             return 0
 
-    def get_xp_coefficient(self, level: int) -> int:
-        if self.is_gathering:
+    def get_xp_coefficient(self, item: Item) -> int:
+        level = item.craft_level or item.level
+        if item.is_gatherable_resource:
             return 8
-        elif not self.is_crafting:
+        elif not item.is_craftable:
             raise ValueError(
                 f"JobType {self.value} does not have an XP coefficient defined."
             )

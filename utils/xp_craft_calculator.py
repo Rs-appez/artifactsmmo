@@ -21,9 +21,8 @@ def nb_xp_per_action(character_job_level: int, wisdom: int, item: Item) -> int:
 
     return floor(
         (
-            item.job.get_base_xp(item_level)
-            + (item_level / character_job_level)
-            * item.job.get_xp_coefficient(item_level)
+            item.job.get_base_xp(item)
+            + (item_level / character_job_level) * item.job.get_xp_coefficient(item)
         )
         * xp_multiplier
         * JobType.get_wisdom_bonus(wisdom)
