@@ -29,6 +29,12 @@ WEIGHTS = {
 #     "prospecting": 0.01,
 # }
 
+SLOT_RULES: dict[str, tuple[int, bool]] = {  # slot: (qty, duplicates_allowed)
+    "ring": (2, True),
+    "artifact": (3, False),
+}
+DEFAULT_RULE = (1, False)
+
 
 def _damage_multiplier(element: Element, monster: "Monster") -> float:
     return max(0, 100 - monster.resistance.get(element, 0)) / 100
@@ -87,52 +93,77 @@ def score_equipment(
     return _score_equipment(equipment, monster, weapon_elems)
 
 
+def _best_picks(
+    candidates: frozenset[tuple["Item", int]],
+    monster: "Monster",
+    weapon_elems: frozenset[Element],
+    count: int,
+    allow_duplicates: bool,
+) -> list["Item"]:
+    """Top `count` picks from a slot, honouring quantities and uniqueness."""
+    ranked = sorted(
+        candidates,
+        key=lambda c: score_equipment(c[0], monster, weapon_elems),
+        reverse=True,
+    )
+    picks: list["Item"] = []
+    for item, qty in ranked:
+        remaining = count - len(picks)
+        if remaining <= 0:
+            break
+        take = min(qty, remaining) if allow_duplicates else 1
+        picks.extend([item] * take)
+    return picks
+
+
 @cache
 def __build_set(
     weapon: "Item",
-    armor_by_slot: frozenset[frozenset["Item"]],
+    armor_by_slot: frozenset[frozenset[tuple["Item", int]]],
     monster: "Monster",
-) -> tuple[set["Item"], float]:
-    """Best armor set around one weapon. Returns (set, total_score)."""
+) -> tuple[dict["Item", int], float]:
+    """Best armor set around one weapon. Returns ({item: qty}, total_score)."""
     elems = frozenset(weapon.atk_element)
-    equipment = {weapon}
+    equipment: dict["Item", int] = {weapon: 1}
     total = score_weapon(weapon, monster)
 
     for candidates in armor_by_slot:
-        best = max(candidates, key=lambda i: score_equipment(i, monster, elems))
-        equipment.add(best)
-        total += score_equipment(best, monster, elems)
+        slot = next(iter(candidates))[0].type
+        count, allow_dup = SLOT_RULES.get(slot, DEFAULT_RULE)
+        for item in _best_picks(candidates, monster, elems, count, allow_dup):
+            equipment[item] = equipment.get(item, 0) + 1
+            total += score_equipment(item, monster, elems)
 
     return equipment, total
 
 
 def _build_set(
     weapon: "Item",
-    armor_by_slot: frozenset[frozenset["Item"]],
+    armor_by_slot: frozenset[frozenset[tuple["Item", int]]],
     monster: "Monster",
-) -> tuple[set["Item"], float]:
+) -> tuple[dict["Item", int], float]:
     """Best armor set around one weapon. Returns (set, total_score)."""
     return __build_set(weapon, armor_by_slot, monster)
 
 
 @cache
 def _best_equips_for_monster(
-    monster: "Monster", items: frozenset["Item"], top_k: int
-) -> set["Item"]:
-    weapons = [i for i in items if i.is_weapon]
+    monster: "Monster", items: frozenset[tuple["Item", int]], top_k: int
+) -> dict["Item", int]:
+    weapons = [i[0] for i in items if i[0].is_weapon]
     if not weapons:
-        return set()
+        return {}
     weapons.sort(key=lambda w: score_weapon(w, monster), reverse=True)
 
-    armor_by_slot: dict[str, list[Item]] = {}
-    for item in items:
+    armor_by_slot: dict[str, list[tuple["Item", int]]] = {}
+    for item, qty in items:
         if item.is_equipment:
-            armor_by_slot.setdefault(item.type, []).append(item)
+            armor_by_slot.setdefault(item.type, []).append((item, qty))
 
     armor_by_slot_set = frozenset(frozenset(v) for v in armor_by_slot.values())
 
     # try top K weapons, keep the best full combo
-    best_set: set["Item"] = set()
+    best_set: dict["Item", int] = {}
     best_total = float("-inf")
     for weapon in weapons[:top_k]:
         equipment, total = _build_set(weapon, armor_by_slot_set, monster)
@@ -144,8 +175,8 @@ def _best_equips_for_monster(
 
 def best_equips_for_monster(
     monster: "Monster",
-    items: frozenset["Item"],
+    items: frozenset[tuple["Item", int]],
     top_k: int = TOP_K_WEAPONS,
-) -> set["Item"]:
+) -> dict["Item", int]:
     """Best equipment set for a character against a monster. Returns a dict of slot -> item."""
     return _best_equips_for_monster(monster, items, top_k)
