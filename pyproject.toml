@@ -12,6 +12,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+  "cmaes>=0.13.0",
+  "optuna>=4.9.0",
   "python-decouple-stubs>=3.8.0.4",
   { include-group = "cli" },
 ]
