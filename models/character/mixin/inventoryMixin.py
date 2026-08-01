@@ -12,6 +12,7 @@ class InventoryMixin:
     _gold: int = 0
     _inventory: dict[Item, int] = field(default_factory=dict)
     _inventory_max_items: int = 0
+    _inventory_max_slots: int = 20
 
     @property
     def gold(self) -> int:
@@ -30,14 +31,18 @@ class InventoryMixin:
         return sum(self._inventory.values())
 
     @property
-    def inventory_free_slots(self) -> int:
+    def inventory_free_space(self) -> int:
         return self._inventory_max_items - self.inventory_used_slots
+
+    @property
+    def inventory_free_slots(self) -> int:
+        return self._inventory_max_slots - len(self._inventory)
 
     @property
     def is_inventory_full(self) -> bool:
         return (
             sum(self._inventory.values()) >= self._inventory_max_items - 5
-            or len(self._inventory) >= 17
+            or len(self._inventory) >= self._inventory_max_slots - 3
         )
 
     @property

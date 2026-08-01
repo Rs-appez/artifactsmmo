@@ -132,7 +132,7 @@ class StuffMixin:
                     and await best_tool_in_bank.is_better_for_job_than(best_tool, job)
                 ):
                     best_tool = best_tool_in_bank
-                    if self.inventory_free_slots < 1:
+                    if self.inventory_free_space < 1:
                         _ = await self.deposit_all_in_bank(with_gold=False)
 
                     if not await self.withdraw_item_from_bank(bank_token):
