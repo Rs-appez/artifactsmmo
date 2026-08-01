@@ -28,7 +28,7 @@ async def mob_farm(
         if isinstance(force, str):
             force = force.lower() in ("true", "force")
 
-        await character.weaponize()
+        await character.weaponize(mob)
         iterations = range(nb) if nb > 0 else count()
         for _ in iterations:
             if character.is_inventory_full:
