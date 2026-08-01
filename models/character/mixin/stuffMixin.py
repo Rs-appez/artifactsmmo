@@ -2,8 +2,13 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 from models import Encyclopedia
-from models.dataclass import Effect, Item
-from models.dataclass.bank import Bank, get_tool, get_best_stat_item, get_bag
+from models.dataclass import Effect, Item, Monster
+from models.dataclass.bank import (
+    get_bag,
+    get_best_equipment,
+    get_best_stat_item,
+    get_tool,
+)
 from models.enums import EquipentType, JobType
 
 if TYPE_CHECKING:
@@ -72,28 +77,27 @@ class StuffMixin:
             print(f"❌ {self.surname} unequip : {e}")
             return False
 
-    async def weaponize(self: "Character") -> None:
-        if self.weapon is not None and self.weapon.is_weapon:
-            return
-
-        for item in self.inventory:
-            if item.is_weapon:
-                if not await self.equip(item):
-                    print(f"❌ {self.surname} failed to equip {item.name} to fight")
-                print(f"⚔️  {self.surname} equipped {item.name} to fight")
-                return
-
-        # temporary need refactor
-        better_weapon = await Encyclopedia.get_item_by_code("king_slime_sword")
-        if better_weapon is None:
-            print(f"❌ {self.surname} failed to find better weapon in encyclopedia")
-            return
-        async with Bank.reserve_items({better_weapon: 1}) as bank_token:
-            _ = await self.deposit_all_in_bank()
-            await self.withdraw_item_from_bank(bank_token)
-
-        if not await self.equip(better_weapon):
-            print(f"❌ {self.surname} failed to equip king slime sword")
+    async def weaponize(self: "Character", monster: Monster) -> None:
+        try:
+            async with get_best_equipment(self, monster) as (
+                bank_token,
+                best_equipment_set,
+            ):
+                await self.deposit_all_in_bank(with_gold=False)
+                await self.withdraw_item_from_bank(bank_token)
+                for item in best_equipment_set:
+                    slot = item.type
+                    if slot == EquipentType.RING.value:
+                        if self._ring_1 is None:
+                            slot = "ring1"
+                        elif self._ring_2 is None:
+                            slot = "ring2"
+                        else:
+                            slot = "ring1"  # Replace ring1 if both are equipped
+                    if not await self.equip(item, slot=slot):
+                        print(f"❌ {self.surname} failed to equip {item.name}")
+        except Exception as e:
+            print(f"❌ {self.surname} Weaponize : {e}")
 
     async def toolize(self: "Character", job: JobType) -> None:
         try:
