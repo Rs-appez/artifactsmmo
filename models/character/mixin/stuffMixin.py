@@ -11,6 +11,7 @@ from models.dataclass.bank import (
     get_tool,
 )
 from models.enums import EquipentType, JobType
+from utils import need_deposit
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -102,7 +103,8 @@ class StuffMixin:
                 bank_token,
                 best_equipment_set,
             ):
-                await self.deposit_all_in_bank(with_gold=False)
+                if need_deposit(self, bank_token):
+                    await self.deposit_all_in_bank(with_gold=False)
                 await self.withdraw_item_from_bank(bank_token)
                 for item in best_equipment_set:
                     slot = item.type
