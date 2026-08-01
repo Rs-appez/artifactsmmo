@@ -44,7 +44,7 @@ async def __get_currency_item(
             async with Bank.get_reserved_items_partial(
                 bank_token, {currency: price_to_withdraw}
             ) as partial_bank_token:
-                if character.inventory_free_slots < price_to_withdraw:
+                if character.inventory_free_space < price_to_withdraw:
                     await character.deposit_all_in_bank(items_to_ignore={currency})
                 if not await character.withdraw_item_from_bank(partial_bank_token):
                     raise Exception(
