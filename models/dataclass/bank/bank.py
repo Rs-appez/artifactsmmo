@@ -125,6 +125,13 @@ class Bank:
         return {token: items for token, items in Bank.__tokens.items()}
 
     @staticmethod
+    def get_token_info(token: uuid.UUID) -> dict[Item, int]:
+        """
+        Get the reserved items for a given token
+        """
+        return Bank.__tokens.get(token, {}).copy()
+
+    @staticmethod
     async def get_missing_promise(token: uuid.UUID) -> dict[Item, int]:
         """
         Get the missing promise for a given token, i.e. the quantity of items that were not reserved because not enough in bank
