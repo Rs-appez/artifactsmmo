@@ -204,19 +204,28 @@ async def get_bag(character: Character) -> AsyncGenerator[tuple[uuid.UUID, Item]
 @asynccontextmanager
 async def get_best_equipment(
     character: Character, monster: "Monster"
-) -> AsyncGenerator[tuple[uuid.UUID, set[Item]], None]:
+) -> AsyncGenerator[tuple[uuid.UUID, dict[Item, int]], None]:
     async with Bank.locked():
         bank = await Bank._check_bank()
-        items = frozenset(
-            item
-            for item in bank.items
+        items = {
+            item: qty
+            for item, qty in bank.items.items()
             if (item.is_equipment or item.is_weapon) and item.can_be_used_by(character)
-        )
-        best_equipment_set = best_equips_for_monster(monster, items)
+        }
 
-        token = await Bank._reserve_items(
-            {item: 1 for item in best_equipment_set}, bank=bank
-        )
+        for item in character.equipped_items:
+            items[item] = items.get(item, 0) + 1
+
+        items_to_score = frozenset((item, qty) for item, qty in items.items())
+        best_equipment_set = best_equips_for_monster(monster, items_to_score)
+
+        reserved_items = {
+            item: qty
+            for item, qty in best_equipment_set.items()
+            if item not in character.equipped_items
+        }
+
+        token = await Bank._reserve_items(reserved_items, bank=bank)
     try:
         yield token, best_equipment_set
     finally:
