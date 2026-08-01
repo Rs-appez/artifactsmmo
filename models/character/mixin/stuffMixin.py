@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from itertools import chain
 from typing import TYPE_CHECKING
 
 from models import Encyclopedia
@@ -40,6 +41,24 @@ class StuffMixin:
     @property
     def get_rings(self) -> tuple[Item | None, Item | None]:
         return self._ring_1, self._ring_2
+
+    @property
+    def get_artifacts(self) -> tuple[Item | None, Item | None, Item | None]:
+        return self._artifact_1, self._artifact_2, self._artifact_3
+
+    @property
+    def equipped_items(self) -> frozenset[Item]:
+        all_equipped_items = {
+            item
+            for item in chain(
+                self._equipped_items.values(),
+                self.get_rings,
+                self.get_artifacts,
+                [self.weapon],
+            )
+            if item is not None
+        }
+        return frozenset(all_equipped_items)
 
     def get_equipped_item_by_slot(self, slot: EquipentType) -> Item | None:
         return self._equipped_items.get(slot, None)
