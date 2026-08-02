@@ -129,6 +129,10 @@ class Item:
         return self.type == "weapon" and self.subtype == "tool"
 
     @property
+    def is_rune(self) -> bool:
+        return self.type == EquipentType.RUNE.value
+
+    @property
     def atk_element(self) -> set[Element]:
         elements = set()
         for effect in self.effects:
