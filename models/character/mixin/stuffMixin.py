@@ -47,8 +47,8 @@ class StuffMixin:
         return self._artifact_1, self._artifact_2, self._artifact_3
 
     @property
-    def equipped_items(self) -> frozenset[Item]:
-        all_equipped_items = {
+    def equipped_items(self) -> list[Item]:
+        all_equipped_items = [
             item
             for item in chain(
                 self._equipped_items.values(),
@@ -57,8 +57,8 @@ class StuffMixin:
                 [self._bag],
             )
             if item is not None
-        }
-        return frozenset(all_equipped_items)
+        ]
+        return all_equipped_items
 
     def get_equipped_item_by_slot(self, slot: EquipentType) -> Item | None:
         return self._equipped_items.get(slot, None)
