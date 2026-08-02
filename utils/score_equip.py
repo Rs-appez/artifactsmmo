@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 TOP_K_WEAPONS = 5
 WEIGHTS = {
     "dmg": 1.274033258119729,
-    "elemental_dmg": 0.08583063944661747,
+    "elemental_dmg": 1.274033258119729,
     "elemental_res": 0.050624965014169535,
     "hp": 0.1325939823954532,
     "critical_strike": 0.9789483154407386,
