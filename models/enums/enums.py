@@ -20,6 +20,7 @@ class Element(Enum):
 
 
 class EquipentType(Enum):
+    WEAPON = "weapon"
     HELMET = "helmet"
     SHIELD = "shield"
     BODY_ARMOR = "body_armor"
