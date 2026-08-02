@@ -210,7 +210,7 @@ async def get_best_equipment(
         items = {
             item: qty
             for item, qty in bank.items.items()
-            if (item.is_equipment or item.is_weapon) and item.can_be_used_by(character)
+            if (item.is_equipment) and item.can_be_used_by(character)
         }
 
         for item in character.equipped_items:
@@ -223,7 +223,12 @@ async def get_best_equipment(
             item: qty
             for item, qty in best_equipment_set.items()
             if item not in character.equipped_items
-        }  # TODO: handle ring
+        }
+
+        rings = character.get_rings
+        best_rings = [item for item in best_equipment_set if item.type == "ring"]
+        if len(best_rings) == 1 and rings.count(best_rings[0]) == 1:
+            reserved_items[best_rings[0]] = 1
 
         token = await Bank._reserve_items(reserved_items, bank=bank)
     try:
