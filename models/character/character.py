@@ -196,6 +196,11 @@ class Character(
             )
             if data.get("amulet_slot")
             else None,
+            EquipentType.WEAPON: await Encyclopedia.get_item_by_code(
+                data["weapon_slot"]
+            )
+            if data.get("weapon_slot")
+            else None,
         }
 
         return dict(
@@ -228,9 +233,6 @@ class Character(
             _effects=effects,
             _bag=await Encyclopedia.get_item_by_code(data["bag_slot"])
             if data.get("bag_slot")
-            else None,
-            _weapon=await Encyclopedia.get_item_by_code(data["weapon_slot"])
-            if data.get("weapon_slot")
             else None,
             _equipped_items=equipments,
             _ring_1=await Encyclopedia.get_item_by_code(data["ring1_slot"])
