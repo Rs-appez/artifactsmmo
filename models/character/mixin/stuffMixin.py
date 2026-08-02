@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING
 from models import Encyclopedia
 from models.dataclass import Effect, Item, Monster
 from models.dataclass.bank import (
+    Bank,
     get_bag,
     get_best_equipment,
     get_best_stat_item,
     get_tool,
 )
 from models.enums import EquipentType, JobType
-from utils import need_deposit
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -96,26 +96,60 @@ class StuffMixin:
             print(f"❌ {self.surname} unequip : {e}")
             return False
 
+    async def _equip_set_items(self: "Character", items: dict[Item, int]) -> None:
+        for item, quantity in items.items():
+            if item.type == EquipentType.RING.value:
+                rings = self.get_rings
+                if quantity == 2:
+                    if rings[0] is None or rings[0] != item:
+                        if not await self.equip(item, slot="ring1"):
+                            print(
+                                f"❌ {self.surname} failed to equip {item.name} in ring1"
+                            )
+                    if rings[1] is None or rings[1] != item:
+                        if not await self.equip(item, slot="ring2"):
+                            print(
+                                f"❌ {self.surname} failed to equip {item.name} in ring2"
+                            )
+                elif item not in rings:
+                    if rings[0] is None or rings[0] not in items:
+                        if not await self.equip(item, slot="ring1"):
+                            print(
+                                f"❌ {self.surname} failed to equip {item.name} in ring1"
+                            )
+                    elif rings[1] is None or rings[1] not in items:
+                        if not await self.equip(item, slot="ring2"):
+                            print(
+                                f"❌ {self.surname} failed to equip {item.name} in ring2"
+                            )
+            elif item.type == EquipentType.ARTIFACT.value:
+                artifacts = self.get_artifacts
+                if item not in artifacts:
+                    for i in range(len(artifacts)):
+                        if artifacts[i] is None or artifacts[i] not in items:
+                            if not await self.equip(item, slot=f"artifact{i + 1}"):
+                                print(
+                                    f"❌ {self.surname} failed to equip {item.name} in artifact{i + 1}"
+                                )
+                            break
+            elif self.get_equipped_item_by_slot(EquipentType(item.type)) != item:
+                if not await self.equip(item):
+                    print(f"❌ {self.surname} failed to equip {item.name}")
+
     async def weaponize(self: "Character", monster: Monster) -> None:
         try:
             async with get_best_equipment(self, monster) as (
                 bank_token,
                 best_equipment_set,
             ):
-                if need_deposit(self, bank_token):
+                if len(Bank.get_token_info(bank_token)) == 0:
+                    return
+
+                if self.need_deposit(bank_token):
                     await self.deposit_all_in_bank(with_gold=False)
                 await self.withdraw_item_from_bank(bank_token)
-                for item in best_equipment_set:
-                    slot = item.type
-                    if slot == EquipentType.RING.value:
-                        if self._ring_1 is None:
-                            slot = "ring1"
-                        elif self._ring_2 is None:
-                            slot = "ring2"
-                        else:
-                            slot = "ring1"  # Replace ring1 if both are equipped
-                    if not await self.equip(item, slot=slot):
-                        print(f"❌ {self.surname} failed to equip {item.name}")
+            await self._equip_set_items(best_equipment_set)
+            await self.deposit_all_in_bank(with_gold=False)
         except Exception as e:
             print(f"❌ {self.surname} Weaponize : {e}")
 
