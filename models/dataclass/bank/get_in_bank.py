@@ -223,7 +223,7 @@ async def get_best_equipment(
             item: qty
             for item, qty in best_equipment_set.items()
             if item not in character.equipped_items
-        }
+        }  # TODO: handle ring
 
         token = await Bank._reserve_items(reserved_items, bank=bank)
     try:
