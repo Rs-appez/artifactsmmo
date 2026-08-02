@@ -157,7 +157,7 @@ def _best_equips_for_monster(
 
     armor_by_slot: dict[str, list[tuple["Item", int]]] = {}
     for item, qty in items:
-        if item.is_equipment:
+        if item.is_equipment and not item.is_weapon and not item.is_tool:
             armor_by_slot.setdefault(item.type, []).append((item, qty))
 
     armor_by_slot_set = frozenset(frozenset(v) for v in armor_by_slot.values())
