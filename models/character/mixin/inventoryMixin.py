@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from models.dataclass import Item
+from models.dataclass.bank import Bank
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -65,6 +67,22 @@ class InventoryMixin:
             if self._inventory.get(item, 0) < quantity:
                 return False
         return True
+
+    def need_deposit(self, token: UUID) -> bool:
+        """
+        Check if the character needs to deposit items in the bank before withdrawing reserved items.
+        Returns True if the character needs to deposit items, False otherwise.
+        """
+        nb_items_to_withdraw = sum(Bank.get_token_info(token).values())
+        nb_slots_to_withdraw = len(Bank.get_token_info(token))
+
+        if (
+            self.inventory_free_space < nb_items_to_withdraw
+            or self.inventory_free_slots < nb_slots_to_withdraw
+        ):
+            return True
+
+        return False
 
     async def use_item(self: "Character", item: Item, quantity: int = 1) -> bool:
         try:
