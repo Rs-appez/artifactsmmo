@@ -21,10 +21,9 @@ if TYPE_CHECKING:
 class StuffMixin:
     _effects: dict[Effect, int] = field(default_factory=dict)
 
-    _equipped_items: dict[EquipentType, Item] = field(default_factory=dict)
+    _equipped_items: dict[EquipentType, Item | None] = field(default_factory=dict)
 
     _bag: Item | None = None
-    _weapon: Item | None = None
     _ring_1: Item | None = None
     _ring_2: Item | None = None
     _artifact_1: Item | None = None
@@ -33,7 +32,7 @@ class StuffMixin:
 
     @property
     def weapon(self) -> Item | None:
-        return self._weapon
+        return self._equipped_items.get(EquipentType.WEAPON, None)
 
     @property
     def effects(self) -> dict[Effect, int]:
@@ -55,7 +54,7 @@ class StuffMixin:
                 self._equipped_items.values(),
                 self.get_rings,
                 self.get_artifacts,
-                [self.weapon],
+                [self._bag],
             )
             if item is not None
         }
