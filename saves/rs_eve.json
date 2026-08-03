@@ -1,6 +1,8 @@
 {
-  "routine_name": "xp_skill",
-  "routine_module": "routines.level_up_skill",
-  "routine_args": ["woodcutting"],
-  "routine_kwargs": {}
+    "routine_name": "xp_skill",
+    "routine_module": "routines.level_up_skill",
+    "routine_args": [
+        "woodcutting"
+    ],
+    "routine_kwargs": {}
 }
