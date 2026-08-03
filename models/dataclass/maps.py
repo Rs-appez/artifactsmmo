@@ -19,7 +19,7 @@ class Map:
     @classmethod
     def from_dict(cls, data: dict) -> "Map":
         transition_map = None
-        transition_data = data.get("transitions", None)
+        transition_data = data.get("interactions", {}).get("transition", None)
         if transition_data:
             transition_map = transition_data.get("map_id")
 
