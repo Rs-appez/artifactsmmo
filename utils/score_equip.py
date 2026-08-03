@@ -7,27 +7,30 @@ if TYPE_CHECKING:
     from models.dataclass import Item, Monster
 
 TOP_K_WEAPONS = 5
-WEIGHTS = {
-    "dmg": 1.274033258119729,
-    "elemental_dmg": 1.274033258119729,
-    "elemental_res": 0.050624965014169535,
-    "hp": 0.1325939823954532,
-    "critical_strike": 0.9789483154407386,
-    "initiative": 0.13160696417676848,
-    "prospecting": 0.03224571781920886,
-    "inventory_space": 0.000001,
-    "haste": 0.000001,
-}
-# mine
 # WEIGHTS = {
-#     "dmg": 2.0,
-#     "elemental_dmg": 2.0,
-#     "elemental_res": 1.0,
-#     "hp": 0.5,
-#     "critical_strike": 1.0,
-#     "initiative": 0.5,
-#     "prospecting": 0.01,
+#     "dmg": 1.274033258119729,
+#     "elemental_dmg": 1.274033258119729,
+#     "elemental_res": 0.050624965014169535,
+#     "hp": 0.1325939823954532,
+#     "critical_strike": 0.9789483154407386,
+#     "initiative": 0.13160696417676848,
+#     "prospecting": 0.03224571781920886,
+#     "inventory_space": 0.000001,
+#     "haste": 0.000001,
 # }
+# mine
+WEIGHTS = {
+    "dmg": 1.25,
+    "elemental_dmg": 1.25,
+    "elemental_res": 3.00,
+    "hp": 0.10,
+    "critical_strike": 0.75,
+    "initiative": 0.02,
+    "haste": 0.35,
+    "wisdom": 0.00001,
+    "prospecting": 0.0001,
+    "inventory_space": 0.0000001,
+}
 
 SLOT_RULES: dict[str, tuple[int, bool]] = {  # slot: (qty, duplicates_allowed)
     "ring": (2, True),
