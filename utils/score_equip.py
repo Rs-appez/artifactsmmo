@@ -69,8 +69,11 @@ def _score_equipment(
     for effect, value in equipment.effects.items():
         code = effect.code
 
-        if code in WEIGHTS:
-            score += value * WEIGHTS[code]
+        if code == "dmg":
+            total_effectiveness = sum(
+                _damage_multiplier(elem, monster) for elem in weapon_elems
+            )
+            score += value * WEIGHTS["dmg"] * total_effectiveness
 
         elif elem := effect.get_dmg_element:
             if elem in weapon_elems:
@@ -82,6 +85,9 @@ def _score_equipment(
             score += (
                 value * WEIGHTS["elemental_res"] * monster.attack.get(elem, 0) / 100
             )
+
+        elif code in WEIGHTS:
+            score += value * WEIGHTS[code]
 
     return score
 
