@@ -50,7 +50,7 @@ class GameManager:
         # await self.__asign_boss()
         tasks = [char.start() for char in self.characters.values()]
         if SANDBOX:
-            await test(self)
+            asyncio.ensure_future(test(self))
         return tasks
 
     async def create_characters(self):
