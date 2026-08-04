@@ -171,6 +171,15 @@ class Encyclopedia:
         await Encyclopedia.wait_monster()
         return list(Encyclopedia._monsters)
 
+    @staticmethod
+    async def get_monsters_by_drop(item: Item) -> set[Monster]:
+        await Encyclopedia.wait_monster()
+        return {
+            monster
+            for monster in Encyclopedia._monsters.values()
+            if any(item in drop for drop in monster.drops)
+        }
+
     @classmethod
     async def __load_monsters(cls):
         if cls.__monsters_loaded:
