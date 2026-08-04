@@ -136,6 +136,10 @@ class StuffMixin:
                 if not await self.equip(item):
                     print(f"❌ {self.surname} failed to equip {item.name}")
 
+        for item in self.equipped_items:
+            if item not in items and not item.is_tool:
+                await self.unequip(item.type)
+
     async def weaponize(self: "Character", monster: Monster) -> None:
         try:
             async with get_best_equipment(self, monster) as (

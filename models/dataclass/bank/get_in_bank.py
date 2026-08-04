@@ -97,9 +97,17 @@ async def _reserve_unequipped_items(
     }
 
     rings = character.get_rings
-    best_rings = [item for item in items if item.type == "ring"]
-    if len(best_rings) == 1 and rings.count(best_rings[0]) == 1:
-        reserved_items[best_rings[0]] = 1
+    best_rings = [
+        (item, qty)
+        for item, qty in items.items()
+        if item.type == EquipentType.RING.value
+    ]
+    if (
+        len(best_rings) == 1
+        and rings.count(best_rings[0]) == 1
+        and best_rings[0][1] > 1
+    ):
+        reserved_items[best_rings[0][0]] = 1
 
     token = await Bank._reserve_items(reserved_items, bank=bank)
     return token
@@ -152,11 +160,11 @@ async def get_best_stat_item(
         better_items.update({item: qty for item, qty in best_rings})
         better_items.update({item: 1 for item in best_artifact})
 
-        # better_items = {
-        #     item: qty
-        #     for item, qty in better_items.items()
-        #     if item.effects.get(wanted_effect, 0) > 0
-        # }
+        better_items = {
+            item: qty
+            for item, qty in better_items.items()
+            if item.effects.get(wanted_effect, 0) > 0
+        }
 
         token = await _reserve_unequipped_items(character, bank, better_items)
     try:
