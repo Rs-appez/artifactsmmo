@@ -21,3 +21,8 @@ HEADERS = {
     "Authorization": f"Bearer {ARTIFACTSMMO_API_KEY}",
 }
 TIMEZONE = ZoneInfo("Europe/Brussels")
+
+
+# Game constants
+MAX_LEVEL_CHARACTER = 50
+MAX_LEVEL_JOB = 50
