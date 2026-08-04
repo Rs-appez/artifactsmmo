@@ -2,7 +2,7 @@ import asyncio
 from itertools import count
 from exceptions import ImpossibleCombatException
 from models import Character, Encyclopedia
-from models.dataclass import Monster
+from models.dataclass import Monster, Item
 from models.dataclass.bank import get_food
 from utils.find_nearest import find_nearest_lootable
 from routines import empty_farm
@@ -90,6 +90,27 @@ async def boss_farm(
         print(f"❌ {character.surname} failed to combat boss : {e}")
     finally:
         character.is_ready_to_fight_boss = False
+
+
+async def drop_on_mob_farm(character: Character, item: Item | str, nb: int | str = -1):
+    if isinstance(item, str):
+        get_item = await Encyclopedia.get_item_by_code(item)
+        if not get_item:
+            print(f"❌ {character.surname} Invalid item code : {item}")
+            return
+        else:
+            item = get_item
+    if isinstance(nb, str):
+        try:
+            nb = int(nb)
+        except ValueError:
+            print(f"❌ {character.surname} Invalid number of iterations : {nb}")
+            return
+    if not isinstance(item, Item):
+        print(f"❌ {character.surname} Invalid item : {item}")
+        return
+
+    monsters = await Encyclopedia.get_monsters_by_drop(item)
 
 
 async def __regenerate_hp(character: Character, full: bool = False):
