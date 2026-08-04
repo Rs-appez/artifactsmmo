@@ -246,13 +246,12 @@ class StuffMixin:
             print(f"❌ {self.surname} Bagize : {e}")
 
     async def maximaze_stats(self: "Character", stats: Effect) -> None:
-        # TODO : handle artifacts
         async with get_best_stat_item(self, stats) as (bank_token, best_item):
-            if not best_item:
+            if len(Bank.get_token_info(bank_token)) == 0:
                 return
             print(f"👚 {self.surname} is going to search {stats.name} items in bank")
 
-            if self.is_inventory_full:
+            if self.need_deposit(bank_token):
                 await self.deposit_all_in_bank()
             if not await self.withdraw_item_from_bank(bank_token):
                 print(
@@ -260,24 +259,5 @@ class StuffMixin:
                 )
                 return
 
-        for item in best_item:
-            if item.type in [EquipentType.RING.value, EquipentType.ARTIFACT.value]:
-                continue
-            if not await self.equip(item):
-                print(f"❌ {self.surname} failed to equip {item.name}")
-
-        rings = [
-            (item[0], item[1])
-            for item in best_item.items()
-            if item[0].type == EquipentType.RING.value
-        ]
-        if rings:
-            if rings[0][1] == 2:
-                _ = await self.equip(rings[0][0], slot="ring1")
-                _ = await self.equip(rings[0][0], slot="ring2")
-            else:
-                _ = await self.equip(rings[0][0], slot="ring1")
-                if len(rings) > 1:
-                    _ = await self.equip(rings[1][0], slot="ring2")
-
+        await self._equip_set_items(best_item)
         await self.deposit_all_in_bank()

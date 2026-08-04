@@ -89,24 +89,41 @@ async def get_tool(
         Bank._unreserve_items(token)
 
 
+async def _reserve_unequipped_items(
+    character: Character, bank: Bank, items: dict[Item, int]
+) -> uuid.UUID:
+    reserved_items = {
+        item: qty for item, qty in items.items() if item not in character.equipped_items
+    }
+
+    rings = character.get_rings
+    best_rings = [item for item in items if item.type == "ring"]
+    if len(best_rings) == 1 and rings.count(best_rings[0]) == 1:
+        reserved_items[best_rings[0]] = 1
+
+    token = await Bank._reserve_items(reserved_items, bank=bank)
+    return token
+
+
 @asynccontextmanager
 async def get_best_stat_item(
     character: Character, wanted_effect: Effect
 ) -> AsyncGenerator[tuple[uuid.UUID, dict[Item, int]], None]:
     async with Bank.locked():
         bank = await Bank._check_bank()
-        better_items_in_bank = defaultdict(int)
+        all_items = {
+            item: qty
+            for item, qty in bank.items.items()
+            if item.is_equipment
+            and item.can_be_used_by(character)
+            and wanted_effect in item.effects
+        }
+        for item in character.equipped_items:
+            all_items[item] = all_items.get(item, 0) + 1
 
         best_equipment = {
             equipmentType: max(
-                (
-                    item
-                    for item in bank.items
-                    if item.is_equipment
-                    and item.can_be_used_by(character)
-                    and wanted_effect in item.effects
-                    and item.type == equipmentType.value
-                ),
+                (item for item in all_items if item.type == equipmentType.value),
                 key=lambda item: item.effects.get(wanted_effect, 0),
                 default=None,
             )
@@ -117,55 +134,28 @@ async def get_best_stat_item(
             2,
             (
                 (item, qty)
-                for item, qty in bank.items.items()
-                if item.is_equipment
-                and item.can_be_used_by(character)
-                and wanted_effect in item.effects
-                and item.type == EquipentType.RING.value
+                for item, qty in all_items.items()
+                if item.type == EquipentType.RING.value
             ),
             key=lambda item: item[0].effects.get(wanted_effect, 0),
         )
-        # TODO : handle artifacts
         best_artifact = heapq.nlargest(
             3,
             (
                 (item, qty)
-                for item, qty in bank.items.items()
-                if item.is_equipment
-                and item.can_be_used_by(character)
-                and wanted_effect in item.effects
-                and item.type == EquipentType.ARTIFACT.value
+                for item, qty in all_items.items()
+                if item.type == EquipentType.ARTIFACT.value
             ),
             key=lambda item: item[0].effects.get(wanted_effect, 0),
         )
 
-        for equipment_type, equipement in best_equipment.items():
-            if equipement is not None:
-                current_item = character.get_equipped_item_by_slot(equipment_type)
-                if current_item is None or current_item.effects.get(
-                    wanted_effect, 0
-                ) < equipement.effects.get(wanted_effect, 0):
-                    better_items_in_bank[equipement] = 1
+        better_items = {item: 1 for item in best_equipment.values() if item is not None}
+        better_items.update({item: qty for item, qty in best_rings})
+        better_items.update({item: 1 for item, _ in best_artifact})
 
-        current_ring_1, current_ring_2 = character.get_rings
-        current_ring_1_stat = (
-            current_ring_1.effects.get(wanted_effect, 0) if current_ring_1 else 0
-        )
-        current_ring_2_stat = (
-            current_ring_2.effects.get(wanted_effect, 0) if current_ring_2 else 0
-        )
-        if len(best_rings) > 0 and best_rings[0][1] > 1:
-            if best_rings[0][0].effects.get(wanted_effect, 0) > current_ring_1_stat:
-                better_items_in_bank[best_rings[0][0]] += 1
-            if best_rings[0][0].effects.get(wanted_effect, 0) > current_ring_2_stat:
-                better_items_in_bank[best_rings[0][0]] += 1
-        elif len(best_rings) > 1:
-            if best_rings[1][0].effects.get(wanted_effect, 0) > current_ring_2_stat:
-                better_items_in_bank[best_rings[1][0]] += 1
-
-        token = await Bank._reserve_items(better_items_in_bank, bank=bank)
+        token = await _reserve_unequipped_items(character, bank, better_items)
     try:
-        yield token, better_items_in_bank
+        yield token, better_items
     finally:
         Bank._unreserve_items(token)
 
@@ -218,19 +208,8 @@ async def get_best_equipment(
 
         items_to_score = frozenset((item, qty) for item, qty in items.items())
         best_equipment_set = best_equips_for_monster(monster, items_to_score)
+        token = await _reserve_unequipped_items(character, bank, best_equipment_set)
 
-        reserved_items = {
-            item: qty
-            for item, qty in best_equipment_set.items()
-            if item not in character.equipped_items
-        }
-
-        rings = character.get_rings
-        best_rings = [item for item in best_equipment_set if item.type == "ring"]
-        if len(best_rings) == 1 and rings.count(best_rings[0]) == 1:
-            reserved_items[best_rings[0]] = 1
-
-        token = await Bank._reserve_items(reserved_items, bank=bank)
     try:
         yield token, best_equipment_set
     finally:
