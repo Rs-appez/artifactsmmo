@@ -74,16 +74,29 @@ class StuffMixin:
         slot = EquipentType(slot) if isinstance(slot, str) else slot
         return self._equipped_items.get(slot, None)
 
+    async def _healh_if_needed_to_equip(self: "Character", slot: str) -> None:
+
+        current_item = self.get_equipped_item_by_slot(slot)
+        hp_effect = await Encyclopedia.get_effect_by_code("hp")
+        if current_item and current_item.effects.get(hp_effect, 0) >= self.hp:
+            print(
+                f"⚕️ {self.surname} is going to heal before equip {slot} item (current hp: {self.hp}, needed: {current_item.effects.get(hp_effect, 0)})"
+            )
+            # TODO : grab food from bank if needed
+            await self.rest()
+
     async def equip(
         self: "Character", item: Item, quantity: int = 1, slot: str | None = None
     ) -> bool:
+        slot = item.type if slot is None else slot
         try:
+            await self._healh_if_needed_to_equip(slot)
             await self.post_api(
                 "/equip",
                 json_data=[
                     {
                         "code": item.code,
-                        "slot": item.type if slot is None else slot,
+                        "slot": slot,
                         "quantity": quantity,
                     }
                 ],
