@@ -26,9 +26,9 @@ WEIGHTS = {
     "hp": 0.10,
     "critical_strike": 0.75,
     "initiative": 0.02,
-    "haste": 0.35,
-    "wisdom": 0.00001,
-    "prospecting": 0.0001,
+    "haste": 0.50,
+    "wisdom": 0.001,
+    "prospecting": 0.01,
     "inventory_space": 0.0000001,
 }
 
