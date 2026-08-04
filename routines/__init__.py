@@ -1,6 +1,6 @@
 from .utils import empty_farm, generate_missing_items
 from .travel import handle_travel, handle_return_travel
-from .monster_farm import mob_farm
+from .monster_farm import mob_farm, drop_on_mob_farm
 from .gather import gather
 from .craft import craft
 from .complete_task import complete_task
@@ -10,6 +10,7 @@ from .level_up_skill import xp_skill
 
 __all__ = [
     "mob_farm",
+    "drop_on_mob_farm",
     "gather",
     "craft",
     "empty_farm",
