@@ -162,9 +162,10 @@ async def __give_up_task(character: Character, task_type: TaskType) -> None:
     task_master = await find_nearest_tasks_master(character, task_type)
 
     if await Encyclopedia.get_item_by_code("tasks_coin") not in character.inventory:
-        async with Bank.reserve_items(
-            {await Encyclopedia.get_item_by_code("tasks_coin"): 1}
-        ) as bank_token:
+        if not (task_coin := await Encyclopedia.get_item_by_code("tasks_coin")):
+            raise Exception("Task coin not found in encyclopedia")
+
+        async with Bank.reserve_items({task_coin: 1}) as bank_token:
             if character.is_inventory_full:
                 if not await character.deposit_all_in_bank(with_gold=False):
                     raise Exception("Failed to deposit items in bank")
