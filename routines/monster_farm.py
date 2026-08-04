@@ -65,7 +65,7 @@ async def boss_farm(
         if isinstance(boss, str):
             boss = await Encyclopedia.get_monster_by_code(boss)
 
-        await character.weaponize()
+        await character.weaponize(boss)
         mob_position = await find_nearest_lootable(character, {boss})
         if character.is_inventory_full:
             for mate in teammate:
