@@ -1,7 +1,6 @@
-from utils.score_equip import best_equips_for_monster
 import heapq
 import uuid
-from collections import defaultdict
+from collections import Counter
 from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, AsyncGenerator
 
@@ -9,6 +8,7 @@ from models import Encyclopedia
 from models.dataclass import Effect, Item, Monster
 from models.dataclass.bank import Bank
 from models.enums import EquipentType, JobType
+from utils.score_equip import best_equips_for_monster
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -130,28 +130,33 @@ async def get_best_stat_item(
             for equipmentType in EquipentType
             if equipmentType not in [EquipentType.RING, EquipentType.ARTIFACT]
         }
-        best_rings = heapq.nlargest(
-            2,
-            (
-                (item, qty)
-                for item, qty in all_items.items()
-                if item.type == EquipentType.RING.value
-            ),
-            key=lambda item: item[0].effects.get(wanted_effect, 0),
-        )
+        best_rings = Counter(
+            heapq.nlargest(
+                2,
+                (
+                    item
+                    for item, qty in all_items.items()
+                    if item.type == EquipentType.RING.value
+                    for _ in range(qty)
+                ),
+                key=lambda item: item.effects.get(wanted_effect, 0),
+            )
+        ).items()
         best_artifact = heapq.nlargest(
             3,
-            (
-                (item, qty)
-                for item, qty in all_items.items()
-                if item.type == EquipentType.ARTIFACT.value
-            ),
-            key=lambda item: item[0].effects.get(wanted_effect, 0),
+            (item for item in all_items if item.type == EquipentType.ARTIFACT.value),
+            key=lambda item: item.effects.get(wanted_effect, 0),
         )
 
         better_items = {item: 1 for item in best_equipment.values() if item is not None}
         better_items.update({item: qty for item, qty in best_rings})
-        better_items.update({item: 1 for item, _ in best_artifact})
+        better_items.update({item: 1 for item in best_artifact})
+
+        # better_items = {
+        #     item: qty
+        #     for item, qty in better_items.items()
+        #     if item.effects.get(wanted_effect, 0) > 0
+        # }
 
         token = await _reserve_unequipped_items(character, bank, better_items)
     try:
