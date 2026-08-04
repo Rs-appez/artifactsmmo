@@ -137,7 +137,12 @@ class StuffMixin:
                     print(f"❌ {self.surname} failed to equip {item.name}")
 
         for item in self.equipped_items:
-            if item not in items and not item.is_tool:
+            if (
+                item not in items
+                and not item.is_tool
+                and not item.type == EquipentType.BAG.value
+                and not item.is_rune
+            ):
                 await self.unequip(item.type)
 
     async def weaponize(self: "Character", monster: Monster) -> None:
