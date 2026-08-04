@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import TYPE_CHECKING
 
+from config import MAX_LEVEL_JOB
+
 if TYPE_CHECKING:
     from models.dataclass import Item
 
@@ -58,7 +60,7 @@ class JobType(Enum):
 
     @property
     def max_level(self) -> int:
-        return 50
+        return MAX_LEVEL_JOB
 
     @property
     def job_xp_multiplier(self) -> float:
@@ -185,8 +187,11 @@ class JobType(Enum):
 
     @staticmethod
     def get_next_level_xp(level: int) -> int:
-        if not (1 <= level <= 49):
-            raise ValueError("Level must be between 1 and 49")
+        if level < 1:
+            raise ValueError("Level must be greater than or equal to 1.")
+
+        if level >= MAX_LEVEL_JOB:
+            return 0
 
         l_start, xp_base, delta = max(r for r in _XP_RANGES if r[0] <= level)
         return xp_base + delta * (level - l_start)
