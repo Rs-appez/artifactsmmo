@@ -144,7 +144,9 @@ class StuffMixin:
             ):
                 if len(Bank.get_token_info(bank_token)) == 0:
                     return
-
+                print(
+                    f"⚔️ {self.surname} is going to search best equipment in bank for {monster.name}"
+                )
                 if self.need_deposit(bank_token):
                     await self.deposit_all_in_bank(with_gold=False)
                 await self.withdraw_item_from_bank(bank_token)
