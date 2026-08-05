@@ -69,9 +69,16 @@ class FightMixin:
     async def set_ready_to_fight(self: "Character"):
         self._ready_to_fight_boss = True
 
-    async def fight(self: "Character", teammate: list[Character] | None = None) -> bool:
+    async def fight(
+        self: "Character", teammate: list[Character] | None = None
+    ) -> tuple[bool, dict]:
+        """
+        Fight with the character and optionally with teammates.
+        Returns a tuple of (result, fight_data) where result is True if the fight was won, False otherwise, and fight_data contains additional information about the fight.
+        """
+
         try:
-            pos = self.location
+            result_data = {"fight": {}}
             await self.post_api(
                 "/fight",
                 json_data={
@@ -81,18 +88,19 @@ class FightMixin:
                 }
                 if teammate
                 else None,
+                retreive_data=result_data,
             )
 
-            result = True if self.location == pos else False
+            result: bool = result_data["fight"]["result"] == "win"
             participants = [mate.surname for mate in teammate] if teammate else []
             print(
-                f"{'󰓥 ' if result else ' '} {','.join(participants) if participants else self.surname} Fought and {'won' if result else 'lost'}"
+                f"{'󰓥 ' if result else ' '} {','.join(participants) if participants else self.surname} Fought and {'won' if result_data else 'lost'}"
             )
 
-            return result
+            return (result, result_data["fight"])
         except Exception as e:
             print(f"❌ {self.surname} fight : {e}")
-            return False
+            return (False, {})
 
     async def rest(self: "Character") -> bool:
         try:
