@@ -74,6 +74,24 @@ class StuffMixin:
         slot = EquipentType(slot) if isinstance(slot, str) else slot
         return self._equipped_items.get(slot, None)
 
+    def get_slot_by_equipped_item(self, item: Item) -> str | None:
+        if item == self._ring_1:
+            return "ring1"
+        elif item == self._ring_2:
+            return "ring2"
+        elif item == self._artifact_1:
+            return "artifact1"
+        elif item == self._artifact_2:
+            return "artifact2"
+        elif item == self._artifact_3:
+            return "artifact3"
+        elif item == self._bag:
+            return "bag"
+        for slot, equipped_item in self._equipped_items.items():
+            if equipped_item == item:
+                return slot.value
+        return None
+
     async def _healh_if_needed_to_equip(self: "Character", slot: str) -> None:
 
         current_item = self.get_equipped_item_by_slot(slot)
