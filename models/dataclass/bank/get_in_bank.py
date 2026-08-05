@@ -123,6 +123,7 @@ async def get_best_stat_item(
             item: qty
             for item, qty in bank.items.items()
             if item.is_equipment
+            and item.type != EquipentType.WEAPON.value
             and item.can_be_used_by(character)
             and wanted_effect in item.effects
         }
@@ -141,7 +142,8 @@ async def get_best_stat_item(
                 default=None,
             )
             for equipmentType in EquipentType
-            if equipmentType not in [EquipentType.RING, EquipentType.ARTIFACT]
+            if equipmentType
+            not in [EquipentType.RING, EquipentType.ARTIFACT, EquipentType.WEAPON]
         }
         best_rings = Counter(
             heapq.nlargest(
@@ -228,13 +230,11 @@ async def get_best_equipment(
         items = {
             item: qty
             for item, qty in bank.items.items()
-            if (item.is_equipment and not (item.is_weapon or item.is_tool))
-            and item.can_be_used_by(character)
+            if (item.is_equipment) and item.can_be_used_by(character)
         }
 
         for item in character.equipped_items:
-            if not item.is_weapon and not item.is_tool:
-                items[item] = items.get(item, 0) + 1
+            items[item] = items.get(item, 0) + 1
 
         items_to_score = frozenset((item, qty) for item, qty in items.items())
         best_equipment_set = best_equips_for_monster(monster, items_to_score)
