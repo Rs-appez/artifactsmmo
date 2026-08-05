@@ -20,9 +20,5 @@ class CharacterManager:
             return
         item = min(event.content.drops.items(), key=lambda d: d[1]["rate"])[0]
         for character in self.characters.values():
-            if (
-                character.has_job(item.job, item.level)
-                and character.work_on
-                != "mob_farm"  # TODO : tmp before handle restuff for fighting
-            ):
+            if character.has_job(item.job, item.level) and character.work_on:
                 character.do_one_time_task(gather, item)
