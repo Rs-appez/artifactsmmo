@@ -130,6 +130,8 @@ async def drop_on_mob_farm(character: Character, item: Item | str, nb: int | str
                         print(
                             f" {character.surname} found {item.name} on {monster.name} ({current_drop}/{nb if nb != -1 else '∞'})"
                         )
+                        break
+                break
 
 
 async def __regenerate_hp(character: Character, full: bool = False):
