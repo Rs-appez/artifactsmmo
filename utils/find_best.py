@@ -1,4 +1,5 @@
-from models.dataclass import NPC, Item
+from models import Character, Encyclopedia, LocationRegistry
+from models.dataclass import NPC, Item, Monster
 
 
 def find_best_npc(npcs: set[NPC], item: Item) -> NPC:
@@ -8,3 +9,23 @@ def find_best_npc(npcs: set[NPC], item: Item) -> NPC:
         return npc
 
     raise ValueError(f"No NPC found buying {item.name}")
+
+
+async def find_best_monster(character: Character, item: Item) -> Monster:
+
+    monsters = sorted(
+        [
+            m
+            for m in await Encyclopedia.get_monsters_by_drop(item)
+            if await LocationRegistry.get_locations(m)
+        ],
+        key=lambda m: m.drop_rate(item),
+        reverse=True,
+    )
+
+    if not monsters:
+        raise ValueError(
+            f"No monster found dropping {item.name} that {character.surname} can defeat"
+        )
+
+    return monsters[0]
