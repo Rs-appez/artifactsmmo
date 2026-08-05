@@ -1,3 +1,4 @@
+from utils.find_best import find_best_monster
 import asyncio
 from itertools import count
 from exceptions import ImpossibleCombatException
@@ -117,7 +118,18 @@ async def drop_on_mob_farm(character: Character, item: Item | str, nb: int | str
         print(f"❌ {character.surname} Invalid item : {item}")
         return
 
-    monsters = await Encyclopedia.get_monsters_by_drop(item)
+    monster = await find_best_monster(character, item)
+    current_drop = 0
+    while nb == -1 or nb > current_drop:
+        fight_result = (await _fight(character, monster))["characters"]
+        for char in fight_result:
+            if char["character_name"] == character.name:
+                for drops in char["drops"]:
+                    if drops["code"] == item.code:
+                        current_drop += drops["quantity"]
+                        print(
+                            f" {character.surname} found {item.name} on {monster.name} ({current_drop}/{nb if nb != -1 else '∞'})"
+                        )
 
 
 async def __regenerate_hp(character: Character, full: bool = False):
