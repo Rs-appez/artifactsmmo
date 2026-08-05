@@ -8,6 +8,29 @@ from utils.find_nearest import find_nearest_lootable
 from routines import empty_farm
 
 
+async def _fight(character: Character, mob: Monster, force: bool = False) -> dict:
+    if character.is_inventory_full:
+        deposit_gold = True if character.gold > 10000 else False
+        _ = await character.deposit_all_in_bank(with_gold=deposit_gold)
+    await character.weaponize(mob)
+    try:
+        while not character.will_win_against(mob):
+            await __regenerate_hp(character)
+    except ImpossibleCombatException as e:
+        if force:
+            await __regenerate_hp(character, full=True)
+        else:
+            raise e
+    mob_position = await find_nearest_lootable(character, {mob})
+    if not await character.move(mob_position):
+        raise Exception(f"Failed to move to {mob_position.name}")
+    fight_result = await character.fight()
+    if not fight_result[0]:
+        raise Exception(f"Failed to fight {mob.name}")
+
+    return fight_result[1]
+
+
 async def mob_farm(
     character: Character,
     mob: Monster | str,
@@ -26,27 +49,11 @@ async def mob_farm(
                 return
 
         if isinstance(force, str):
-            force = force.lower() in ("true", "force")
+            force = force.lower() in ("true", "force", "f")
 
-        await character.weaponize(mob)
         iterations = range(nb) if nb > 0 else count()
         for _ in iterations:
-            if character.is_inventory_full:
-                deposit_gold = True if character.gold > 10000 else False
-                _ = await character.deposit_all_in_bank(with_gold=deposit_gold)
-            try:
-                while not character.will_win_against(mob):
-                    await __regenerate_hp(character)
-            except ImpossibleCombatException as e:
-                if force:
-                    await __regenerate_hp(character, full=True)
-                else:
-                    raise e
-            mob_position = await find_nearest_lootable(character, {mob})
-            if not await character.move(mob_position):
-                raise Exception(f"Failed to move to {mob_position.name}")
-            if not await character.fight():
-                raise Exception(f"Failed to fight {mob.name}")
+            await _fight(character, mob, force)
 
     except ImpossibleCombatException as e:
         raise e
