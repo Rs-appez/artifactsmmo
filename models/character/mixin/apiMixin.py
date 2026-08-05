@@ -35,7 +35,10 @@ class ApiMixin:
     @request_action
     @refresh_after
     async def post_api(
-        self: "Character", endpoint: str, json_data: dict | list[dict] | None = None
+        self: "Character",
+        endpoint: str,
+        json_data: dict | list[dict] | None = None,
+        retreive_data: dict[str, dict] | None = None,
     ) -> dict:
         attempt = 0
         while attempt < 3:
@@ -59,6 +62,11 @@ class ApiMixin:
                             break
                 else:
                     character_data = data["character"]
+
+                if retreive_data:
+                    for key, value in retreive_data.items():
+                        if key in data:
+                            value.update(data[key])
 
                 break
 
