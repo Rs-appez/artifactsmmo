@@ -185,7 +185,9 @@ class StuffMixin:
                 and not item.type == EquipentType.BAG.value
                 and not item.is_rune
             ):
-                await self.unequip(item.type)
+                slot = self.get_slot_by_equipped_item(item)
+                if slot is not None:
+                    await self.unequip(slot)
 
     async def weaponize(self: "Character", monster: Monster) -> None:
         try:
