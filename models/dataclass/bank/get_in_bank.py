@@ -132,7 +132,12 @@ async def get_best_stat_item(
         best_equipment = {
             equipmentType: max(
                 (item for item in all_items if item.type == equipmentType.value),
-                key=lambda item: item.effects.get(wanted_effect, 0),
+                key=lambda item: (
+                    item.effects.get(wanted_effect, 0),
+                    item.level,
+                    all_items[item],
+                    item.code,
+                ),
                 default=None,
             )
             for equipmentType in EquipentType
@@ -147,13 +152,23 @@ async def get_best_stat_item(
                     if item.type == EquipentType.RING.value
                     for _ in range(qty)
                 ),
-                key=lambda item: item.effects.get(wanted_effect, 0),
+                key=lambda item: (
+                    item.effects.get(wanted_effect, 0),
+                    item.level,
+                    all_items[item],
+                    item.code,
+                ),
             )
         ).items()
         best_artifact = heapq.nlargest(
             3,
             (item for item in all_items if item.type == EquipentType.ARTIFACT.value),
-            key=lambda item: item.effects.get(wanted_effect, 0),
+            key=lambda item: (
+                item.effects.get(wanted_effect, 0),
+                item.level,
+                all_items[item],
+                item.code,
+            ),
         )
 
         better_items = {item: 1 for item in best_equipment.values() if item is not None}
