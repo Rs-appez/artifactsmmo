@@ -105,7 +105,7 @@ def score_equipment(
 def _best_picks(
     candidates: frozenset[tuple["Item", int]],
     monster: "Monster",
-    weapon_elems: frozenset[Element],
+    weapon_elems: frozenset[tuple[Element, float]],
     count: int,
     allow_duplicates: bool,
 ) -> list["Item"]:
