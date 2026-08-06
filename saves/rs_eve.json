@@ -2,7 +2,7 @@
     "routine_name": "gather",
     "routine_module": "routines.gather",
     "routine_args": [
-        "maple_wood"
+        "mithril_ore"
     ],
     "routine_kwargs": {}
 }
