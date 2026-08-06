@@ -26,8 +26,6 @@ async def _fight(character: Character, mob: Monster, force: bool = False) -> dic
     if not await character.move(mob_position):
         raise Exception(f"Failed to move to {mob_position.name}")
     fight_result = await character.fight()
-    if not fight_result[0]:
-        raise Exception(f"Failed to fight {mob.name}")
 
     return fight_result[1]
 
