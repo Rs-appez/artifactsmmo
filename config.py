@@ -26,3 +26,4 @@ TIMEZONE = ZoneInfo("Europe/Brussels")
 # Game constants
 MAX_LEVEL_CHARACTER = 50
 MAX_LEVEL_JOB = 50
+CRITICAL_STRIKE_MULTIPLIER = 1.5

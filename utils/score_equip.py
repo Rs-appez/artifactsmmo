@@ -1,30 +1,19 @@
 from functools import cache
 from typing import TYPE_CHECKING
 
+from config import CRITICAL_STRIKE_MULTIPLIER
 from models.enums import Element
 
 if TYPE_CHECKING:
     from models.dataclass import Item, Monster
 
 TOP_K_WEAPONS = 5
-# WEIGHTS = {
-#     "dmg": 1.274033258119729,
-#     "elemental_dmg": 1.274033258119729,
-#     "elemental_res": 0.050624965014169535,
-#     "hp": 0.1325939823954532,
-#     "critical_strike": 0.9789483154407386,
-#     "initiative": 0.13160696417676848,
-#     "prospecting": 0.03224571781920886,
-#     "inventory_space": 0.000001,
-#     "haste": 0.000001,
-# }
-# mine
 WEIGHTS = {
     "dmg": 1.25,
     "elemental_dmg": 1.25,
     "elemental_res": 3.00,
     "hp": 0.01,
-    "critical_strike": 0.75,
+    "critical_strike": 0.05,
     "initiative": 0.02,
     "haste": 0.50,
     "wisdom": 0.001,
@@ -48,13 +37,17 @@ def _score_weapon(weapon: "Item", monster: "Monster") -> float:
     if not weapon.is_weapon:
         raise ValueError(f"Item {weapon.name} is not a weapon")
     score = 0.0
+    dmg = 0
+    critical_strike = 0
     for effect, value in weapon.effects.items():
         element = effect.get_atk_element
         if element is not None:
-            score += value * _damage_multiplier(element, monster)
+            dmg += value * _damage_multiplier(element, monster)
+        elif effect.code == "critical_strike":
+            critical_strike += value
         elif effect.code in WEIGHTS:
             score += value * WEIGHTS[effect.code]
-    return score
+    return score + dmg + (dmg * 1.5 * critical_strike / 100)
 
 
 def score_weapon(weapon: "Item", monster: "Monster") -> float:
