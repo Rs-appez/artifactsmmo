@@ -174,6 +174,7 @@ def _best_equips_for_monster(
     best_total = float("-inf")
     for weapon in weapons[:top_k]:
         equipment, total = _build_set(weapon, armor_by_slot_set, monster)
+        print(f" {monster.name} - {weapon.name} combo score: {total:.2f}")
         if total > best_total:
             best_set, best_total = equipment, total
 
