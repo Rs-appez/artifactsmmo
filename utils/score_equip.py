@@ -32,6 +32,15 @@ def _damage_multiplier(element: Element, monster: "Monster") -> float:
     return max(0, 100 - monster.resistance.get(element, 0)) / 100
 
 
+def _weapon_attacks(weapon: "Item") -> frozenset[tuple[Element, float]]:
+    """(element, base attack) pairs dealt by the weapon each turn."""
+    return frozenset(
+        (elem, value)
+        for effect, value in weapon.effects.items()
+        if (elem := effect.get_atk_element) is not None
+    )
+
+
 @cache
 def _score_weapon(weapon: "Item", monster: "Monster") -> float:
     if not weapon.is_weapon:
@@ -47,7 +56,7 @@ def _score_weapon(weapon: "Item", monster: "Monster") -> float:
             critical_strike += value
         elif effect.code in WEIGHTS:
             score += value * WEIGHTS[effect.code]
-    return score + dmg + (dmg * CRITICAL_STRIKE_MULTIPLIER * critical_strike / 100)
+    return score + (dmg * CRITICAL_STRIKE_MULTIPLIER * critical_strike / 100)
 
 
 def score_weapon(weapon: "Item", monster: "Monster") -> float:
@@ -57,39 +66,37 @@ def score_weapon(weapon: "Item", monster: "Monster") -> float:
 
 @cache
 def _score_equipment(
-    equipment: "Item", monster: "Monster", weapon_elems: frozenset[Element]
+    equipment: "Item",
+    monster: "Monster",
+    weapon_attacks: frozenset[tuple[Element, float]],  # was weapon_elems
 ) -> float:
     if not equipment.is_equipment:
         raise ValueError(f"Item {equipment.name} is not equipment")
     score = 0.0
+    base = {e: atk * _damage_multiplier(e, monster) for e, atk in weapon_attacks}
+    total_base = sum(base.values())
+
     for effect, value in equipment.effects.items():
         code = effect.code
-
         if code == "dmg":
-            total_effectiveness = sum(
-                _damage_multiplier(elem, monster) for elem in weapon_elems
-            )
-            score += value * WEIGHTS["dmg"] * total_effectiveness
-
-        elif elem := effect.get_dmg_element:
-            if elem in weapon_elems:
-                score += (
-                    value * WEIGHTS["elemental_dmg"] * _damage_multiplier(elem, monster)
-                )
-
-        elif elem := effect.get_res_element:
+            score += total_base * value / 100
+        elif (elem := effect.get_dmg_element) is not None:
+            score += base.get(elem, 0.0) * value / 100
+        elif code == "critical_strike":
+            score += total_base * CRITICAL_STRIKE_MULTIPLIER * value / 100
+        elif (elem := effect.get_res_element) is not None:
             score += (
                 value * WEIGHTS["elemental_res"] * monster.attack.get(elem, 0) / 100
             )
-
         elif code in WEIGHTS:
             score += value * WEIGHTS[code]
-
     return score
 
 
 def score_equipment(
-    equipment: "Item", monster: "Monster", weapon_elems: frozenset[Element]
+    equipment: "Item",
+    monster: "Monster",
+    weapon_elems: frozenset[tuple[Element, float]],
 ) -> float:
     """Score a piece of equipment against a monster. Higher is better."""
     return _score_equipment(equipment, monster, weapon_elems)
@@ -125,7 +132,7 @@ def __build_set(
     monster: "Monster",
 ) -> tuple[dict["Item", int], float]:
     """Best armor set around one weapon. Returns ({item: qty}, total_score)."""
-    elems = frozenset(weapon.atk_element)
+    elems = _weapon_attacks(weapon)
     equipment: dict["Item", int] = {weapon: 1}
     total = score_weapon(weapon, monster)
 
