@@ -125,7 +125,7 @@ def evaluate(monsters) -> tuple[float, dict]:
     for m in monsters:
         # builds the best set; top_k defaults to TOP_K_WEAPONS = 5 [1]
         build = score_equip.best_equips_for_monster(
-            m, frozenset(item for item in ITEMS if item.level <= m.level + 5)
+            m, frozenset(item for item in ITEMS)
         )
         wr, avg_turns = simulate_battles(m, build)
 
@@ -168,11 +168,7 @@ def objective(trial: optuna.Trial) -> float:
 
 async def main():
     await Encyclopedia.initialize()
-    ITEMS.update(
-        item
-        for item in Encyclopedia._items.values()
-        if item.is_equipment or item.is_weapon
-    )
+    ITEMS.update(item for item in Encyclopedia._items.values() if item.is_equipment)
     for m_name in TRAIN_MONSTERS_NAMES:
         TRAIN_MONSTERS.add(await Encyclopedia.get_monster_by_code(m_name))
 
