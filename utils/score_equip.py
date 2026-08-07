@@ -9,14 +9,14 @@ if TYPE_CHECKING:
 
 TOP_K_WEAPONS = 5
 WEIGHTS = {
-    "dmg": 2.5,
-    "elemental_dmg": 2.5,
-    "elemental_res": 4.00,
+    "dmg": 3.5,
+    "elemental_dmg": 3.5,
+    "elemental_res": 4.50,
     "hp": 0.01,
     "critical_strike": 0.05,
     "initiative": 0.02,
     "haste": 0.50,
-    "wisdom": 0.001,
+    "wisdom": 0.0001,
     "prospecting": 0.01,
     "inventory_space": 0.0000001,
 }
