@@ -1,27 +1,47 @@
 from models import Character, Encyclopedia
+from models.dataclass import Item
 from models.enums import JobType
-from routines import gather
+from routines import craft, gather
 
 
-async def xp_skill(character: Character, job: JobType | str, target_level: int = -1):
+async def xp_skill(
+    character: Character,
+    job: JobType | str,
+    target_level: int | str = -1,
+    item_target: Item | str | None = None,
+):
     if isinstance(job, str):
         job = JobType(job)
 
+    if isinstance(target_level, str):
+        target_level = int(target_level)
+
     if job.is_crafting:
-        await _xp_craft_skill(character, job, target_level)
+        if item_target is None:
+            raise ValueError("item_target must be provided for crafting jobs.")
+        if isinstance(item_target, str):
+            item_target = await Encyclopedia.get_item_by_code(item_target)
+            if item_target is None:
+                raise ValueError(f"Item {item_target} not found in Encyclopedia.")
+        await _xp_craft_skill(character, job, target_level, item_target)
     elif job.is_gathering:
         await _xp_gather_skill(character, job, target_level)
     else:
         raise ValueError(f"Job {job} is neither crafting nor gathering.")
 
 
-async def _xp_craft_skill(character: Character, job: JobType, target_level):
+async def _xp_craft_skill(
+    character: Character, job: JobType, target_level: int, item_target: Item
+):
     if not job.is_crafting:
         raise ValueError(f"Job {job} is not a crafting job.")
-    raise NotImplementedError("This function is not yet implemented.")
+
+    while target_level == -1 or character.get_job_level(job) < target_level:
+        need_for_level_up = character.nb_action_needed_for_level_up(item_target)
+        await craft(character, item_target, need_for_level_up)
 
 
-async def _xp_gather_skill(character: Character, job: JobType, target_level):
+async def _xp_gather_skill(character: Character, job: JobType, target_level: int):
     if not job.is_gathering:
         raise ValueError(f"Job {job} is not a gathering job.")
 
