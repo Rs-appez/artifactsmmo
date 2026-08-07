@@ -2,6 +2,7 @@ from models import Character, Encyclopedia
 from models.dataclass import Item
 from models.enums import JobType
 from routines import craft, gather
+from utils.xp_craft_calculator import nb_craft_needed_for_level_up
 
 
 async def xp_skill(
@@ -36,9 +37,10 @@ async def _xp_craft_skill(
     if not job.is_crafting:
         raise ValueError(f"Job {job} is not a crafting job.")
 
-    while target_level == -1 or character.get_job_level(job) < target_level:
-        need_for_level_up = character.nb_action_needed_for_level_up(item_target)
-        await craft(character, item_target, need_for_level_up)
+    need_for_level_up = await nb_craft_needed_for_level_up(
+        character, item_target, target_level
+    )
+    await craft(character, item_target, need_for_level_up)
 
 
 async def _xp_gather_skill(character: Character, job: JobType, target_level: int):
