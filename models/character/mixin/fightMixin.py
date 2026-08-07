@@ -94,7 +94,7 @@ class FightMixin:
             result: bool = result_data["fight"]["result"] == "win"
             participants = [mate.surname for mate in teammate] if teammate else []
             print(
-                f"{'󰓥 ' if result else ' '} {','.join(participants) if participants else self.surname} Fought and {'won' if result_data else 'lost'}"
+                f"{'󰓥 ' if result else ' '} {','.join(participants) if participants else self.surname} Fought and {'won' if result else 'lost'}"
             )
 
             return (result, result_data["fight"])
