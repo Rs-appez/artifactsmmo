@@ -11,7 +11,7 @@ TOP_K_WEAPONS = 5
 WEIGHTS = {
     "dmg": 3.5,
     "elemental_dmg": 3.5,
-    "elemental_res": 4.00,
+    "elemental_res": 1.5,
     "hp": 0.01,
     "critical_strike": 0.05,
     "initiative": 0.02,
