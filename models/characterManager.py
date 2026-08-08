@@ -1,6 +1,6 @@
-from routines import gather
 from models import Character
-from models.dataclass import Event, Resource
+from models.dataclass import Event, Monster, Resource
+from routines import gather, mob_farm
 
 
 class CharacterManager:
@@ -11,8 +11,20 @@ class CharacterManager:
         match event.content:
             case Resource():
                 self._farm_gather_event(event)
+            case Monster():
+                self._farm_monster_event(event)
             case _:
                 pass
+
+    def _farm_monster_event(self, event: Event):
+        if not isinstance(event.content, Monster):
+            print(f"❌ Invalid event content for hunting: {event.content}")
+            return
+        monster = event.content
+
+        for character in self.characters.values():
+            if character.level >= monster.level:
+                character.do_one_time_task(mob_farm, monster)
 
     def _farm_gather_event(self, event: Event):
         if not isinstance(event.content, Resource):
