@@ -65,8 +65,9 @@ class Bank:
     @property
     def items(self) -> dict[Item, int]:
         return {
-            item: max(quantity - self.__reserved_items[item], 0)
+            item: qty
             for item, quantity in self._items.items()
+            if (qty := max(quantity - self.__reserved_items[item], 0)) > 0
         }
 
     @classmethod
