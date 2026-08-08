@@ -1,0 +1,5 @@
+(B) 2026-08-08 handle x -> 2 craft @refactor
+(A) 2026-08-08 handle generate resource for buy to npc @refactor
+(B) 2026-08-08 better handle of food consuming (when need overfeed) @refactor
+(C) 2026-08-08 block item qty to 2 when scoring equipment to avoid useless recompute @refactor
+(A) 2026-08-08 handle auto mission for event bandit/demon @feature
