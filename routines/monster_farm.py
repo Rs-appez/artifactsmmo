@@ -15,7 +15,10 @@ async def _fight(character: Character, mob: Monster, force: bool = False) -> dic
 
     if character.is_inventory_full:
         deposit_gold = True if character.gold > 10000 else False
-        _ = await character.deposit_all_in_bank(with_gold=deposit_gold)
+        food = {item for item in character.inventory if item.is_food}
+        await character.deposit_all_in_bank(
+            with_gold=deposit_gold, items_to_ignore=food
+        )
     await character.weaponize(mob)
     try:
         while not character.will_win_against(mob):
