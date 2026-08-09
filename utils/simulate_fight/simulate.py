@@ -1,7 +1,8 @@
-from math import floor
 from functools import cache
-from random import choice
+from math import floor
+from random import choice, randint
 
+from config import CRITICAL_STRIKE_MULTIPLIER
 from utils.math_fight import calc_resistance
 
 from .simulateData import SimulateData, SimulateResult
@@ -31,9 +32,10 @@ def _compute_damage(attacker: str, data: SimulateData) -> int:
 
     for element, attack_value in attacks:
         resistance = target_resistances.get(element, 0)
-        damage += calc_resistance(attack_value, resistance) * (
-            1 + critical_strike / 100
-        )
+        damage += calc_resistance(attack_value, resistance)
+
+    if randint(1, 100) <= critical_strike:
+        damage *= CRITICAL_STRIKE_MULTIPLIER
 
     return floor(damage + 0.5)
 
