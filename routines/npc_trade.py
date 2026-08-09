@@ -1,8 +1,10 @@
 from collections.abc import AsyncGenerator
 
+from exceptions import NotEnoughInBankException
 from models.character import Character
 from models.dataclass import NPC, Item
 from models.dataclass.bank import Bank
+from routines import generate_missing_items
 from utils.find_best import find_best_npc
 from utils.find_nearest import find_nearest_npc
 
@@ -27,31 +29,44 @@ async def __go_buy_from_npc(
 async def __get_currency_item(
     character: "Character", currency: Item, price: int, total_price: int
 ) -> AsyncGenerator[int, None]:
+    retry = True
+    while retry:
+        retry = False
+        try:
+            async with Bank.reserve_items(
+                {currency: total_price}, inventory=character.inventory
+            ) as bank_token:
+                per_trip = (character.inventory_max_items // price) * price
+                nb_trips = (total_price + per_trip - 1) // per_trip
+                print(
+                    f"💰 Need to withdraw {total_price} {currency.name} from bank to buy items, will do it in {nb_trips} trip(s)"
+                )
+                remain = total_price
+                for _ in range(nb_trips):
+                    price_to_withdraw = min(remain, per_trip)
+                    await character.deposit_all_in_bank(with_gold=False)
 
-    async with Bank.reserve_items(
-        {currency: total_price}, inventory=character.inventory
-    ) as bank_token:
-        per_trip = (character.inventory_max_items // price) * price
-        nb_trips = (total_price + per_trip - 1) // per_trip
-        print(
-            f"💰 Need to withdraw {total_price} {currency.name} from bank to buy items, will do it in {nb_trips} trip(s)"
-        )
-        remain = total_price
-        for _ in range(nb_trips):
-            price_to_withdraw = min(remain, per_trip)
-            await character.deposit_all_in_bank(with_gold=False)
-
-            async with Bank.get_reserved_items_partial(
-                bank_token, {currency: price_to_withdraw}
-            ) as partial_bank_token:
-                if character.inventory_free_space < price_to_withdraw:
-                    await character.deposit_all_in_bank(items_to_ignore={currency})
-                if not await character.withdraw_item_from_bank(partial_bank_token):
-                    raise Exception(
-                        f"❌ {character.surname} does not have enough {currency.name} to buy items"
-                    )
-            yield price_to_withdraw // price
-            remain -= price_to_withdraw
+                    async with Bank.get_reserved_items_partial(
+                        bank_token, {currency: price_to_withdraw}
+                    ) as partial_bank_token:
+                        if character.inventory_free_space < price_to_withdraw:
+                            await character.deposit_all_in_bank(
+                                items_to_ignore={currency}
+                            )
+                        if not await character.withdraw_item_from_bank(
+                            partial_bank_token
+                        ):
+                            raise Exception(
+                                f"❌ {character.surname} does not have enough {currency.name} to buy items"
+                            )
+                    yield price_to_withdraw // price
+                    remain -= price_to_withdraw
+        except NotEnoughInBankException:
+            await generate_missing_items(character, {currency: total_price})
+            retry = True
+        except Exception as e:
+            print(f"❌ npc trade : {character.surname} : {e}")
+            return
 
 
 async def buy_from_npc(character: "Character", item: "Item", quantity: int):
