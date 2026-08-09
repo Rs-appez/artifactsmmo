@@ -1,5 +1,10 @@
 (B) 2026-08-08 handle x -> 2 craft @refactor
-(A) 2026-08-08 handle generate resource for buy to npc @refactor
 (B) 2026-08-08 better handle of food consuming (when need overfeed) @refactor
 (C) 2026-08-08 block item qty to 2 when scoring equipment to avoid useless recompute @refactor
-(A) 2026-08-08 handle auto mission for event bandit/demon @feature
+(B) 2026-08-08 handle delegation @feature
+(D) 2026-08-08 handle auto withdraw pending item on the "best" character @feature
+(A) 2026-08-09 rework battle simulation @refactor
+(B) 2026-08-09 better handling recycle in xp_skill craft @feature
+(B) 2026-08-09 add command to make ge sell order (for useless stuff) @feature
+(B) 2026-08-09 fix assure dont loosing wisdom stuff when farming for a craft @fix
+(A) 2026-08-09 handle farm in the enchented forest @feature
