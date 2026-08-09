@@ -5,32 +5,35 @@ from random import choice, randint
 from config import CRITICAL_STRIKE_MULTIPLIER
 from utils.math_fight import calc_resistance
 
+from .computeEffect import compute_hp_effects
 from .simulateData import SimulateData, SimulateResult
 
 
 def _is_player_start(data: SimulateData) -> bool:
-    if data.char_initiative > data.monster_initiative:
+    char_initiative = data.get_initiative(True)
+    char_hp = data.get_hp(True)
+
+    monster_hp = data.get_hp(False)
+    monster_initiative = data.get_initiative(False)
+
+    if char_initiative > monster_initiative:
         return True
-    elif data.char_initiative < data.monster_initiative:
+    elif char_initiative < monster_initiative:
         return False
-    elif data.char_hp > data.monster_hp:
+    elif char_hp > monster_hp:
         return True
-    elif data.char_hp < data.monster_hp:
+    elif char_hp < monster_hp:
         return False
     else:
         return choice([True, False])
 
 
-def _compute_damage(attacker: str, data: SimulateData) -> int:
+def _compute_damage(char_turn: bool, data: SimulateData) -> int:
     damage = 0
-    target = "monster" if attacker == "char" else "char"
-    attacks, critical_strike = data.get_attacks(attacker)
-    attacker_effects = data.get_effects(attacker)
+    attacks, critical_strike = data.get_attacks(char_turn)
+    target_resistances = data.get_resistances(not char_turn)
 
-    target_resistances = data.get_resistances(target)
-    target_effects = data.get_effects(target)
-
-    for element, attack_value in attacks:
+    for element, attack_value in attacks.items():
         resistance = target_resistances.get(element, 0)
         damage += calc_resistance(attack_value, resistance)
 
@@ -40,15 +43,17 @@ def _compute_damage(attacker: str, data: SimulateData) -> int:
     return floor(damage + 0.5)
 
 
-def _fight(tenta_data: dict[str, int], data: SimulateData):
+def _fight(data: SimulateData):
 
     char_turn = _is_player_start(data)
-    while tenta_data["char_hp"] > 0 and tenta_data["monster_hp"] > 0:
-        tenta_data["nb_turns"] += 1
+    while data.get_hp(True) > 0 and data.get_hp(False) > 0:
+        data.increment_turns(char_turn)
 
-        attacker = "char" if char_turn else "monster"
-        dmg = _compute_damage(attacker, data)
-        tenta_data["char_hp" if not char_turn else "monster_hp"] -= dmg
+        self_effect_dmg = compute_hp_effects(char_turn, data)
+        dmg = _compute_damage(char_turn, data)
+
+        data.take_damage(not char_turn, dmg)
+        data.take_damage(char_turn, self_effect_dmg)
 
         char_turn = not char_turn
 
@@ -62,19 +67,15 @@ def _simulate(data: SimulateData, n: int = 100) -> SimulateResult:
     total_turns = 0
 
     for _ in range(n):
-        tenta_data = {
-            "nb_turns": 0,
-            "char_hp": data.char_hp,
-            "monster_hp": data.monster_hp,
-        }
+        data.reset_metadata()
 
-        _fight(tenta_data, data)
+        _fight(data)
 
-        if tenta_data["char_hp"] > 0:
+        if data.get_hp(True) > 0:
             char_wins += 1
-        total_char_hp += tenta_data["char_hp"]
-        total_monster_hp += tenta_data["monster_hp"]
-        total_turns += tenta_data["nb_turns"]
+        total_char_hp += data.get_hp(True)
+        total_monster_hp += data.get_hp(False)
+        total_turns += data.get_turns
 
     return SimulateResult(
         win_rate=(char_wins / n) * 100,
