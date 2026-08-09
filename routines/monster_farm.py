@@ -10,6 +10,9 @@ from routines import empty_farm
 
 
 async def _fight(character: Character, mob: Monster, force: bool = False) -> dict:
+
+    mob_position = await find_nearest_lootable(character, {mob})
+
     if character.is_inventory_full:
         deposit_gold = True if character.gold > 10000 else False
         _ = await character.deposit_all_in_bank(with_gold=deposit_gold)
@@ -22,7 +25,6 @@ async def _fight(character: Character, mob: Monster, force: bool = False) -> dic
             await __regenerate_hp(character, full=True)
         else:
             raise e
-    mob_position = await find_nearest_lootable(character, {mob})
     if not await character.move(mob_position):
         raise Exception(f"Failed to move to {mob_position.name}")
     fight_result = await character.fight()
