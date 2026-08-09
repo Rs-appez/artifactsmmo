@@ -58,6 +58,7 @@ async def __make_trip(
     bank_token: uuid.UUID,
     item: Item,
     quantity: int,
+    recycling_after: bool,
 ):
     _ = await character.deposit_all_in_bank(comeback=False)
     if not await character.withdraw_item_from_bank(bank_token):
@@ -73,9 +74,14 @@ async def __make_trip(
     if not await character.craft(item, quantity):
         print(f"❌ {character.surname} failed to craft {quantity}x {item.name}")
         return
+    if recycling_after and not await character.decraft(item, quantity):
+        print(f"❌ {character.surname} failed to decraft {quantity}x {item.name}")
+        return
 
 
-async def craft(character: Character, item: Item, quantity: int):
+async def craft(
+    character: Character, item: Item, quantity: int, recycling_after: bool = False
+):
     if not character.has_job(item.job, item.craft_level):
         print(
             f"❌ {character.surname} does not have the required {item.job} level to craft {item.name}",
@@ -128,6 +134,7 @@ async def craft(character: Character, item: Item, quantity: int):
                             trip_token,
                             item,
                             nb_craft_per_trip,
+                            recycling_after,
                         )
                 async with Bank.get_reserved_items_partial(
                     bank_token, ingredients_for_last_trip
@@ -138,6 +145,7 @@ async def craft(character: Character, item: Item, quantity: int):
                         last_trip_token,
                         item,
                         nb_craft_last_trip,
+                        recycling_after,
                     )
 
             print(f"⚒️ {character.surname} finished crafting {quantity}x {item.name}")
