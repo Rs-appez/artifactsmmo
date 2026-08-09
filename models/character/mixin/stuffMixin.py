@@ -22,13 +22,19 @@ class StuffMixin:
     _effects: dict[Effect, int] = field(default_factory=dict)
 
     _equipped_items: dict[EquipentType, Item | None] = field(default_factory=dict)
-
     _bag: Item | None = None
+
     _ring_1: Item | None = None
     _ring_2: Item | None = None
+
     _artifact_1: Item | None = None
     _artifact_2: Item | None = None
     _artifact_3: Item | None = None
+
+    _utility_items: dict[Item, int] = field(default_factory=dict)
+
+    def __init_stuff_mixin__(self: "Character"):
+        self._init_utility_items_effects()
 
     @property
     def weapon(self) -> Item | None:
@@ -37,6 +43,18 @@ class StuffMixin:
     @property
     def effects(self) -> dict[Effect, int]:
         return self._effects.copy()
+
+    def has_effect(self, effect: Effect) -> int:
+        """
+        Check if the character has a specific effect and return its value.
+        :param effect: The effect to check.
+        :return: The value of the effect if present, otherwise 0.
+        """
+        return self._effects.get(effect, -1)
+
+    @property
+    def get_utility_items(self) -> dict[Item, int]:
+        return self._utility_items.copy()
 
     @property
     def get_rings(self) -> tuple[Item | None, Item | None]:
@@ -102,6 +120,11 @@ class StuffMixin:
             )
             # TODO : grab food from bank if needed
             await self.rest()
+
+    def _init_utility_items_effects(self: "Character") -> None:
+        for item in self._utility_items:
+            for effect, value in item.effects.items():
+                self._effects[effect] = self._effects.get(effect, 0) + value
 
     async def equip(
         self: "Character", item: Item, quantity: int = 1, slot: str | None = None
