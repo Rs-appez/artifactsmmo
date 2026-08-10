@@ -8,3 +8,4 @@
 (B) 2026-08-09 add command to make ge sell order (for useless stuff) @feature
 (B) 2026-08-09 fix assure dont loosing wisdom stuff when farming for a craft @fix
 (A) 2026-08-09 handle farm in the enchented forest @feature
+(B) 2026-08-10 better handling food retrieve (take when equip, smart refull when emptyfarm) @refactor
