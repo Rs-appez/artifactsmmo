@@ -19,7 +19,6 @@ async def _fight(character: Character, mob: Monster, force: bool = False) -> dic
         await character.deposit_all_in_bank(
             with_gold=deposit_gold, items_to_ignore=food
         )
-    await character.weaponize(mob)
     try:
         while not character.will_win_against(mob):
             await __regenerate_hp(character)
@@ -56,6 +55,7 @@ async def mob_farm(
             force = force.lower() in ("true", "force", "f")
 
         iterations = range(nb) if nb > 0 else count()
+        await character.weaponize(mob)
         for _ in iterations:
             await _fight(character, mob, force)
 
@@ -122,6 +122,7 @@ async def drop_on_mob_farm(character: Character, item: Item | str, nb: int | str
         return
 
     monster = await find_best_monster(character, item)
+    await character.weaponize(monster)
     current_drop = 0
     while nb == -1 or nb > current_drop:
         fight_result = (await _fight(character, monster))["characters"]
