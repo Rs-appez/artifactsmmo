@@ -10,3 +10,5 @@
 (A) 2026-08-09 handle farm in the enchented forest @feature
 (B) 2026-08-10 better handling food retrieve (take when equip, smart refull when emptyfarm) @refactor
 (A) 2026-08-10 cache bank to reduce api call @refactor
+(B) 2026-08-11 prioritize high level food when getting food @refactor
+(B) 2026-08-12 fix auto generate apple @fix
