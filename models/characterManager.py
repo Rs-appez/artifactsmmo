@@ -21,6 +21,9 @@ class CharacterManager:
             print(f"❌ Invalid event content for hunting: {event.content}")
             return
         monster = event.content
+        if monster.is_boss:
+            return
+            # TODO: Implement boss hunting logic
 
         for character in self.characters.values():
             if character.level >= monster.level:
