@@ -83,6 +83,10 @@ class Monster:
     def average_gold(self) -> float:
         return (self.min_gold + self.max_gold) / 2
 
+    @property
+    def is_boss(self) -> bool:
+        return self.type == "boss"
+
     def drop_rate(self, item: "Item") -> float:
         for drop in self.drops:
             if item in drop:
