@@ -1,9 +1,9 @@
-from exceptions import TimeoutButSuccessException
-from typing import TYPE_CHECKING
 import uuid
+from typing import TYPE_CHECKING
 
+from exceptions import TimeoutButSuccessException
 from models.dataclass import Item
-from models.dataclass.bank import Bank, lock_bank
+from models.dataclass.bank import Bank, get_food, lock_bank
 
 from ..decorators import need_bank
 
@@ -138,3 +138,11 @@ class BankMixin:
         except Exception as e:
             print(f"❌ {self.surname} withdraw gold : {e}")
             return False
+
+    async def get_food_from_bank(self: "Character"):
+        print(f"󰜎 {self.surname} will search for food in bank")
+        qty = int(self.inventory_max_items * 0.8)
+        async with get_food(self, qty) as food_token:
+            await self.deposit_all_in_bank(with_gold=False)
+            if not await self.withdraw_item_from_bank(food_token):
+                raise Exception("Failed to withdraw food from bank")

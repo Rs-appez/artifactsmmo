@@ -1,12 +1,13 @@
-from utils.find_best import find_best_monster
 import asyncio
 from itertools import count
+
 from exceptions import ImpossibleCombatException
 from models import Character, Encyclopedia
-from models.dataclass import Monster, Item
+from models.dataclass import Item, Monster
 from models.dataclass.bank import get_food
-from utils.find_nearest import find_nearest_lootable
 from routines import empty_farm
+from utils.find_best import find_best_monster
+from utils.find_nearest import find_nearest_lootable
 
 
 async def _fight(character: Character, mob: Monster, force: bool = False) -> dict:
@@ -19,14 +20,15 @@ async def _fight(character: Character, mob: Monster, force: bool = False) -> dic
         await character.deposit_all_in_bank(
             with_gold=deposit_gold, items_to_ignore=food
         )
-    try:
-        while not character.will_win_against(mob):
-            await __regenerate_hp(character)
-    except ImpossibleCombatException as e:
-        if force:
-            await __regenerate_hp(character, full=True)
-        else:
-            raise e
+
+    if not character.will_win_against(mob, max_hp=False):
+        if not character.will_win_against(mob, max_hp=True) and not force:
+            raise ImpossibleCombatException(
+                f"❌ {character.surname} will lose against {mob.name} even with full hp"
+            )
+        need_full_regeneration = not __can_win_with_eco_food(character, mob)
+        await __regenerate_hp(character, full=need_full_regeneration)
+
     if not await character.move(mob_position):
         raise Exception(f"Failed to move to {mob_position.name}")
     fight_result = await character.fight()
@@ -141,16 +143,15 @@ async def drop_on_mob_farm(character: Character, item: Item | str, nb: int | str
 async def __regenerate_hp(character: Character, full: bool = False):
     try:
         if not character.has_food:
-            print(f"󰜎 {character.surname} will search for food in bank")
-            qty = int(character.inventory_max_items * 0.8)
-            async with get_food(character, qty) as food_token:
-                await character.deposit_all_in_bank(with_gold=False)
-                if not await character.withdraw_item_from_bank(food_token):
-                    raise Exception("Failed to withdraw food from bank")
-        await character.regenerate_hp()
-        if full and character.missing_hp > 0:
-            await character.regenerate_hp()
+            await character.get_food_from_bank()
+
+        await character.regenerate_hp(full=full)
 
     except Exception:
         _ = await character.rest()
         print(f"󰻝  {character.surname} rests to recover hp before fighting")
+
+
+async def __can_win_with_eco_food(character: Character, mob: Monster) -> bool:
+    food_regen = character.how_much_hp_can_regenerate()
+    return character.will_win_against(mob, custom_hp=character.hp + food_regen)
