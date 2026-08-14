@@ -51,7 +51,7 @@ async def get_food(
             raise Exception("No food found in bank for character")
         packed_food = {}
         for item, available_quantity in sorted(
-            food_items.items(), key=lambda x: x[1], reverse=True
+            food_items.items(), key=lambda x: (x[0].level, x[1]), reverse=True
         ):
             if quantity <= 0:
                 break
