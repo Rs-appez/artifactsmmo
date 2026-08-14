@@ -28,7 +28,7 @@ dict_actions = {
 
 dict_all = {
     "stopall": cli_action.stop_all,
-    "status": cli_action.status,
+    "ls": cli_action.status,
 }
 
 dict_special = {

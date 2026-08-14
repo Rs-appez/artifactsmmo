@@ -1,3 +1,4 @@
+from models import Encyclopedia
 from collections.abc import AsyncGenerator
 
 from exceptions import NotEnoughInBankException
@@ -69,7 +70,20 @@ async def __get_currency_item(
             return
 
 
-async def buy_from_npc(character: "Character", item: "Item", quantity: int):
+async def buy_from_npc(character: "Character", item: "Item" | str, quantity: int | str):
+    if isinstance(item, str):
+        item_object = await Encyclopedia.get_item_by_code(item)
+        if not item_object:
+            print(f"❌ Item {item} not found")
+            return
+        item = item_object
+
+    if isinstance(quantity, str):
+        try:
+            quantity = int(quantity)
+        except ValueError:
+            print(f"❌ Invalid quantity {quantity}")
+            return
     npcs = NPC.get_npcs_by_item_to_buy(item)
     if not npcs:
         print(f"❌ No NPC found buying {item.name}")

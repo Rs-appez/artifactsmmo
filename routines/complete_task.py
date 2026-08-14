@@ -24,6 +24,13 @@ async def complete_task(
             print(f"❌ Invalid number of iterations : {nb}")
             return
 
+    if isinstance(type, str):
+        try:
+            type = TaskType(type)
+        except ValueError:
+            print(f"❌ Invalid task type : {type}")
+            return
+
     if character.task is not None:
         if isinstance(character.task.cible, Monster):
             task_master = await find_nearest_tasks_master(character, TaskType.MONSTER)
@@ -41,9 +48,6 @@ async def complete_task(
                 )
             case TaskType.ITEM:
                 task_master = await find_nearest_tasks_master(character, TaskType.ITEM)
-            case _:
-                print(f"❌ Invalid task type : {type}")
-                return
 
     iterations = range(nb) if nb > 0 else count()
     for _ in iterations:
