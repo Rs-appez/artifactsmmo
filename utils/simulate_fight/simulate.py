@@ -5,11 +5,11 @@ from random import choice, randint
 from config import CRITICAL_STRIKE_MULTIPLIER
 from utils.math_fight import calc_resistance
 
-from .computeEffect import compute_hp_effects
-from .simulateData import SimulateData, SimulateResult
+from .computeEffect import compute_effects
+from .simulateData import FightMetadata, SimulateData, SimulateResult
 
 
-def _is_player_start(data: SimulateData) -> bool:
+def _is_player_start(data: FightMetadata) -> bool:
     char_initiative = data.get_initiative(True)
     char_hp = data.get_hp(True)
 
@@ -28,29 +28,34 @@ def _is_player_start(data: SimulateData) -> bool:
         return choice([True, False])
 
 
-def _compute_damage(char_turn: bool, data: SimulateData) -> int:
+def _compute_damage(char_turn: bool, data: FightMetadata) -> int:
     damage = 0
-    attacks, critical_strike = data.get_attacks(char_turn)
+    attacks = data.get_attacks(char_turn)
     target_resistances = data.get_resistances(not char_turn)
 
     for element, attack_value in attacks.items():
+        if attack_value <= 0:
+            continue
         resistance = target_resistances.get(element, 0)
         damage += calc_resistance(attack_value, resistance)
 
-    if randint(1, 100) <= critical_strike:
+    if data.has_critical_strike(char_turn):
         damage *= CRITICAL_STRIKE_MULTIPLIER
 
     return floor(damage + 0.5)
 
 
-def _fight(data: SimulateData):
+def _fight(data: FightMetadata):
 
     char_turn = _is_player_start(data)
-    while data.get_hp(True) > 0 and data.get_hp(False) > 0:
+    while data.get_hp(True) > 0 and data.get_hp(False) > 0 and data.get_turns < 100:
         data.increment_turns(char_turn)
 
-        self_effect_dmg = compute_hp_effects(char_turn, data)
+        has_crit = randint(1, 100) <= data.get_critical_strike(char_turn)
+        data.set_critical_strike(char_turn, has_crit)
+
         dmg = _compute_damage(char_turn, data)
+        self_effect_dmg = compute_effects(char_turn, dmg, data)
 
         data.take_damage(not char_turn, dmg)
         data.take_damage(char_turn, self_effect_dmg)
@@ -59,7 +64,7 @@ def _fight(data: SimulateData):
 
 
 @cache
-def _simulate(data: SimulateData, n: int = 100) -> SimulateResult:
+def _simulate(data: SimulateData, n: int) -> SimulateResult:
 
     char_wins = 0
     total_char_hp = 0
@@ -67,15 +72,14 @@ def _simulate(data: SimulateData, n: int = 100) -> SimulateResult:
     total_turns = 0
 
     for _ in range(n):
-        data.reset_metadata()
+        with data.generate_metadata() as metadata:
+            _fight(metadata)
 
-        _fight(data)
-
-        if data.get_hp(True) > 0:
-            char_wins += 1
-        total_char_hp += data.get_hp(True)
-        total_monster_hp += data.get_hp(False)
-        total_turns += data.get_turns
+            if metadata.get_hp(False) <= 0:
+                char_wins += 1
+            total_char_hp += metadata.get_hp(True)
+            total_monster_hp += metadata.get_hp(False)
+            total_turns += metadata.get_turns
 
     return SimulateResult(
         win_rate=(char_wins / n) * 100,
@@ -85,7 +89,7 @@ def _simulate(data: SimulateData, n: int = 100) -> SimulateResult:
     )
 
 
-def simulate(data: SimulateData, n: int = 100) -> SimulateResult:
+def simulate(data: SimulateData, n: int = 1000) -> SimulateResult:
     if n <= 0:
         raise ValueError("n must be greater than 0")
     return _simulate(data, n)

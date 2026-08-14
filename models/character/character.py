@@ -3,10 +3,9 @@ from dataclasses import KW_ONLY, dataclass
 from datetime import datetime
 from typing import override
 
-
 from config import ARTIFACTSMMO_URL, TIMEZONE
 from models import Encyclopedia, LocationRegistry
-from models.dataclass import TaskQuest
+from models.dataclass import Item, TaskQuest
 from models.enums import Element, EquipentType, JobType
 from utils.math_fight import calc_attack
 
@@ -15,16 +14,16 @@ from .mixin import (
     ApiMixin,
     BankMixin,
     CraftMixin,
-    JobMixin,
     FightMixin,
     GatherMixin,
+    InventoryMixin,
+    JobMixin,
     MoveMixin,
+    NpcMixin,
+    SaveMixin,
+    StuffMixin,
     TaskMixin,
     WorkMixin,
-    StuffMixin,
-    SaveMixin,
-    InventoryMixin,
-    NpcMixin,
 )
 
 
@@ -59,6 +58,7 @@ class Character(
     def __post_init__(self):
         self.__init_api_mixin__()
         self.__init_work_mixin__()
+        self.__init_stuff_mixin__()
 
     def __hash__(self):
         return hash(self.name)
@@ -235,6 +235,7 @@ class Character(
             if data.get("bag_slot")
             else None,
             _equipped_items=equipments,
+            _utility_items=await Character.__get_utility_items(data),
             _ring_1=await Encyclopedia.get_item_by_code(data["ring1_slot"])
             if data.get("ring1_slot")
             else None,
@@ -265,3 +266,19 @@ class Character(
         for job_type in JobType.character_job_types():
             jobs[job_type] = get_job_level(job_type)
         return jobs
+
+    @classmethod
+    async def __get_utility_items(cls, data: dict) -> dict[Item, int]:
+        utility_items = {}
+        util_1 = data.get("utility1_slot", None)
+        util_2 = data.get("utility2_slot", None)
+
+        utils = [(i + 1, u) for i, u in enumerate([util_1, util_2]) if u is not None]
+
+        for i, util in utils:
+            item = await Encyclopedia.get_item_by_code(util)
+            if item:
+                qty = data.get(f"utility{i}_quantity", 0)
+                utility_items[item] = qty
+
+        return utility_items
