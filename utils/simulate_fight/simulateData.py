@@ -149,10 +149,16 @@ class SimulateData:
 
     @classmethod
     def from_models(
-        cls, char: "Character", monster: "Monster", char_max_hp: bool = False
+        cls,
+        char: "Character",
+        monster: "Monster",
+        char_max_hp: bool = False,
+        custom_hp: int | None = None,
     ) -> "SimulateData":
         char_data = _EntityData(
-            _hp=char.hp if not char_max_hp else char.max_hp,
+            _hp=custom_hp
+            if custom_hp is not None
+            else (char.max_hp if char_max_hp else char.hp),
             _max_hp=char.max_hp,
             _initiative=char.initiative,
             _resistance=frozenset(char.resistance.items()),
