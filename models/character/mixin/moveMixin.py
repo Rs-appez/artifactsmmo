@@ -3,36 +3,43 @@ from typing import TYPE_CHECKING
 
 from config import SANDBOX
 from exceptions import TimeoutButSuccessException
-from models.dataclass import Map
-from models.enums import Layer
+from models import LocationRegistry
+from models.dataclass import Item, Map
+from models.dataclass.bank import Bank
+from models.enums import Layer, ZoneType
 from utils.find_nearest import find_nearest_transition
 from utils.reset_cooldown import reset_cooldown
 
 if TYPE_CHECKING:
     from models.character import Character
 
+TRANSITION_MAPS = {
+    ZoneType.SANDWHISPER: {ZoneType.DEFAULT: 1093, ZoneType.SANDWHISPER: 1336},
+}
+
 
 @dataclass
 class MoveMixin:
-    _location: Map | None = None
+    _location: Map
+
+    _default_return_potion: Item
 
     @property
     def location(self: "Character") -> Map:
-        if self._location is None:
-            raise Exception("Location is not set for this character")
         return self._location
 
     async def move(self: "Character", destination: Map) -> bool:
         if destination == self.location:
             return True
 
+        await self._handle_travel(destination)
+
         if destination.layer != self.location.layer:
             await self._change_layer(destination)
-            if SANDBOX:
-                await reset_cooldown(self)
-            await self.available
-            if destination == self.location:
-                return True
+
+        if destination == self.location:
+            return True
+
         try:
             await self.post_api("/move", json_data={"map_id": destination.map_id})
 
@@ -94,3 +101,51 @@ class MoveMixin:
                 f"❌ {self.surname} Failed to transition to layer {destination.layer} from {transition_map.name}"
             )
             return
+
+    async def _handle_travel(self: "Character", destination: Map) -> None:
+        char_zone = self.location.zone
+        if char_zone != destination.zone:
+            match destination.zone:
+                case ZoneType.DEFAULT:
+                    await self._return_to_default_location()
+                case ZoneType.SANDWHISPER:
+                    await self.__handle_sandwhisper_travel()
+
+    async def __get_pre_travel_items(
+        self: "Character", gold_to_travel: int, return_potion: Item | None = None
+    ) -> None:
+
+        if return_potion is None:
+            return_potion = self._default_return_potion
+
+        if not self.has_in_inventory({return_potion: 1}):
+            async with Bank.reserve_items({return_potion: 1}) as bank_token:
+                if not await self.withdraw_item_from_bank(bank_token):
+                    raise Exception(
+                        f"Failed to withdraw {return_potion.name} from bank"
+                    )
+
+        if self.gold < gold_to_travel:
+            if not await self.withdraw_gold_from_bank(gold_to_travel):
+                raise Exception(f"Failed to withdraw {gold_to_travel} gold from bank")
+
+    async def __handle_sandwhisper_travel(self: "Character") -> None:
+        await self.__get_pre_travel_items(1000)
+        boat = await LocationRegistry.get_map_by_id(
+            TRANSITION_MAPS[ZoneType.SANDWHISPER][self.location.zone]
+        )
+        await self.move(boat)
+        await self.transition()
+
+    async def _return_to_default_location(self: "Character") -> None:
+        if self.has_in_inventory({self._default_return_potion: 1}):
+            await self.use_item(self._default_return_potion)
+
+        else:
+            match self.location.zone:
+                case ZoneType.SANDWHISPER:
+                    boat = await LocationRegistry.get_map_by_id(
+                        TRANSITION_MAPS[ZoneType.SANDWHISPER][self.location.zone]
+                    )
+                    await self.move(boat)
+                    await self.transition()

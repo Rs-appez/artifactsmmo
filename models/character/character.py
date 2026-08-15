@@ -30,7 +30,6 @@ from .mixin import (
 @dataclass
 class Character(
     ApiMixin,
-    MoveMixin,
     JobMixin,
     InventoryMixin,
     BankMixin,
@@ -42,6 +41,7 @@ class Character(
     StuffMixin,
     SaveMixin,
     NpcMixin,
+    MoveMixin,
 ):
     _: KW_ONLY
     _name: str
@@ -251,6 +251,9 @@ class Character(
             _artifact_3=await Encyclopedia.get_item_by_code(data["artifact3_slot"])
             if data.get("artifact3_slot")
             else None,
+            _default_return_potion=await Encyclopedia.get_item_by_code(
+                "forest_bank_potion"
+            ),
         )
 
     @classmethod
