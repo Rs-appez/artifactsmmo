@@ -1,13 +1,16 @@
-from models import Encyclopedia
 from collections.abc import AsyncGenerator
+from typing import TYPE_CHECKING
 
 from exceptions import NotEnoughInBankException
-from models.character import Character
+from models import Encyclopedia
 from models.dataclass import NPC, Item
 from models.dataclass.bank import Bank
 from routines import generate_missing_items
 from utils.find_best import find_best_npc
 from utils.find_nearest import find_nearest_npc
+
+if TYPE_CHECKING:
+    from models.character import Character
 
 
 async def __go_buy_from_npc(

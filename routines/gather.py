@@ -1,8 +1,12 @@
 from itertools import count
+from typing import TYPE_CHECKING
 
-from models import Character, Encyclopedia
+from models import Encyclopedia
 from models.dataclass import Item, Resource
 from utils.find_nearest import find_nearest_lootable
+
+if TYPE_CHECKING:
+    from models.character import Character
 
 
 async def gather(character: Character, item: Item | str, nb: int | str = -1) -> None:

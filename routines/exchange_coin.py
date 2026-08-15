@@ -1,6 +1,11 @@
-from models import Character, Encyclopedia
+from typing import TYPE_CHECKING
+
+from models import Encyclopedia
 from models.dataclass.bank import get_max_items
 from utils.find_nearest import find_nearest_tasks_master
+
+if TYPE_CHECKING:
+    from models.character import Character
 
 
 async def exchange_task_coin(character: Character) -> None:

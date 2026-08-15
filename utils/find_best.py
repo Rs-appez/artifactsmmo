@@ -1,5 +1,10 @@
-from models import Character, Encyclopedia, LocationRegistry
+from typing import TYPE_CHECKING
+
+from models import Encyclopedia, LocationRegistry
 from models.dataclass import NPC, Item, Monster
+
+if TYPE_CHECKING:
+    from models.character import Character
 
 
 def find_best_npc(npcs: set[NPC], item: Item) -> NPC:

@@ -1,8 +1,13 @@
-from models import Character, Encyclopedia
+from typing import TYPE_CHECKING
+
+from models import Encyclopedia
 from models.dataclass import Item
 from models.enums import JobType
 from routines import craft, gather
 from utils.xp_craft_calculator import nb_craft_needed_for_level_up
+
+if TYPE_CHECKING:
+    from models.character import Character
 
 
 async def xp_skill(

@@ -1,6 +1,10 @@
 from exceptions import DontHaveLevelException
-from models import Character
 from models.dataclass.bank import Bank
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from models import Character
 
 
 async def empty_farm(character: Character):
