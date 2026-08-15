@@ -236,7 +236,9 @@ async def get_best_equipment(
         for item in character.equipped_items:
             items[item] = items.get(item, 0) + 1
 
-        items_to_score = frozenset((item, qty) for item, qty in items.items())
+        items_to_score = frozenset(
+            (item, 2 if qty > 1 else qty) for item, qty in items.items()
+        )
         best_equipment_set = best_equips_for_monster(monster, items_to_score)
         token = await _reserve_unequipped_items(character, bank, best_equipment_set)
 
