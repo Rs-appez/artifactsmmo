@@ -45,10 +45,13 @@ class Encyclopedia:
             _ = await asyncio.sleep(1)
 
     @staticmethod
-    async def get_item_by_code(code: str) -> Item | None:
+    async def get_item_by_code(code: str) -> Item:
         await Encyclopedia.wait_item()
 
-        item = Encyclopedia._items.get(code, None)
+        item = Encyclopedia._items.get(code)
+
+        if not item:
+            raise ValueError(f"Item with code '{code}' not found.")
 
         return item
 
