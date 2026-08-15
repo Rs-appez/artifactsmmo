@@ -152,6 +152,6 @@ async def __regenerate_hp(character: Character, full: bool = False):
         print(f"󰻝  {character.surname} rests to recover hp before fighting")
 
 
-async def __can_win_with_eco_food(character: Character, mob: Monster) -> bool:
+def __can_win_with_eco_food(character: Character, mob: Monster) -> bool:
     food_regen = character.how_much_hp_can_regenerate()
     return character.will_win_against(mob, custom_hp=character.hp + food_regen)
