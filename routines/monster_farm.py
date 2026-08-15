@@ -1,13 +1,16 @@
 import asyncio
 from itertools import count
+from typing import TYPE_CHECKING
 
 from exceptions import ImpossibleCombatException
-from models import Character, Encyclopedia
+from models import Encyclopedia
 from models.dataclass import Item, Monster
-from models.dataclass.bank import get_food
 from routines import empty_farm
 from utils.find_best import find_best_monster
 from utils.find_nearest import find_nearest_lootable
+
+if TYPE_CHECKING:
+    from models.character import Character
 
 
 async def _fight(character: Character, mob: Monster, force: bool = False) -> dict:

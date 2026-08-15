@@ -1,12 +1,16 @@
 import uuid
 from math import ceil
+from typing import TYPE_CHECKING
 
 from exceptions import NotEnoughInBankException
-from models import Character, Encyclopedia
+from models import Encyclopedia
 from models.dataclass import Item, Map
 from models.dataclass.bank import Bank
 from routines import generate_missing_items
 from utils.find_nearest import find_nearest_workshop
+
+if TYPE_CHECKING:
+    from models.character import Character
 
 
 async def __get_trips_info(
@@ -53,7 +57,7 @@ async def __get_trips_info(
 
 
 async def __make_trip(
-    character: Character,
+    character: "Character",
     workshop_location: Map,
     bank_token: uuid.UUID,
     item: Item,
@@ -80,7 +84,7 @@ async def __make_trip(
 
 
 async def craft(
-    character: Character, item: Item, quantity: int, recycling_after: bool = False
+    character: "Character", item: Item, quantity: int, recycling_after: bool = False
 ):
     if not character.has_job(item.job, item.craft_level):
         print(
