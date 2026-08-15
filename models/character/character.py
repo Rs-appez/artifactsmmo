@@ -276,9 +276,10 @@ class Character(
         utils = [(i + 1, u) for i, u in enumerate([util_1, util_2]) if u is not None]
 
         for i, util in utils:
-            item = await Encyclopedia.get_item_by_code(util)
-            if item:
-                qty = data.get(f"utility{i}_quantity", 0)
-                utility_items[item] = qty
+            if util:
+                item = await Encyclopedia.get_item_by_code(util)
+                if item:
+                    qty = data.get(f"utility{i}_quantity", 0)
+                    utility_items[item] = qty
 
         return utility_items
