@@ -1,4 +1,4 @@
-from functools import cache
+from functools import lru_cache
 from math import floor
 from random import choice, randint
 
@@ -63,7 +63,7 @@ def _fight(data: FightMetadata):
         char_turn = not char_turn
 
 
-@cache
+@lru_cache(maxsize=128)
 def _simulate(data: SimulateData, n: int) -> SimulateResult:
 
     char_wins = 0
