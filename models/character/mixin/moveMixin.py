@@ -1,14 +1,13 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from config import SANDBOX
-from exceptions import TimeoutButSuccessException
+from exceptions import NotEnoughInBankException, TimeoutButSuccessException
 from models import LocationRegistry
 from models.dataclass import Item, Map
 from models.dataclass.bank import Bank
 from models.enums import Layer, ZoneType
+from routines import craft
 from utils.find_nearest import find_nearest_transition
-from utils.reset_cooldown import reset_cooldown
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -119,11 +118,22 @@ class MoveMixin:
             return_potion = self._default_return_potion
 
         if not self.has_in_inventory({return_potion: 1}):
-            async with Bank.reserve_items({return_potion: 1}) as bank_token:
-                if not await self.withdraw_item_from_bank(bank_token):
-                    raise Exception(
-                        f"Failed to withdraw {return_potion.name} from bank"
-                    )
+            retry = True
+            while retry:
+                retry = False
+                try:
+                    async with Bank.reserve_items({return_potion: 1}) as bank_token:
+                        if (
+                            self.inventory_free_space < 1
+                            or self.inventory_free_slots < 1
+                        ):
+                            await self.deposit_all_in_bank(with_gold=False)
+                        await self.withdraw_item_from_bank(bank_token)
+                except NotEnoughInBankException:
+                    retry = True
+                    await craft(self, return_potion, 100)
+                except Exception as e:
+                    raise e
 
         if self.gold < gold_to_travel:
             if not await self.withdraw_gold_from_bank(gold_to_travel):
