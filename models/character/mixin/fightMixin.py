@@ -114,7 +114,6 @@ class FightMixin:
     def how_much_hp_can_regenerate(self: "Character") -> int:
         food = self.get_food
         if not food:
-            print(f"❌ {self.surname} has no food to regenerate hp")
             return 0
         missing_hp = self.missing_hp
         total_heal = 0
