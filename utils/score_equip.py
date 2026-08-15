@@ -1,4 +1,4 @@
-from functools import cache
+from functools import lru_cache
 from typing import TYPE_CHECKING
 
 from config import CRITICAL_STRIKE_MULTIPLIER
@@ -41,7 +41,7 @@ def _weapon_attacks(weapon: "Item") -> frozenset[tuple[Element, float]]:
     )
 
 
-@cache
+@lru_cache(maxsize=128)
 def _score_weapon(weapon: "Item", monster: "Monster") -> float:
     if not weapon.is_weapon:
         raise ValueError(f"Item {weapon.name} is not a weapon")
@@ -64,7 +64,7 @@ def score_weapon(weapon: "Item", monster: "Monster") -> float:
     return _score_weapon(weapon, monster)
 
 
-@cache
+@lru_cache(maxsize=1280)
 def _score_equipment(
     equipment: "Item",
     monster: "Monster",
@@ -125,7 +125,7 @@ def _best_picks(
     return picks
 
 
-@cache
+@lru_cache(maxsize=1280)
 def __build_set(
     weapon: "Item",
     armor_by_slot: frozenset[frozenset[tuple["Item", int]]],
@@ -155,7 +155,7 @@ def _build_set(
     return __build_set(weapon, armor_by_slot, monster)
 
 
-@cache
+@lru_cache(maxsize=1280)
 def _best_equips_for_monster(
     monster: "Monster", items: frozenset[tuple["Item", int]], top_k: int
 ) -> dict["Item", int]:
