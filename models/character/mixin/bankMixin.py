@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 
 class BankMixin:
+    @need_bank
     async def deposit_all_in_bank(
         self: "Character",
         with_gold: bool = True,
