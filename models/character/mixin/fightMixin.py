@@ -168,4 +168,4 @@ class FightMixin:
         )
         win_rate = simulate(simulateData).win_rate
 
-        return win_rate == 100.0
+        return win_rate >= 99.0
