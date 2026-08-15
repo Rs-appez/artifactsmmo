@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import override
 
-from models.enums import Layer
+from models.enums import Layer, ZoneType
 
 
 @dataclass(frozen=True)
@@ -15,6 +15,7 @@ class Map:
     access_type: str
     conditions: list[dict[str, str | int]]
     _transitions_map: int | None
+    zone: ZoneType
 
     @classmethod
     def from_dict(cls, data: dict) -> "Map":
@@ -32,6 +33,7 @@ class Map:
             layer=Layer(data["layer"]),
             access_type=data["access"]["type"],
             conditions=data["access"].get("conditions", []),
+            zone=ZoneType.from_map_name(data["name"]),
             _transitions_map=transition_map,
         )
 
