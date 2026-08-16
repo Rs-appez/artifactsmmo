@@ -119,7 +119,7 @@ class LocationRegistry:
                 locations_data = data["data"]
 
                 for location in locations_data:
-                    map = Map.from_dict(location)
+                    map = await Map.from_dict(location)
                     cls.__maps[map.map_id] = map
 
                     if interaction := location.get("interactions"):

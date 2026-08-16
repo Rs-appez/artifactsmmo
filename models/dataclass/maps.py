@@ -1,7 +1,14 @@
 from dataclasses import dataclass
 from typing import override
 
+from models.dataclass import Item
 from models.enums import Layer, ZoneType
+
+
+# maps that are in a closed zone but are the entry point to the zone
+ENTRY_ZONE_IDS = {
+    718  # Enchanted Forest
+}
 
 
 @dataclass(frozen=True)
@@ -16,13 +23,33 @@ class Map:
     conditions: list[dict[str, str | int]]
     _transitions_map: int | None
     zone: ZoneType
+    transition_cost: tuple[Item | None, int] | None
 
     @classmethod
-    def from_dict(cls, data: dict) -> "Map":
+    async def from_dict(cls, data: dict) -> "Map":
+        from models import Encyclopedia
+
         transition_map = None
+        transition_cost = None
         transition_data = data.get("interactions", {}).get("transition", None)
         if transition_data:
             transition_map = transition_data.get("map_id")
+            if conditions := transition_data.get("conditions"):
+                condition = conditions[0]
+
+                trans_currency_code = condition.get("code")
+                trans_currency = (
+                    await Encyclopedia.get_item_by_code(trans_currency_code)
+                    if trans_currency_code != "gold"
+                    else None
+                )
+                transition_cost = (trans_currency, condition.get("value"))
+
+        zone = (
+            ZoneType.from_map_name(data["name"])
+            if data["map_id"] not in ENTRY_ZONE_IDS
+            else ZoneType.DEFAULT
+        )
 
         return cls(
             map_id=data["map_id"],
@@ -33,8 +60,9 @@ class Map:
             layer=Layer(data["layer"]),
             access_type=data["access"]["type"],
             conditions=data["access"].get("conditions", []),
-            zone=ZoneType.from_map_name(data["name"]),
+            zone=zone,
             _transitions_map=transition_map,
+            transition_cost=transition_cost,
         )
 
     @override
