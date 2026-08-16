@@ -1,8 +1,12 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from exceptions import NotEnoughInBankException, TimeoutButSuccessException
-from models import LocationRegistry, Encyclopedia
+from exceptions import (
+    NeedToRefreshStuffException,
+    NotEnoughInBankException,
+    TimeoutButSuccessException,
+)
+from models import Encyclopedia, LocationRegistry
 from models.dataclass import Item, Map
 from models.dataclass.bank import Bank
 from models.enums import Layer, ZoneType
@@ -35,15 +39,15 @@ class MoveMixin:
         if destination == self.location:
             return True
 
-        await self._handle_travel(destination)
-
-        if destination.layer != self.location.layer:
-            await self._change_layer(destination)
-
-        if destination == self.location:
-            return True
-
         try:
+            await self._handle_travel(destination)
+
+            if destination.layer != self.location.layer:
+                await self._change_layer(destination)
+
+            if destination == self.location:
+                return True
+
             await self.post_api("/move", json_data={"map_id": destination.map_id})
 
             arrived = self.location
@@ -57,6 +61,9 @@ class MoveMixin:
                 f"🏃 {self.surname} Moved to ({destination.x}, {destination.y}) on {destination.name} (layer : {destination.layer.value}) (timeout but success)"
             )
             return True
+        except NeedToRefreshStuffException as e:
+            raise e
+
         except Exception as e:
             print(f"❌ {self.surname} move : {e}")
             return False
@@ -105,7 +112,7 @@ class MoveMixin:
             )
             return
 
-    async def _handle_travel(self: "Character", destination: Map) -> None:
+    async def _handle_travel(self: "Character", destination: Map) -> bool:
         char_zone = self.location.zone
         if char_zone != destination.zone:
             match destination.zone:
@@ -115,28 +122,26 @@ class MoveMixin:
                     await self.__handle_sandwhisper_travel()
                 case ZoneType.ENCHANTED_FOREST:
                     await self.__handle_enchanted_forest_travel()
+            return True
+        return False
 
     async def __get_pre_travel_items(
         self: "Character", gold_to_travel: int, return_potion: Item | None = None
     ) -> None:
 
         if return_potion and not self.has_in_inventory({return_potion: 1}):
-            retry = True
-            while retry:
-                retry = False
-                try:
-                    async with Bank.reserve_items({return_potion: 1}) as bank_token:
-                        if (
-                            self.inventory_free_space < 1
-                            or self.inventory_free_slots < 1
-                        ):
-                            await self.deposit_all_in_bank(with_gold=False)
-                        await self.withdraw_item_from_bank(bank_token)
-                except NotEnoughInBankException:
-                    retry = True
-                    await craft(self, return_potion, 100)
-                except Exception as e:
-                    raise e
+            try:
+                async with Bank.reserve_items({return_potion: 1}) as bank_token:
+                    if self.inventory_free_space < 1 or self.inventory_free_slots < 1:
+                        await self.deposit_all_in_bank(with_gold=False)
+                    await self.withdraw_item_from_bank(bank_token)
+            except NotEnoughInBankException:
+                await craft(self, return_potion, 100)
+                raise NeedToRefreshStuffException(
+                    f"Crafted {return_potion.name}, please retry the travel"
+                )
+            except Exception as e:
+                raise e
 
         if self.gold < gold_to_travel:
             if not await self.withdraw_gold_from_bank(gold_to_travel):
@@ -198,7 +203,9 @@ class MoveMixin:
                         {enchanted_mush: 1}, inventory=self.inventory
                     ) as bank_token:
                         await craft(self, tp_potion, 1, token=bank_token)
-                        await self.use_item(tp_potion)
+                        raise NeedToRefreshStuffException(
+                            f"Crafted {tp_potion.name} from {enchanted_mush.name}, please retry the travel"
+                        )
                 except NotEnoughInBankException:
                     boat = await LocationRegistry.get_map_by_id(
                         TRANSITION_MAPS[ZoneType.ENCHANTED_FOREST][self.location.zone]
