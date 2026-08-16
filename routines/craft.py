@@ -13,76 +13,6 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
-async def __get_trips_info(
-    ingredients: dict[Item, int],
-    quantity: int,
-    inventory_max_items: int,
-) -> tuple[int, tuple[int, dict[Item, int]], tuple[int, dict[Item, int]]]:
-    """
-    Calculate the number of trips needed to craft the desired quantity of items, based on the ingredients required and the character's inventory capacity.
-    Args:
-        craft_ingredients (list[dict[str, str | int]]): A list of dictionaries representing the ingredients required for crafting, where each dictionary contains the "code" and "quantity" of the ingredient.
-        quantity (int): The total quantity of the item to be crafted.
-        inventory_max_items (int): The maximum number of items that the character can carry in their inventory.
-    Returns:
-        tuple[int, tuple[int, list[tuple[str, int]]], tuple[int, list[tuple[str, int]]]]: A tuple containing:
-            - The total number of trips needed to craft the desired quantity of items.
-            - A tuple with the number of items to craft per trip and a list of tuples representing the ingredients needed for each trip.
-            - A tuple with the number of items to craft on the last trip and a list of tuples representing the ingredients needed for the last trip.
-    Raises:
-        Exception: If the number of ingredients required exceeds the character's inventory capacity, an exception is raised indicating that crafting is not possible.
-    """
-
-    nb_ingredients = sum(nb for nb in ingredients.values())
-    nb_craft_per_trip = inventory_max_items // nb_ingredients
-    if nb_craft_per_trip == 0:
-        raise Exception(
-            f"Cannot craft item, not enough inventory space for ingredients (needed: {nb_ingredients}, max: {inventory_max_items})"
-        )
-    nb_trips = ceil(quantity / nb_craft_per_trip)
-    nb_craft_last_trip = quantity - (nb_trips - 1) * nb_craft_per_trip
-
-    ingredients_per_trip = {
-        item: nb_craft_per_trip * qty for item, qty in ingredients.items()
-    }
-    ingredients_last_trip = {
-        item: nb_craft_last_trip * qty for item, qty in ingredients.items()
-    }
-
-    return (
-        nb_trips,
-        (nb_craft_per_trip, ingredients_per_trip),
-        (nb_craft_last_trip, ingredients_last_trip),
-    )
-
-
-async def __make_trip(
-    character: "Character",
-    workshop_location: Map,
-    bank_token: uuid.UUID,
-    item: Item,
-    quantity: int,
-    recycling_after: bool,
-):
-    _ = await character.deposit_all_in_bank(comeback=False)
-    if not await character.withdraw_item_from_bank(bank_token):
-        print(
-            f"❌ {character.surname} failed to withdraw ingredients from bank for crafting {item.name}"
-        )
-        return
-    if not await character.move(workshop_location):
-        print(
-            f"❌ {character.surname} failed to move to workshop for crafting {item.name}"
-        )
-        return
-    if not await character.craft(item, quantity):
-        print(f"❌ {character.surname} failed to craft {quantity}x {item.name}")
-        return
-    if recycling_after and not await character.decraft(item, quantity):
-        print(f"❌ {character.surname} failed to decraft {quantity}x {item.name}")
-        return
-
-
 async def craft(
     character: "Character", item: Item, quantity: int, recycling_after: bool = False
 ):
@@ -160,3 +90,73 @@ async def craft(
         except Exception as e:
             print(f"❌ {character.surname} failed to craft : {e}")
             return
+
+
+async def __get_trips_info(
+    ingredients: dict[Item, int],
+    quantity: int,
+    inventory_max_items: int,
+) -> tuple[int, tuple[int, dict[Item, int]], tuple[int, dict[Item, int]]]:
+    """
+    Calculate the number of trips needed to craft the desired quantity of items, based on the ingredients required and the character's inventory capacity.
+    Args:
+        craft_ingredients (list[dict[str, str | int]]): A list of dictionaries representing the ingredients required for crafting, where each dictionary contains the "code" and "quantity" of the ingredient.
+        quantity (int): The total quantity of the item to be crafted.
+        inventory_max_items (int): The maximum number of items that the character can carry in their inventory.
+    Returns:
+        tuple[int, tuple[int, list[tuple[str, int]]], tuple[int, list[tuple[str, int]]]]: A tuple containing:
+            - The total number of trips needed to craft the desired quantity of items.
+            - A tuple with the number of items to craft per trip and a list of tuples representing the ingredients needed for each trip.
+            - A tuple with the number of items to craft on the last trip and a list of tuples representing the ingredients needed for the last trip.
+    Raises:
+        Exception: If the number of ingredients required exceeds the character's inventory capacity, an exception is raised indicating that crafting is not possible.
+    """
+
+    nb_ingredients = sum(nb for nb in ingredients.values())
+    nb_craft_per_trip = inventory_max_items // nb_ingredients
+    if nb_craft_per_trip == 0:
+        raise Exception(
+            f"Cannot craft item, not enough inventory space for ingredients (needed: {nb_ingredients}, max: {inventory_max_items})"
+        )
+    nb_trips = ceil(quantity / nb_craft_per_trip)
+    nb_craft_last_trip = quantity - (nb_trips - 1) * nb_craft_per_trip
+
+    ingredients_per_trip = {
+        item: nb_craft_per_trip * qty for item, qty in ingredients.items()
+    }
+    ingredients_last_trip = {
+        item: nb_craft_last_trip * qty for item, qty in ingredients.items()
+    }
+
+    return (
+        nb_trips,
+        (nb_craft_per_trip, ingredients_per_trip),
+        (nb_craft_last_trip, ingredients_last_trip),
+    )
+
+
+async def __make_trip(
+    character: "Character",
+    workshop_location: Map,
+    bank_token: uuid.UUID,
+    item: Item,
+    quantity: int,
+    recycling_after: bool,
+):
+    _ = await character.deposit_all_in_bank(comeback=False)
+    if not await character.withdraw_item_from_bank(bank_token):
+        print(
+            f"❌ {character.surname} failed to withdraw ingredients from bank for crafting {item.name}"
+        )
+        return
+    if not await character.move(workshop_location):
+        print(
+            f"❌ {character.surname} failed to move to workshop for crafting {item.name}"
+        )
+        return
+    if not await character.craft(item, quantity):
+        print(f"❌ {character.surname} failed to craft {quantity}x {item.name}")
+        return
+    if recycling_after and not await character.decraft(item, quantity):
+        print(f"❌ {character.surname} failed to decraft {quantity}x {item.name}")
+        return
