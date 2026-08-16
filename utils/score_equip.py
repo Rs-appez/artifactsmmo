@@ -82,8 +82,6 @@ def _score_equipment(
             score += total_base * value / 100
         elif (elem := effect.get_dmg_element) is not None:
             score += base.get(elem, 0.0) * value / 100
-        elif code == "critical_strike":
-            score += total_base * CRITICAL_STRIKE_MULTIPLIER * value / 100
         elif (elem := effect.get_res_element) is not None:
             score += (
                 value * WEIGHTS["elemental_res"] * monster.attack.get(elem, 0) / 100
