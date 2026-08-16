@@ -93,7 +93,9 @@ async def _reserve_unequipped_items(
     character: Character, bank: Bank, items: dict[Item, int]
 ) -> uuid.UUID:
     reserved_items = {
-        item: qty for item, qty in items.items() if item not in character.equipped_items
+        item: qty
+        for item, qty in items.items()
+        if item not in character.equipped_items and item not in character.inventory
     }
 
     rings = character.get_rings
@@ -235,6 +237,10 @@ async def get_best_equipment(
 
         for item in character.equipped_items:
             items[item] = items.get(item, 0) + 1
+
+        for item in character.inventory:
+            if item.is_equipment and item.can_be_used_by(character):
+                items[item] = items.get(item, 0) + 1
 
         items_to_score = frozenset(
             (item, 2 if qty > 1 else qty) for item, qty in items.items()

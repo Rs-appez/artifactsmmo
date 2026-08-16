@@ -218,14 +218,13 @@ class StuffMixin:
                 bank_token,
                 best_equipment_set,
             ):
-                if len(Bank.get_token_info(bank_token)) == 0:
-                    return
-                print(
-                    f"⚔️ {self.surname} is going to search best equipment in bank for {monster.name}"
-                )
-                if self.need_deposit(bank_token):
-                    await self.deposit_all_in_bank(with_gold=False)
-                await self.withdraw_item_from_bank(bank_token)
+                if len(Bank.get_token_info(bank_token)) != 0:
+                    print(
+                        f"⚔️ {self.surname} is going to search best equipment in bank for {monster.name}"
+                    )
+                    if self.need_deposit(bank_token):
+                        await self.deposit_all_in_bank(with_gold=False)
+                    await self.withdraw_item_from_bank(bank_token)
             await self._equip_set_items(best_equipment_set)
             await self.deposit_all_in_bank(with_gold=False)
         except Exception as e:
