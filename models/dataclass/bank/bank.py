@@ -77,8 +77,12 @@ class Bank:
         items: dict[Item, int],
         imediately_needed: bool = True,
         inventory: dict[Item, int] | None = None,
+        tokens_to_revoke: set[uuid.UUID] | None = None,
     ):
         async with cls.locked():
+            if tokens_to_revoke:
+                for token in tokens_to_revoke:
+                    cls._unreserve_items(token)
             token = await cls._reserve_items(
                 items, imediately_needed=imediately_needed, inventory=inventory
             )
