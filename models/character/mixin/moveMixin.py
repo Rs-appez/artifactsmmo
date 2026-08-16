@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from exceptions import NotEnoughInBankException, TimeoutButSuccessException
-from models import LocationRegistry
+from models import LocationRegistry, Encyclopedia
 from models.dataclass import Item, Map
 from models.dataclass.bank import Bank
 from models.enums import Layer, ZoneType
@@ -14,6 +14,10 @@ if TYPE_CHECKING:
 
 TRANSITION_MAPS = {
     ZoneType.SANDWHISPER: {ZoneType.DEFAULT: 1093, ZoneType.SANDWHISPER: 1336},
+    ZoneType.ENCHANTED_FOREST: {
+        ZoneType.DEFAULT: 718,
+        ZoneType.ENCHANTED_FOREST: 667,
+    },
 }
 
 
@@ -109,15 +113,14 @@ class MoveMixin:
                     await self._return_to_default_location()
                 case ZoneType.SANDWHISPER:
                     await self.__handle_sandwhisper_travel()
+                case ZoneType.ENCHANTED_FOREST:
+                    await self.__handle_enchanted_forest_travel()
 
     async def __get_pre_travel_items(
         self: "Character", gold_to_travel: int, return_potion: Item | None = None
     ) -> None:
 
-        if return_potion is None:
-            return_potion = self._default_return_potion
-
-        if not self.has_in_inventory({return_potion: 1}):
+        if return_potion and not self.has_in_inventory({return_potion: 1}):
             retry = True
             while retry:
                 retry = False
@@ -140,22 +143,70 @@ class MoveMixin:
                 raise Exception(f"Failed to withdraw {gold_to_travel} gold from bank")
 
     async def __handle_sandwhisper_travel(self: "Character") -> None:
-        await self.__get_pre_travel_items(1000)
         boat = await LocationRegistry.get_map_by_id(
             TRANSITION_MAPS[ZoneType.SANDWHISPER][self.location.zone]
         )
+        price = boat.transition_cost
+        if price:
+            if price[0] is None:
+                gold_to_travel = price[1]
+                await self.__get_pre_travel_items(
+                    gold_to_travel, self._default_return_potion
+                )
+
         await self.move(boat)
         await self.transition()
 
     async def _return_to_default_location(self: "Character") -> None:
-        if self.has_in_inventory({self._default_return_potion: 1}):
-            await self.use_item(self._default_return_potion)
 
-        else:
-            match self.location.zone:
-                case ZoneType.SANDWHISPER:
-                    boat = await LocationRegistry.get_map_by_id(
+        match self.location.zone:
+            case ZoneType.SANDWHISPER:
+                if self.has_in_inventory({self._default_return_potion: 1}):
+                    await self.use_item(self._default_return_potion)
+                else:
+                    transition = await LocationRegistry.get_map_by_id(
                         TRANSITION_MAPS[ZoneType.SANDWHISPER][self.location.zone]
                     )
+                    await self.move(transition)
+                    await self.transition()
+            case ZoneType.ENCHANTED_FOREST:
+                transition = await LocationRegistry.get_map_by_id(
+                    TRANSITION_MAPS[ZoneType.ENCHANTED_FOREST][self.location.zone]
+                )
+                await self.move(transition)
+                await self.transition()
+
+    async def __handle_enchanted_forest_travel(self: "Character") -> None:
+        tp_potion = await Encyclopedia.get_item_by_code("enchanted_potion")
+        if self.has_in_inventory({tp_potion: 1}):
+            await self.use_item(tp_potion)
+
+        else:
+            try:
+                async with Bank.reserve_items({tp_potion: 1}) as bank_token:
+                    if self.inventory_free_space < 1 or self.inventory_free_slots < 1:
+                        await self.deposit_all_in_bank(with_gold=False)
+                    await self.withdraw_item_from_bank(bank_token)
+                await self.use_item(tp_potion)
+            except NotEnoughInBankException:
+                enchanted_mush = await Encyclopedia.get_item_by_code(
+                    "enchanted_mushroom"
+                )
+
+                try:
+                    async with Bank.reserve_items(
+                        {enchanted_mush: 1}, inventory=self.inventory
+                    ) as bank_token:
+                        await craft(self, tp_potion, 1, token=bank_token)
+                        await self.use_item(tp_potion)
+                except NotEnoughInBankException:
+                    boat = await LocationRegistry.get_map_by_id(
+                        TRANSITION_MAPS[ZoneType.ENCHANTED_FOREST][self.location.zone]
+                    )
+                    price = boat.transition_cost
+                    if price:
+                        if price[0] is None:
+                            gold_to_travel = price[1]
+                            await self.__get_pre_travel_items(gold_to_travel)
                     await self.move(boat)
                     await self.transition()
