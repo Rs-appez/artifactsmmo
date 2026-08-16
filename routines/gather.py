@@ -1,6 +1,7 @@
 from itertools import count
 from typing import TYPE_CHECKING
 
+from exceptions import NeedToRefreshStuffException
 from models import Encyclopedia
 from models.dataclass import Item, Resource
 from utils.find_nearest import find_nearest_lootable
@@ -27,24 +28,36 @@ async def gather(character: Character, item: Item | str, nb: int | str = -1) -> 
         if not isinstance(item, Item):
             print(f"❌ {character.surname} Invalid item : {item}")
             return
-        await character.toolize(item.job)
 
-        if character.will_gain_xp_with(item):
-            wisdom = await Encyclopedia.get_effect_by_code("wisdom")
-            await character.maximaze_stats(wisdom)
-        elif item.job.has_drop:
-            prospection = await Encyclopedia.get_effect_by_code("prospecting")
-            await character.maximaze_stats(prospection)
+        await _get_ready_to_gather(character, item)
 
         iterations = range(nb) if nb > 0 else count()
         for _ in iterations:
-            if character.is_inventory_full:
-                await character.deposit_all_in_bank()
-            resources = Resource.from_drop_item(item)
-            resource_position = await find_nearest_lootable(character, set(resources))
-            if not await character.move(resource_position):
-                raise Exception(f"Failed to move to {resource_position.name}")
-            if not await character.gather():
-                raise Exception(f"Failed to gather {item.name}")
+            while True:
+                try:
+                    if character.is_inventory_full:
+                        await character.deposit_all_in_bank()
+                    resources = Resource.from_drop_item(item)
+                    resource_position = await find_nearest_lootable(
+                        character, set(resources)
+                    )
+                    if not await character.move(resource_position):
+                        raise Exception(f"Failed to move to {resource_position.name}")
+                    if not await character.gather():
+                        raise Exception(f"Failed to gather {item.name}")
+                    break
+                except NeedToRefreshStuffException:
+                    await _get_ready_to_gather(character, item)
     except Exception as e:
         print(f"❌ {character.surname} failed to gather : {e}")
+
+
+async def _get_ready_to_gather(character: Character, item: Item) -> None:
+    await character.toolize(item.job)
+
+    if character.will_gain_xp_with(item):
+        wisdom = await Encyclopedia.get_effect_by_code("wisdom")
+        await character.maximaze_stats(wisdom)
+    elif item.job.has_drop:
+        prospection = await Encyclopedia.get_effect_by_code("prospecting")
+        await character.maximaze_stats(prospection)
