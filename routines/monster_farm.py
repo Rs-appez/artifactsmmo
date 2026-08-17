@@ -34,8 +34,7 @@ async def _fight(character: Character, mob: Monster, force: bool = False) -> dic
                 need_full_regeneration = not __can_win_with_eco_food(character, mob)
                 await __regenerate_hp(character, full=need_full_regeneration)
 
-            if not await character.move(mob_position):
-                raise Exception(f"Failed to move to {mob_position.name}")
+            await character.move(mob_position)
             fight_result = await character.fight()
 
             return fight_result[1]
@@ -93,7 +92,7 @@ async def boss_farm(
 
         if character.hp < 500:
             _ = await __regenerate_hp(character)
-        _ = await character.move(mob_position)
+        await character.move(mob_position)
         await character.set_ready_to_fight()
         if leader:
             while any(not mate.is_ready_to_fight_boss for mate in teammate):

@@ -26,8 +26,7 @@ async def exchange_task_coin(character: Character) -> None:
                 if not await character.withdraw_item_from_bank(token):
                     print("Failed to withdraw task coin from bank")
                     return
-                if not await character.move(task_master_pos):
-                    print("Failed to move to task master")
+                await character.move(task_master_pos)
                 while await character.exchange_task_coin():
                     pass
         await character.deposit_all_in_bank()

@@ -155,11 +155,7 @@ async def __make_trip(
             f"❌ {character.surname} failed to withdraw ingredients from bank for crafting {item.name}"
         )
         return
-    if not await character.move(workshop_location):
-        print(
-            f"❌ {character.surname} failed to move to workshop for crafting {item.name}"
-        )
-        return
+    await character.move(workshop_location)
     if not await character.craft(item, quantity):
         print(f"❌ {character.surname} failed to craft {quantity}x {item.name}")
         return

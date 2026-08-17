@@ -17,11 +17,7 @@ async def __go_buy_from_npc(
     character: "Character", npc: NPC, item: "Item", quantity: int
 ):
     npc_location = await find_nearest_npc(character, npc)
-    if not await character.move(npc_location):
-        print(
-            f"❌ {character.surname} failed to move to {npc.name} to buy {quantity}x {item.name}"
-        )
-        return
+    await character.move(npc_location)
 
     if not await character.buy_from_npc(item, quantity):
         print(

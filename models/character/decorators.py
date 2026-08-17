@@ -34,9 +34,7 @@ def need_bank(
     async def wrapper(self: C, *args: P.args, **kwargs: P.kwargs) -> R | None:
         bank_location = await find_nearest_bank(self.location)
         current_location = self.location
-        if not await self.move(bank_location):
-            print("❌ Failed to move to bank")
-            return None
+        await self.move(bank_location)
         result = await func(self, *args, **kwargs)
         if kwargs.get("comeback"):
             if not await self.move(current_location):

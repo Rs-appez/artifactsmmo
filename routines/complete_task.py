@@ -63,9 +63,7 @@ async def complete_task(
                     print(f"❌ Invalid task type : {type}")
                     return
 
-            if not await character.move(task_master):
-                print("Failed to move to task master")
-                return
+            await character.move(task_master)
             if not await character.accept_task():
                 print("Failed to accept task")
                 return
@@ -85,9 +83,8 @@ async def complete_task(
                     print("Failed to deposit items in bank")
                     return
 
-            if not await character.move(task_master):
-                print("Failed to move to task master to complete the task")
-                return
+            await character.move(task_master)
+
             if await character.complete_task():
                 print(f"  {character.surname} completed the task")
             else:
@@ -135,8 +132,7 @@ async def __item_task(character: Character) -> None:
                     await character.deposit_all_in_bank(with_gold=False)
                     if not await character.withdraw_item_from_bank(trip_token):
                         raise Exception("Failed to withdraw item from bank")
-                if not await character.move(task_master):
-                    raise Exception("Failed to move to task master")
+                await character.move(task_master)
                 if not await character.trade_with_task_master(
                     item, nb_resources_for_the_trip
                 ):
@@ -179,7 +175,6 @@ async def __give_up_task(character: Character, task_type: TaskType) -> None:
                     raise Exception("Failed to deposit items in bank")
             if not await character.withdraw_item_from_bank(bank_token):
                 raise Exception("Failed to withdraw task coin from bank")
-    if not await character.move(task_master):
-        raise Exception("Failed to move to task master")
+    await character.move(task_master)
     if not await character.give_up_task():
         raise Exception("Failed to give up task")

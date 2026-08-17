@@ -41,8 +41,7 @@ async def gather(character: Character, item: Item | str, nb: int | str = -1) -> 
                     resource_position = await find_nearest_lootable(
                         character, set(resources)
                     )
-                    if not await character.move(resource_position):
-                        raise Exception(f"Failed to move to {resource_position.name}")
+                    await character.move(resource_position)
                     if not await character.gather():
                         raise Exception(f"Failed to gather {item.name}")
                     break
