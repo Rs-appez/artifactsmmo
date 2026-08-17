@@ -1,20 +1,19 @@
 import heapq
+from functools import lru_cache
 from itertools import count
 
 from models import LocationRegistry
 from models.dataclass import Map
 
-cache = {}
+
+@lru_cache(maxsize=128)
+async def get_route(a: Map, b: Map) -> tuple[list[Map], int]:
+    return dijkstra(await LocationRegistry.get_map_graph(), a, b)
 
 
-async def get_route(a: Map, b: Map):
-    key = (a, b)
-    if key not in cache:
-        cache[key] = dijkstra(await LocationRegistry.get_map_graph(), a, b)
-    return cache[key]
-
-
-def dijkstra(graph: dict[Map, set[Map]], start: Map, goal: Map):
+def dijkstra(
+    graph: dict[Map, set[Map]], start: Map, goal: Map
+) -> tuple[list[Map], int]:
     dist = {start: 0}
     prev = {}
     tie = count()
@@ -34,7 +33,7 @@ def dijkstra(graph: dict[Map, set[Map]], start: Map, goal: Map):
                 heapq.heappush(pq, (nd, next(tie), v))
 
     if goal not in dist:
-        return None, float("inf")
+        raise ValueError(f"No path found from {start} to {goal}")
     path = [goal]
     while path[-1] != start:
         path.append(prev[path[-1]])
