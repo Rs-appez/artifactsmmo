@@ -194,9 +194,11 @@ class LocationRegistry:
             for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
                 lookup_key = (map.x + dx, map.y + dy, map.layer)
                 if lookup_key in coord_lookup:
-                    cls._adjacent_maps_from_coordinates[map].add(
-                        coord_lookup[lookup_key]
-                    )
+                    adj_map = coord_lookup[lookup_key]
+                    if await map.is_joined(adj_map):
+                        cls._adjacent_maps_from_coordinates[map].add(
+                            coord_lookup[lookup_key]
+                        )
 
             transition_map = await map.get_transition_map
             if transition_map:
