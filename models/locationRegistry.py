@@ -11,6 +11,7 @@ from models.enums import JobType, Layer, TaskType
 
 class LocationRegistry:
     __maps_loaded = False
+    __neighboors_generated = asyncio.Event()
     __drop_locations: defaultdict[Resource | Monster, set[Map]] = defaultdict(set)
     __bank_locations: set[Map] = set()
     __workshop_locations: dict[JobType, set[Map]] = defaultdict(set)
@@ -19,15 +20,28 @@ class LocationRegistry:
     __transition_locations: dict[Layer, set[int]] = defaultdict(set)
     __npc_locations: defaultdict[NPC, set[Map]] = defaultdict(set)
     __maps: dict[int, Map] = {}
+    _adjacent_maps_from_coordinates: dict[Map, set[Map]] = {}
 
     @classmethod
     async def initialize(cls):
         await cls.__load_locations()
+        await cls.generate_adjacent_maps()
 
     @classmethod
     async def wait_location(cls) -> None:
         while not cls.__maps_loaded:
             _ = await asyncio.sleep(1)
+
+    @classmethod
+    async def get_adjacent_maps(cls, map: Map) -> set[Map]:
+        await cls.__neighboors_generated.wait()
+        return cls._adjacent_maps_from_coordinates.get(map.coordinates, set())
+
+    @classmethod
+    async def get_map_graph(cls) -> dict[Map, set[Map]]:
+        while len(cls._adjacent_maps_from_coordinates) == 0:
+            await asyncio.sleep(0.1)
+        return cls._adjacent_maps_from_coordinates
 
     @staticmethod
     async def get_locations(entity: Resource | Monster) -> set[Map]:
@@ -168,3 +182,24 @@ class LocationRegistry:
 
             cls.__maps_loaded = True
             print(f"Loaded {len(cls.__maps)} maps.")
+
+    @classmethod
+    async def generate_adjacent_maps(cls):
+        coord_lookup = {map.coordinates: map for map in cls.__maps.values()}
+
+        for map in cls.__maps.values():
+            if map not in cls._adjacent_maps_from_coordinates:
+                cls._adjacent_maps_from_coordinates[map] = set()
+
+            for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+                lookup_key = (map.x + dx, map.y + dy, map.layer)
+                if lookup_key in coord_lookup:
+                    cls._adjacent_maps_from_coordinates[map].add(
+                        coord_lookup[lookup_key]
+                    )
+
+            transition_map = await map.get_transition_map
+            if transition_map:
+                cls._adjacent_maps_from_coordinates[map].add(transition_map)
+
+        cls.__neighboors_generated.set()
