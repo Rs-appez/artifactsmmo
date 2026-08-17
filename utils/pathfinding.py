@@ -7,11 +7,24 @@ from models.dataclass import Map
 
 
 @lru_cache(maxsize=128)
-async def get_route(a: Map, b: Map) -> tuple[list[Map], int]:
-    return dijkstra(await LocationRegistry.get_map_graph(), a, b)
+async def get_route(a: Map, b: Map) -> list[Map]:
+    maps_key = []
+    path, cost = _dijkstra(await LocationRegistry.get_map_graph(), a, b)
+
+    for i, map in enumerate(path):
+        if (
+            (map_trans := await map.get_transition_map)
+            and i + 1 < len(path)
+            and map_trans == path[i + 1]
+        ):
+            maps_key.append(map)
+
+    maps_key.append(path[-1])
+
+    return maps_key
 
 
-def dijkstra(
+def _dijkstra(
     graph: dict[Map, set[Map]], start: Map, goal: Map
 ) -> tuple[list[Map], int]:
     dist = {start: 0}
@@ -26,7 +39,7 @@ def dijkstra(
         if d > dist.get(u, float("inf")):
             continue
         for v in graph.get(u, ()):
-            nd = d + weight(u, v)
+            nd = d + __weight(u, v)
             if nd < dist.get(v, float("inf")):
                 dist[v] = nd
                 prev[v] = u
@@ -40,7 +53,7 @@ def dijkstra(
     return path[::-1], dist[goal]
 
 
-def weight(u: Map, v: Map) -> int:
+def __weight(u: Map, v: Map) -> int:
     if u.has_transition:
         return 1
     return 0
