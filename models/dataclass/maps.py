@@ -4,7 +4,6 @@ from typing import override
 from models.dataclass import Item
 from models.enums import Layer, ZoneType
 
-
 # maps that are in a closed zone but are the entry point to the zone
 ENTRY_ZONE_IDS = {
     718  # Enchanted Forest
@@ -24,10 +23,6 @@ class Map:
     _transitions_map: int | None
     zone: ZoneType
     transition_cost: tuple[Item | None, int] | None
-
-    @property
-    def coordinates(self) -> tuple[int, int, Layer]:
-        return (self.x, self.y, self.layer)
 
     @classmethod
     async def from_dict(cls, data: dict) -> "Map":
@@ -89,3 +84,21 @@ class Map:
             return None
 
         return await LocationRegistry.get_map_by_id(self._transitions_map)
+
+    @property
+    def coordinates(self) -> tuple[int, int, Layer]:
+        return (self.x, self.y, self.layer)
+
+    async def is_joined(self, map: Map) -> bool:
+        if self == await map.get_transition_map:
+            return True
+
+        if (
+            self.access_type == map.access_type
+            and self.zone == map.zone
+            and self.layer == map.layer
+            and abs(self.x - map.x) + abs(self.y - map.y) <= 1
+        ):
+            return True
+
+        return False
