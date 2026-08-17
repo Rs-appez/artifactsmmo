@@ -12,6 +12,7 @@ from models.dataclass.bank import Bank
 from models.enums import Layer, ZoneType
 from routines import craft
 from utils.find_nearest import find_nearest_transition
+from utils.pathfinding import get_route
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -35,19 +36,21 @@ class MoveMixin:
     def location(self: "Character") -> Map:
         return self._location
 
-    async def move(self: "Character", destination: Map) -> bool:
+    async def move(self: "Character", destination: Map) -> None:
         if destination == self.location:
-            return True
+            return
+
+        path = await get_route(self.location, destination)
+        for i, map in enumerate(path):
+            await self._move(map)
+            if i + 1 < len(path) and map.has_transition:
+                await self._transition()
+
+    async def _move(self: "Character", destination: Map) -> None:
+        if destination == self.location:
+            return
 
         try:
-            await self._handle_travel(destination)
-
-            if destination.layer != self.location.layer:
-                await self._change_layer(destination)
-
-            if destination == self.location:
-                return True
-
             await self.post_api("/move", json_data={"map_id": destination.map_id})
 
             arrived = self.location
@@ -55,20 +58,14 @@ class MoveMixin:
             print(
                 f"🏃 {self.surname} Moved to ({arrived.x}, {arrived.y}) on {arrived.name} (layer : {arrived.layer.value})"
             )
-            return True
         except TimeoutButSuccessException:
             print(
                 f"🏃 {self.surname} Moved to ({destination.x}, {destination.y}) on {destination.name} (layer : {destination.layer.value}) (timeout but success)"
             )
-            return True
         except NeedToRefreshStuffException as e:
             raise e
 
-        except Exception as e:
-            print(f"❌ {self.surname} move : {e}")
-            return False
-
-    async def transition(self: "Character") -> bool:
+    async def _transition(self: "Character") -> bool:
         try:
             await self.post_api("/transition")
             destination = self.location
@@ -106,7 +103,7 @@ class MoveMixin:
             )
             return
 
-        if not await self.transition():
+        if not await self._transition():
             print(
                 f"❌ {self.surname} Failed to transition to layer {destination.layer} from {transition_map.name}"
             )
@@ -160,7 +157,7 @@ class MoveMixin:
                 )
 
         await self.move(boat)
-        await self.transition()
+        await self._transition()
 
     async def _return_to_default_location(self: "Character") -> None:
 
@@ -173,13 +170,13 @@ class MoveMixin:
                         TRANSITION_MAPS[ZoneType.SANDWHISPER][self.location.zone]
                     )
                     await self.move(transition)
-                    await self.transition()
+                    await self._transition()
             case ZoneType.ENCHANTED_FOREST:
                 transition = await LocationRegistry.get_map_by_id(
                     TRANSITION_MAPS[ZoneType.ENCHANTED_FOREST][self.location.zone]
                 )
                 await self.move(transition)
-                await self.transition()
+                await self._transition()
 
     async def __handle_enchanted_forest_travel(self: "Character") -> None:
         tp_potion = await Encyclopedia.get_item_by_code("enchanted_potion")
@@ -216,4 +213,4 @@ class MoveMixin:
                             gold_to_travel = price[1]
                             await self.__get_pre_travel_items(gold_to_travel)
                     await self.move(boat)
-                    await self.transition()
+                    await self._transition()
