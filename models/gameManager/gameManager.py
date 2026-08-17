@@ -67,18 +67,18 @@ class GameManager:
             character.save()
 
     async def __asign_boss(self):
-        boss = await Encyclopedia.get_monster_by_code("king_slime")
-        john = self.characters.get("john")
-        jane = self.characters.get("jane")
-        bob = self.characters.get("bob")
+        boss = await Encyclopedia.get_monster_by_code("lich")
+        alice = self.characters.get("alice")
+        charlie = self.characters.get("charlie")
+        eve = self.characters.get("eve")
 
-        team = [john, jane, bob]
+        team = [alice, charlie, eve]
 
-        if jane:
-            jane.assign_routine(boss_farm, team, boss)
+        if alice:
+            alice.assign_routine(boss_farm, team, boss, True)
 
-        if bob:
-            bob.assign_routine(boss_farm, team, boss, True)
+        if charlie:
+            charlie.assign_routine(boss_farm, team, boss)
 
-        if john:
-            john.assign_routine(boss_farm, team, boss)
+        if eve:
+            eve.assign_routine(boss_farm, team, boss)
