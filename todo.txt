@@ -11,4 +11,4 @@
 (B) 2026-08-16 better handling near resource after transition ect @refactor
 (C) 2026-08-16 use food if need hp to equip a item @refactor
 (A) 2026-08-16 check if char can win before searching stuff in bank @refactor
-(A) 2026-08-16 setup boss fight farm @feature
+(A) 2026-08-16 setup boss fight farm with transition @feature
