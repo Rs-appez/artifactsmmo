@@ -25,6 +25,10 @@ class Map:
     zone: ZoneType
     transition_cost: tuple[Item | None, int] | None
 
+    @property
+    def coordinates(self) -> tuple[int, int, Layer]:
+        return (self.x, self.y, self.layer)
+
     @classmethod
     async def from_dict(cls, data: dict) -> "Map":
         from models import Encyclopedia
