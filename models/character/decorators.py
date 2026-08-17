@@ -19,7 +19,7 @@ def request_action(
 ) -> Callable[Concatenate[C, P], Awaitable[R]]:
     @functools.wraps(func)
     async def wrapper(self: C, *args: P.args, **kwargs: P.kwargs) -> R:
-        if SANDBOX:
+        if SANDBOX and self.cooldown > 0:
             await reset_cooldown(self)
         await self.available
         return await func(self, *args, **kwargs)
