@@ -1,13 +1,19 @@
 import heapq
-from functools import lru_cache
 from itertools import count
+
+from cachetools import LRUCache
 
 from models import LocationRegistry
 from models.dataclass import Map
 
+_route_cache: LRUCache = LRUCache(maxsize=128)
 
-@lru_cache(maxsize=128)
+
 async def get_route(a: Map, b: Map) -> list[Map]:
+    key = (a, b)
+    if key in _route_cache:
+        return _route_cache[key]
+
     maps_key = []
     path, cost = _dijkstra(await LocationRegistry.get_map_graph(), a, b)
 
@@ -20,6 +26,8 @@ async def get_route(a: Map, b: Map) -> list[Map]:
             maps_key.append(map)
 
     maps_key.append(path[-1])
+
+    _route_cache[key] = maps_key
 
     return maps_key
 
