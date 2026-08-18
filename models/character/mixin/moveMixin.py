@@ -1,5 +1,6 @@
+from uuid import UUID
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from exceptions import (
     NeedToRefreshStuffException,
@@ -11,19 +12,10 @@ from models.dataclass import Item, Map
 from models.dataclass.bank import Bank
 from models.enums import Layer, ZoneType
 from routines import craft
-from utils.find_nearest import find_nearest_transition
 from utils.pathfinding import get_route
 
 if TYPE_CHECKING:
     from models.character import Character
-
-TRANSITION_MAPS = {
-    ZoneType.SANDWHISPER: {ZoneType.DEFAULT: 1093, ZoneType.SANDWHISPER: 1336},
-    ZoneType.ENCHANTED_FOREST: {
-        ZoneType.DEFAULT: 718,
-        ZoneType.ENCHANTED_FOREST: 667,
-    },
-}
 
 
 @dataclass
@@ -37,14 +29,15 @@ class MoveMixin:
         return self._location
 
     async def move(self: "Character", destination: Map) -> None:
+        plan = await self.plan_move(destination)
+        await plan.quick_move()
+
+    async def plan_move(self: "Character", destination: Map) -> MovePlan:
         if destination == self.location:
-            return
+            return MovePlan(self, [])
 
         path = await get_route(self.location, destination)
-        for i, map in enumerate(path):
-            await self._move(map)
-            if i + 1 < len(path) and map.has_transition:
-                await self._transition()
+        return MovePlan(self, path)
 
     async def _move(self: "Character", destination: Map) -> None:
         if destination == self.location:
@@ -62,8 +55,6 @@ class MoveMixin:
             print(
                 f"🏃 {self.surname} Moved to ({destination.x}, {destination.y}) on {destination.name} (layer : {destination.layer.value}) (timeout but success)"
             )
-        except NeedToRefreshStuffException as e:
-            raise e
 
     async def _transition(self: "Character") -> bool:
         try:
@@ -84,133 +75,140 @@ class MoveMixin:
             print(f"❌ {self.surname} transition : {e}")
             return False
 
-    async def _change_layer(self: "Character", destination: Map) -> None:
-        if destination.layer == self.location.layer:
+
+class MovePlan:
+    _character: "Character"
+    _start_location: Map
+    _path: list[Map]
+
+    _actions_for_prepare: list[Callable]
+    _has_prepared: bool
+
+    _actions_to_perform: list[Callable]
+    _has_executed: bool
+
+    _gold_needed: int
+    _items_needed: dict[Item, int]
+    _items_token: UUID | None
+
+    def __init__(self, character: Character, path: list[Map]):
+        self._character = character
+        self._start_location = character.location
+        self._path = path
+
+        self._actions_to_perform = []
+        self._actions_for_prepare = []
+        self._has_prepared = False
+        self._has_executed = False
+
+        self._gold_needed = 0
+        self._items_needed = {}
+        self._items_token = None
+
+        self._compute_actions()
+
+    @property
+    def is_ready(self) -> bool:
+        return self._has_prepared or len(self._actions_for_prepare) == 0
+
+    def _compute_actions(self, with_cost: bool = True) -> None:
+        for i, map in enumerate(self._path):
+            self._add_action(lambda map=map: self._character._move(map))
+            if i + 1 < len(self._path) and map.has_transition:
+                if with_cost and (cost := map.transition_cost):
+                    self._handle_transition_cost(cost)
+                self._add_action(lambda: self._character._transition())
+
+    async def quick_move(self) -> None:
+        await self.prepare()
+        await self.execute_move()
+
+    async def prepare(self) -> None:
+        if self._has_prepared:
             return
 
-        if self.location.layer is Layer.OVERWORLD:
-            transition_map = await find_nearest_transition(
-                destination, destination.layer, self.location.layer
-            )
-        else:
-            transition_map = await find_nearest_transition(
-                self.location, destination.layer, self.location.layer
-            )
+        await self._prepare_items_needed()
 
-        if not await self.move(transition_map):
+        for action in self._actions_for_prepare:
+            await action()
+
+        self._has_prepared = True
+
+    async def execute_move(self) -> None:
+        try:
+            if not self.is_ready:
+                raise Exception("MovePlan is not ready. Call prepare() first.")
+
+            if self._has_executed:
+                return
+
+            await self._get_ready()
+            await self._recompute_path()
+
+            for action in self._actions_to_perform:
+                await action()
+
+            self._has_executed = True
+
+        finally:
+            if self._items_token is not None:
+                Bank._unreserve_items(self._items_token)
+                self._items_token = None
+
+    async def _get_ready(self) -> None:
+        if self._items_needed:
+            await self._get_items_needed()
+        if self._gold_needed > 0:
+            await self._get_gold_needed()
+
+    async def _recompute_path(self) -> None:
+        if self._character.location != self._start_location:
+            self._path = await get_route(self._character.location, self._path[-1])
+            self._actions_to_perform.clear()
+            self._compute_actions(with_cost=False)
+
+    async def _get_gold_needed(self) -> None:
+        if self._character.gold < self._gold_needed:
+            await self._character.withdraw_gold_from_bank(self._gold_needed)
+
+    async def _get_items_needed(self) -> None:
+        if self._items_token is None:
+            raise Exception("Items token is not set. Cannot retrieve items.")
+        await self._character.withdraw_item_from_bank(self._items_token)
+
+    async def _prepare_items_needed(self) -> None:
+        if not self._items_needed:
+            return
+
+        try:
+            async with Bank.reserve_items(
+                self._items_needed, auto_unreserve_token=False
+            ) as token:
+                self._items_token = token
+        except NotEnoughInBankException as e:
             print(
-                f"❌ {self.surname} Failed to move to transition map {transition_map.name} to change layer"
+                f"❌ {self._character.surname} Not enough items in bank to prepare move: {e}"
             )
-            return
 
-        if not await self._transition():
-            print(
-                f"❌ {self.surname} Failed to transition to layer {destination.layer} from {transition_map.name}"
-            )
-            return
+    def _add_action(self, action: Callable) -> None:
+        if self._has_executed:
+            raise Exception("Cannot add actions after execution.")
+        self._actions_to_perform.append(action)
 
-    async def _handle_travel(self: "Character", destination: Map) -> bool:
-        char_zone = self.location.zone
-        if char_zone != destination.zone:
-            match destination.zone:
-                case ZoneType.DEFAULT:
-                    await self._return_to_default_location()
-                case ZoneType.SANDWHISPER:
-                    await self.__handle_sandwhisper_travel()
-                case ZoneType.ENCHANTED_FOREST:
-                    await self.__handle_enchanted_forest_travel()
-            return True
-        return False
+    def add_prepare_action(self, action: Callable) -> None:
+        if self._has_prepared:
+            raise Exception("Cannot add prepare actions after preparation.")
+        self._actions_for_prepare.append(action)
 
-    async def __get_pre_travel_items(
-        self: "Character", gold_to_travel: int, return_potion: Item | None = None
-    ) -> None:
+    def add_gold_needed(self, amount: int) -> None:
+        self._gold_needed += amount
 
-        if return_potion and not self.has_in_inventory({return_potion: 1}):
-            try:
-                async with Bank.reserve_items({return_potion: 1}) as bank_token:
-                    if self.inventory_free_space < 1 or self.inventory_free_slots < 1:
-                        await self.deposit_all_in_bank(with_gold=False)
-                    await self.withdraw_item_from_bank(bank_token)
-            except NotEnoughInBankException:
-                await craft(self, return_potion, 100)
-                raise NeedToRefreshStuffException(
-                    f"Crafted {return_potion.name}, please retry the travel"
-                )
-            except Exception as e:
-                raise e
+    def add_item_needed(self, item: Item, amount: int) -> None:
+        self._items_needed[item] = self._items_needed.get(item, 0) + amount
 
-        if self.gold < gold_to_travel:
-            if not await self.withdraw_gold_from_bank(gold_to_travel):
-                raise Exception(f"Failed to withdraw {gold_to_travel} gold from bank")
-
-    async def __handle_sandwhisper_travel(self: "Character") -> None:
-        boat = await LocationRegistry.get_map_by_id(
-            TRANSITION_MAPS[ZoneType.SANDWHISPER][self.location.zone]
-        )
-        price = boat.transition_cost
-        if price:
-            if price[0] is None:
-                gold_to_travel = price[1]
-                await self.__get_pre_travel_items(
-                    gold_to_travel, self._default_return_potion
-                )
-
-        await self.move(boat)
-        await self._transition()
-
-    async def _return_to_default_location(self: "Character") -> None:
-
-        match self.location.zone:
-            case ZoneType.SANDWHISPER:
-                if self.has_in_inventory({self._default_return_potion: 1}):
-                    await self.use_item(self._default_return_potion)
-                else:
-                    transition = await LocationRegistry.get_map_by_id(
-                        TRANSITION_MAPS[ZoneType.SANDWHISPER][self.location.zone]
-                    )
-                    await self.move(transition)
-                    await self._transition()
-            case ZoneType.ENCHANTED_FOREST:
-                transition = await LocationRegistry.get_map_by_id(
-                    TRANSITION_MAPS[ZoneType.ENCHANTED_FOREST][self.location.zone]
-                )
-                await self.move(transition)
-                await self._transition()
-
-    async def __handle_enchanted_forest_travel(self: "Character") -> None:
-        tp_potion = await Encyclopedia.get_item_by_code("enchanted_potion")
-        if self.has_in_inventory({tp_potion: 1}):
-            await self.use_item(tp_potion)
-
+    def _handle_transition_cost(self, cost: tuple[Item | None, int]) -> None:
+        item, amount = cost
+        if item is None:
+            self.add_gold_needed(amount)
         else:
-            try:
-                async with Bank.reserve_items({tp_potion: 1}) as bank_token:
-                    if self.inventory_free_space < 1 or self.inventory_free_slots < 1:
-                        await self.deposit_all_in_bank(with_gold=False)
-                    await self.withdraw_item_from_bank(bank_token)
-                await self.use_item(tp_potion)
-            except NotEnoughInBankException:
-                enchanted_mush = await Encyclopedia.get_item_by_code(
-                    "enchanted_mushroom"
-                )
-
-                try:
-                    async with Bank.reserve_items(
-                        {enchanted_mush: 1}, inventory=self.inventory
-                    ) as bank_token:
-                        await craft(self, tp_potion, 1, token=bank_token)
-                        raise NeedToRefreshStuffException(
-                            f"Crafted {tp_potion.name} from {enchanted_mush.name}, please retry the travel"
-                        )
-                except NotEnoughInBankException:
-                    boat = await LocationRegistry.get_map_by_id(
-                        TRANSITION_MAPS[ZoneType.ENCHANTED_FOREST][self.location.zone]
-                    )
-                    price = boat.transition_cost
-                    if price:
-                        if price[0] is None:
-                            gold_to_travel = price[1]
-                            await self.__get_pre_travel_items(gold_to_travel)
-                    await self.move(boat)
-                    await self._transition()
+            self.add_item_needed(item, amount)
