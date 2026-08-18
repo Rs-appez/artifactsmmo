@@ -193,4 +193,4 @@ async def cli(game_manager: GameManager):
                     if asyncio.iscoroutine(result):
                         await result
             except Exception as e:
-                print(f"❌ {e}")
+                print(f"❌ cli error : {e}")
