@@ -78,6 +78,7 @@ class Bank:
         imediately_needed: bool = True,
         inventory: dict[Item, int] | None = None,
         tokens_to_revoke: set[uuid.UUID] | None = None,
+        auto_unreserve_token: bool = True,
     ) -> AsyncGenerator[uuid.UUID, None]:
         async with cls.locked():
             if tokens_to_revoke:
@@ -89,7 +90,8 @@ class Bank:
         try:
             yield token
         finally:
-            cls._unreserve_items(token)
+            if auto_unreserve_token:
+                cls._unreserve_items(token)
 
     @classmethod
     async def _reserve_items(
