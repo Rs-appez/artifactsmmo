@@ -33,20 +33,14 @@ async def gather(character: Character, item: Item | str, nb: int | str = -1) -> 
 
         iterations = range(nb) if nb > 0 else count()
         for _ in iterations:
-            while True:
-                try:
-                    if character.is_inventory_full:
-                        await character.deposit_all_in_bank()
-                    resources = Resource.from_drop_item(item)
-                    resource_position = await find_nearest_lootable(
-                        character, set(resources)
-                    )
-                    await character.move(resource_position)
-                    if not await character.gather():
-                        raise Exception(f"Failed to gather {item.name}")
-                    break
-                except NeedToRefreshStuffException:
-                    await _get_ready_to_gather(character, item)
+            if character.is_inventory_full:
+                await character.deposit_all_in_bank()
+            resources = Resource.from_drop_item(item)
+            resource_position = await find_nearest_lootable(character, set(resources))
+            await character.move(resource_position)
+            if not await character.gather():
+                raise Exception(f"Failed to gather {item.name}")
+
     except Exception as e:
         print(f"❌ {character.surname} failed to gather : {e}")
 
