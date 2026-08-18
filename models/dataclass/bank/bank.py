@@ -6,7 +6,7 @@ from collections import defaultdict
 from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Concatenate, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, AsyncGenerator, Concatenate, ParamSpec, TypeVar
 
 from httpx import AsyncClient
 
@@ -78,7 +78,7 @@ class Bank:
         imediately_needed: bool = True,
         inventory: dict[Item, int] | None = None,
         tokens_to_revoke: set[uuid.UUID] | None = None,
-    ):
+    ) -> AsyncGenerator[uuid.UUID, None]:
         async with cls.locked():
             if tokens_to_revoke:
                 for token in tokens_to_revoke:
@@ -179,7 +179,9 @@ class Bank:
 
     @classmethod
     @asynccontextmanager
-    async def get_reserved_items_partial(cls, token: uuid.UUID, items: dict[Item, int]):
+    async def get_reserved_items_partial(
+        cls, token: uuid.UUID, items: dict[Item, int]
+    ) -> AsyncGenerator[uuid.UUID, None]:
         async with cls.locked():
             new_token = cls.__get_reserved_items_partial(token, items)
         try:
