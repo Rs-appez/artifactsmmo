@@ -25,7 +25,7 @@ class LocationRegistry:
     @classmethod
     async def initialize(cls):
         await cls.__load_locations()
-        await cls.generate_adjacent_maps()
+        await cls._generate_adjacent_maps()
 
     @classmethod
     async def wait_location(cls) -> None:
@@ -184,7 +184,7 @@ class LocationRegistry:
             print(f"Loaded {len(cls.__maps)} maps.")
 
     @classmethod
-    async def generate_adjacent_maps(cls):
+    async def _generate_adjacent_maps(cls):
         coord_lookup = {map.coordinates: map for map in cls.__maps.values()}
 
         for map in cls.__maps.values():
