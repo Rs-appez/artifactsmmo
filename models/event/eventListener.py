@@ -19,6 +19,8 @@ class EventListener:
 
     def __init__(self, event_handler: EventHandler):
         self._event_handler = event_handler
+        self._last_message_time = None
+        self._message_timeout = 90
 
     async def connect(self):
         retries = 0
@@ -28,6 +30,7 @@ class EventListener:
                     await websocket.send(json.dumps(self.subscription_message))
                     print("Subscribed to websocket events.")
                     retries = 0
+                    self._last_message_time = asyncio.get_event_loop().time()
                     await self._listen(websocket)
 
             except asyncio.CancelledError:
@@ -45,10 +48,16 @@ class EventListener:
                 break
 
     async def _listen(self, websocket: ClientConnection):
+        timeout_task = asyncio.create_task(self._check_timeout(websocket))
 
-        while True:
-            message = await websocket.recv()
-            await self._handle_message(json.loads(message))
+        try:
+            while True:
+                message = await websocket.recv()
+                self._last_message_time = asyncio.get_event_loop().time()
+                await self._handle_message(json.loads(message))
+
+        finally:
+            timeout_task.cancel()  # noqa: F821
 
     async def _handle_message(self, message: dict):
         event_type = message["type"]
@@ -65,3 +74,15 @@ class EventListener:
 
             case _:
                 pass
+
+    async def _check_timeout(self, websocket: ClientConnection):
+        while True:
+            await asyncio.sleep(self._message_timeout)
+            current_time = asyncio.get_event_loop().time()
+            if (
+                self._last_message_time is not None
+                and (current_time - self._last_message_time) > self._message_timeout
+            ):
+                print("No messages received for a while, reconnecting...")
+                await websocket.close()
+                break
