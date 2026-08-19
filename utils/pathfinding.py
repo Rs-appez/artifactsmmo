@@ -62,6 +62,6 @@ def _dijkstra(
 
 
 def __weight(u: Map, v: Map) -> int:
-    if u.has_transition:
+    if not u.free_transition:
         return 1
     return 0
