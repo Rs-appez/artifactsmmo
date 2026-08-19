@@ -107,11 +107,12 @@ class Bank:
 
         if imediately_needed and missing_items:
             raise NotEnoughInBankException(
+                missing_items,
                 f"Not enough items in bank to reserve {items}, missing : "
                 + ", ".join(
                     f"{item.name} x{quantity}"
                     for item, quantity in missing_items.items()
-                )
+                ),
             )
         for item, quantity in items.items():
             cls.__reserved_items[item] += quantity
