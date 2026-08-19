@@ -1,5 +1,10 @@
 from enum import StrEnum, auto
 
+SUB_ZONE_MAP = {
+    "Sandwhisper": ["Empress House", "Sandwhisper Isle"],
+    "Enchanted Forest": ["Enchanted Forest"],
+}
+
 
 class ZoneType(StrEnum):
     DEFAULT = auto()
@@ -8,9 +13,9 @@ class ZoneType(StrEnum):
 
     @classmethod
     def from_map_name(cls, map_name: str) -> "ZoneType":
-        if "Sandwhisper" in map_name:
+        if map_name in SUB_ZONE_MAP["Sandwhisper"]:
             return cls.SANDWHISPER
-        elif "Enchanted Forest" in map_name:
+        elif map_name in SUB_ZONE_MAP["Enchanted Forest"]:
             return cls.ENCHANTED_FOREST
         else:
             return cls.DEFAULT
