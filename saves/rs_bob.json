@@ -1,8 +1,8 @@
 {
-    "routine_name": "mob_farm",
-    "routine_module": "routines.monster_farm",
+    "routine_name": "gather",
+    "routine_module": "routines.gather",
     "routine_args": [
-        "rat"
+        "salmon"
     ],
     "routine_kwargs": {}
 }
