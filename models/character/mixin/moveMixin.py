@@ -111,6 +111,14 @@ class MovePlan:
     def is_ready(self) -> bool:
         return self._has_prepared or len(self._actions_for_prepare) == 0
 
+    @property
+    def how_much_gold_needed(self) -> int:
+        return self._gold_needed
+
+    @property
+    def how_much_items_needed(self) -> dict[Item, int]:
+        return self._items_needed
+
     def _compute_actions(self, with_cost: bool = True) -> None:
         for i, map in enumerate(self._path):
             self._add_action(lambda map=map: self._character._move(map))
