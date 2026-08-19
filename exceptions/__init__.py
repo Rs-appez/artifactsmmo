@@ -4,6 +4,7 @@ from .notWorthableTask import NotWorthableTaskException
 from .dontHaveLevel import DontHaveLevelException
 from .timeoutButSuccess import TimeoutButSuccessException
 from .needToRefreshStuff import NeedToRefreshStuffException
+from .impossibleCraft import ImpossibleCraftException
 
 __all__ = [
     "ImpossibleCombatException",
@@ -12,4 +13,5 @@ __all__ = [
     "NotWorthableTaskException",
     "TimeoutButSuccessException",
     "NeedToRefreshStuffException",
+    "ImpossibleCraftException",
 ]
