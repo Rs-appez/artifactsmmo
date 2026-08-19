@@ -77,6 +77,10 @@ class Map:
         return self._transitions_map is not None
 
     @property
+    def free_transition(self) -> bool:
+        return self.transition_cost is None
+
+    @property
     async def get_transition_map(self) -> "Map | None":
         from models import LocationRegistry
 
