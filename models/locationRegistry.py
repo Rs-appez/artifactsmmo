@@ -6,7 +6,7 @@ import httpx
 from config import ARTIFACTSMMO_URL, HEADERS
 from models.dataclass import NPC, Event, Map, Monster, Resource
 from models.encyclopedia import Encyclopedia
-from models.enums import JobType, Layer, TaskType
+from models.enums import JobType, Layer, TaskType, ZoneType
 
 
 class LocationRegistry:
@@ -47,6 +47,10 @@ class LocationRegistry:
     async def get_locations(entity: Resource | Monster) -> set[Map]:
         await LocationRegistry.wait_location()
         return LocationRegistry.__drop_locations.get(entity, set())
+
+    @staticmethod
+    async def get_zones_locations(entity: Resource | Monster) -> set[ZoneType]:
+        return {map.zone for map in await LocationRegistry.get_locations(entity)}
 
     @staticmethod
     async def get_map_by_id(map_id: int) -> Map:
