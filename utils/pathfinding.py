@@ -9,7 +9,7 @@ from models.dataclass import Map
 _route_cache: LRUCache = LRUCache(maxsize=128)
 
 
-async def get_route(a: Map, b: Map) -> list[Map]:
+async def get_route(a: Map, b: Map) -> tuple[list[Map], int]:
     key = (a, b)
     if key in _route_cache:
         return _route_cache[key]
@@ -27,9 +27,11 @@ async def get_route(a: Map, b: Map) -> list[Map]:
 
     maps_key.append(path[-1])
 
-    _route_cache[key] = maps_key
+    result = (maps_key, cost)
 
-    return maps_key
+    _route_cache[key] = result
+
+    return result
 
 
 def _dijkstra(
@@ -62,6 +64,6 @@ def _dijkstra(
 
 
 def __weight(u: Map, v: Map) -> int:
-    if not u.free_transition:
+    if u._transitions_map == v.map_id and not u.free_transition:
         return 1
     return 0
