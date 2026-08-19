@@ -12,3 +12,5 @@
 (C) 2026-08-16 use food if need hp to equip a item @refactor
 (A) 2026-08-16 check if char can win before searching stuff in bank @refactor
 (A) 2026-08-16 setup boss fight farm @feature
+(B) 2026-08-19 handle the infinite loop for trying to gather in a inacessible zone @feature
+(A) 2026-08-19 handle potion @feature
