@@ -22,8 +22,6 @@ if TYPE_CHECKING:
 class MoveMixin:
     _location: Map
 
-    _default_return_potion: Item
-
     @property
     def location(self: "Character") -> Map:
         return self._location
