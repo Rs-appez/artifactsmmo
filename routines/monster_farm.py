@@ -13,35 +13,6 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
-async def _fight(character: Character, mob: Monster, force: bool = False) -> dict:
-
-    mob_position = await find_nearest_lootable(character, {mob})
-
-    while True:
-        try:
-            if character.is_inventory_full:
-                deposit_gold = True if character.gold > 10000 else False
-                food = {item for item in character.inventory if item.is_food}
-                await character.deposit_all_in_bank(
-                    with_gold=deposit_gold, items_to_ignore=food
-                )
-
-            if not character.will_win_against(mob, max_hp=False):
-                if not character.will_win_against(mob, max_hp=True) and not force:
-                    raise ImpossibleCombatException(
-                        f"❌ {character.surname} will lose against {mob.name} even with full hp"
-                    )
-                need_full_regeneration = not __can_win_with_eco_food(character, mob)
-                await __regenerate_hp(character, full=need_full_regeneration)
-
-            await character.move(mob_position)
-            fight_result = await character.fight()
-
-            return fight_result[1]
-        except NeedToRefreshStuffException:
-            await character.weaponize(mob)
-
-
 async def mob_farm(
     character: Character,
     mob: Monster | str,
@@ -63,7 +34,6 @@ async def mob_farm(
             force = force.lower() in ("true", "force", "f")
 
         iterations = range(nb) if nb > 0 else count()
-        await character.weaponize(mob)
         for _ in iterations:
             await _fight(character, mob, force)
 
@@ -146,16 +116,55 @@ async def drop_on_mob_farm(character: Character, item: Item | str, nb: int | str
                 break
 
 
+async def _fight(character: Character, mob: Monster, force: bool = False) -> dict:
+
+    mob_position = await find_nearest_lootable(character, {mob})
+    has_moved = False
+
+    if character.is_inventory_full:
+        deposit_gold = True if character.gold > 10000 else False
+        food = {item for item in character.inventory if item.is_food}
+        await character.deposit_all_in_bank(
+            with_gold=deposit_gold, items_to_ignore=food
+        )
+        has_moved = True
+
+    if not character.will_win_against(mob, max_hp=False):
+        if not character.will_win_against(mob, max_hp=True) and not force:
+            raise ImpossibleCombatException(
+                f"❌ {character.surname} will lose against {mob.name} even with full hp"
+            )
+        need_full_regeneration = not __can_win_with_eco_food(character, mob)
+        has_moved = (
+            await __regenerate_hp(character, full=need_full_regeneration) or has_moved
+        )
+
+    async with character.plan_move(mob_position) as plan:
+        await plan.prepare()
+        if has_moved:
+            await character.weaponize(mob)
+        await plan.execute_move()
+
+    fight_result = await character.fight()
+
+    return fight_result[1]
+
+
 async def __regenerate_hp(character: Character, full: bool = False):
+    # tmp return if has_moved -> to remove when bank will be cached
+    has_moved = False
     try:
         if not character.has_food:
+            has_moved = True
             await character.get_food_from_bank()
 
         await character.regenerate_hp(full=full)
 
+        return has_moved
     except Exception:
         _ = await character.rest()
         print(f"󰻝  {character.surname} rests to recover hp before fighting")
+        return False
 
 
 def __can_win_with_eco_food(character: Character, mob: Monster) -> bool:
