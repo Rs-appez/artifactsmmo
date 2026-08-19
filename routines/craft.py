@@ -18,7 +18,6 @@ async def craft(
     item: Item,
     quantity: int,
     recycling_after: bool = False,
-    token: uuid.UUID | None = None,
 ):
     if not character.has_job(item.job, item.craft_level):
         print(
@@ -44,7 +43,6 @@ async def craft(
             async with Bank.reserve_items(
                 reserved_ingredients,
                 inventory=character.inventory,
-                tokens_to_revoke={token} if token else None,
             ) as bank_token:
                 (
                     nb_trips,
