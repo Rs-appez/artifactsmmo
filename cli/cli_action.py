@@ -1,5 +1,5 @@
 import routines
-from models import Character, Encyclopedia, GameManager
+from models import Character, Encyclopedia, GameManager, LocationRegistry
 from models.dataclass.bank import Bank
 from models.enums import TaskType
 from utils.xp_craft_calculator import nb_craft_needed_for_level_up
@@ -133,3 +133,13 @@ async def bagize(character: Character):
 
     character.do_one_time_task(bagize_routine)
     print(f"👜 {character.surname} will bagize")
+
+
+@_check_freshness
+async def move_to(character: Character, map_id: str):
+    map = await LocationRegistry.get_map_by_id(int(map_id))
+
+    async def move(character: Character, map):
+        await character.move(map)
+
+    character.do_one_time_task(move, map)

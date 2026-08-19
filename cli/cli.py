@@ -24,6 +24,7 @@ dict_actions = {
     "goroutine": cli_action.asign_routine,
     "gomission": cli_action.asign_mission,
     "nbcraft": cli_action.nb_craft_needed_calculator,
+    "move": cli_action.move_to,
 }
 
 dict_all = {
@@ -50,6 +51,7 @@ async def cli(game_manager: GameManager):
     completer_dict = {
         **{cmd: character_names for cmd in dict_single},
         **{"craft": {name: {} for name in characters.keys()}},
+        **{"move": {name: {} for name in characters.keys()}},
         **{
             "gotask": {
                 name: {task: None for task in ["items", "monsters"]}
