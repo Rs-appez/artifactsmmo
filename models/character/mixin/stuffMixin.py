@@ -257,21 +257,26 @@ class StuffMixin:
                 best_tool = best_tool_in_inventory
 
             has_go_to_bank = False
-            async with get_tool(self, job) as (bank_token, best_tool_in_bank):
-                if best_tool is None or (
-                    best_tool_in_bank is not None
-                    and await best_tool_in_bank.is_better_for_job_than(best_tool, job)
-                ):
-                    best_tool = best_tool_in_bank
-                    if self.inventory_free_space < 1:
-                        _ = await self.deposit_all_in_bank(with_gold=False)
-
-                    if not await self.withdraw_item_from_bank(bank_token):
-                        print(
-                            f"❌ {self.surname} failed to withdraw tool from bank for toolize"
+            try:
+                async with get_tool(self, job) as (bank_token, best_tool_in_bank):
+                    if best_tool is None or (
+                        best_tool_in_bank is not None
+                        and await best_tool_in_bank.is_better_for_job_than(
+                            best_tool, job
                         )
-                        return
-                    has_go_to_bank = True
+                    ):
+                        best_tool = best_tool_in_bank
+                        if self.inventory_free_space < 1:
+                            _ = await self.deposit_all_in_bank(with_gold=False)
+
+                        if not await self.withdraw_item_from_bank(bank_token):
+                            print(
+                                f"❌ {self.surname} failed to withdraw tool from bank for toolize"
+                            )
+                            return
+                        has_go_to_bank = True
+            except Exception:
+                pass
 
             if best_tool is not None and best_tool != self.weapon:
                 if not await self.equip(best_tool):
