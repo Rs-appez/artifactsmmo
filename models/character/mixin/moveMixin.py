@@ -1,20 +1,20 @@
-from contextlib import asynccontextmanager
 import asyncio
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from itertools import chain
-from typing import TYPE_CHECKING, Callable, AsyncGenerator
+from typing import TYPE_CHECKING, AsyncGenerator, Callable
 from uuid import UUID
 
 from exceptions import (
-    NeedToRefreshStuffException,
+    ImpossibleCraftException,
     NotEnoughInBankException,
     TimeoutButSuccessException,
 )
 from models import Encyclopedia, LocationRegistry
-from models.dataclass import Item, Map
+from models.dataclass import Item, Map, Resource
 from models.dataclass.bank import Bank
-from models.enums import Layer, ZoneType
-from routines import craft, generate_missing_items
+from models.enums import ZoneType
+from routines import generate_missing_items
 from utils.pathfinding import get_route
 
 if TYPE_CHECKING:
@@ -39,7 +39,7 @@ class MoveMixin:
     ) -> AsyncGenerator[MovePlan]:
 
         if destination == self.location:
-            yield MovePlan(self, [])
+            yield MovePlan(self, ([], 0))
             return
 
         path = await get_route(self.location, destination)
@@ -84,16 +84,18 @@ class MoveMixin:
 
 
 class MovePlan:
-    def __init__(self, character: Character, path: list[Map]):
+    def __init__(self, character: Character, path: tuple[list[Map], int]):
         self._character = character
         self._start_location = character.location
-        self._path = path
+        self._path = path[0]
+        self._total_cost = path[1]
 
         self._actions_to_perform: list[Callable] = []
         self._use_potions: list[Callable] = []
         self._actions_for_prepare: list[Callable] = []
         self._has_prepared = False
         self._has_executed = False
+        self._can_shortcut = True
 
         self._gold_needed = 0
         self._items_needed: dict[Item, int] = {}
@@ -129,7 +131,7 @@ class MovePlan:
 
     async def _compute_actions(self, with_cost: bool = True) -> None:
 
-        if with_cost:
+        if with_cost and self._can_shortcut and self._total_cost > 0:
             await self._check_shortcut()
 
         for i, map in enumerate(self._path):
@@ -146,8 +148,13 @@ class MovePlan:
 
         if self._has_prepared:
             return
-
-        await self._prepare_items_needed()
+        try:
+            await self._prepare_items_needed()
+        except ImpossibleCraftException:
+            self._can_shortcut = False
+            self._actions_computed.clear()
+            await self._compute_actions(with_cost=True)
+            await self._prepare_items_needed()
 
         for action in self._actions_for_prepare:
             await action()
@@ -157,13 +164,14 @@ class MovePlan:
     async def execute_move(self) -> None:
         if not self.is_ready:
             raise Exception("MovePlan is not ready. Call prepare() first.")
+        for i in self._items_needed:
+            print(f"need item : {i.name} x {self._items_needed[i]}")
 
         if self._has_executed:
             return
 
         await self._get_ready()
-        if not self._use_potions:
-            await self._recompute_path()
+        await self._recompute_path()
 
         for action in chain(self._use_potions, self._actions_to_perform):
             await action()
@@ -177,10 +185,14 @@ class MovePlan:
             await self._get_gold_needed()
 
     async def _recompute_path(self) -> None:
+        print(self._character.location)
         if self._character.location != self._start_location:
-            self._path = await get_route(self._character.location, self._path[-1])
+            self._path, self._total_cost = await get_route(
+                self._character.location, self._path[-1]
+            )
             self._actions_to_perform.clear()
-            await self._compute_actions(with_cost=False)
+            self._use_potions.clear()
+            await self._compute_actions()
 
     async def _check_shortcut(self) -> None:
         if not self._path:
@@ -228,6 +240,13 @@ class MovePlan:
             except NotEnoughInBankException as e:
                 for item in e.missing_items:
                     if item.is_gatherable_resource:
+                        if not await self._can_gather(item):
+                            # todo : refactor gather to restrict to the current zone if needed
+                            raise ImpossibleCraftException(
+                                f"Cannot gather {item.name} in the current zone. Missing items: {e.missing_items}"
+                            )
+                    elif item.is_craftable:
+                        # todo : check if we have recipes available to craft the item
                         pass
 
                 await generate_missing_items(self._character, self._items_needed)
@@ -241,7 +260,9 @@ class MovePlan:
         self._use_potions.append(lambda: self._character.use_item(tp_potion))
         tp_destination = tp_potion.effects[teleport_effect]
         tp_destination_map = await LocationRegistry.get_map_by_id(tp_destination)
-        self._path = await get_route(tp_destination_map, self._path[-1])
+        self._path, self._total_cost = await get_route(
+            tp_destination_map, self._path[-1]
+        )
 
     def _add_action(self, action: Callable) -> None:
         if self._has_executed:
@@ -265,3 +286,19 @@ class MovePlan:
             self.add_gold_needed(amount)
         else:
             self.add_item_needed(item, amount)
+
+    async def _can_gather(self, item: Item) -> bool:
+        if not item.is_gatherable_resource:
+            return False
+        resources = Resource.from_drop_item(item)
+        print("resources : ", resources)
+        found_valid_zone = False
+        for resource in resources:
+            zones = await LocationRegistry.get_zones_locations(resource)
+            print("zones : ", zones)
+            if any(zone != self._path[-1].zone for zone in zones):
+                found_valid_zone = True
+                print(f"Found valid zone for {item.name} : {zones}")
+                break
+
+        return found_valid_zone
