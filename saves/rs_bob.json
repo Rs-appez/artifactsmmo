@@ -1,8 +1,6 @@
 {
-    "routine_name": "gather",
-    "routine_module": "routines.gather",
-    "routine_args": [
-        "gold_ore"
-    ],
+    "routine_name": "seeking_the_meaning_of_life",
+    "routine_module": "models.character.mixin.workMixin",
+    "routine_args": [],
     "routine_kwargs": {}
 }

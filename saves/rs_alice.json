@@ -1,8 +1,6 @@
 {
-    "routine_name": "mob_farm",
+    "routine_name": "boss_farm",
     "routine_module": "routines.monster_farm",
     "routine_args": [
-        "goblin_wolfrider"
-    ],
-    "routine_kwargs": {}
-}
+        [
+            
