@@ -7,7 +7,7 @@ from models.enums import Element
 if TYPE_CHECKING:
     from models.dataclass import Item, Monster
 
-TOP_K_WEAPONS = 5
+TOP_K_WEAPONS = 10
 WEIGHTS = {
     "dmg": 3.5,
     "elemental_dmg": 3.5,

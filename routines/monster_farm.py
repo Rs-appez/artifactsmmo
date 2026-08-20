@@ -54,7 +54,7 @@ async def boss_farm(
         if isinstance(boss, str):
             boss = await Encyclopedia.get_monster_by_code(boss)
 
-        await character.weaponize(boss)
+        # await character.weaponize(boss)
         mob_position = await find_nearest_lootable(character, {boss})
         if character.is_inventory_full:
             for mate in teammate:
@@ -66,7 +66,7 @@ async def boss_farm(
         await character.set_ready_to_fight()
         if leader:
             while any(not mate.is_ready_to_fight_boss for mate in teammate):
-                await asyncio.sleep(0.2)
+                await asyncio.sleep(0.1)
             _ = await character.fight(teammate)
             for mate in teammate or []:
                 if mate != character:

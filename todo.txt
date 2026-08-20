@@ -14,3 +14,5 @@
 (A) 2026-08-16 setup boss fight farm @feature
 (B) 2026-08-19 handle the infinite loop for trying to gather in a inacessible zone @feature
 (A) 2026-08-19 handle potion @feature
+(A) 2026-08-16 setup boss fight farm with transition @feature
+(A) 2026-08-19 checking the ping from websocket to make sure the connection is still alive @refactor
