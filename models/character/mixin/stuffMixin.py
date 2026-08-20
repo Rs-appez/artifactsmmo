@@ -22,7 +22,6 @@ class StuffMixin:
     _effects: dict[Effect, int] = field(default_factory=dict)
 
     _equipped_items: dict[EquipentType, Item | None] = field(default_factory=dict)
-    _bag: Item | None = None
 
     _ring_1: Item | None = None
     _ring_2: Item | None = None
@@ -72,7 +71,6 @@ class StuffMixin:
                 self._equipped_items.values(),
                 self.get_rings,
                 self.get_artifacts,
-                [self._bag],
             )
             if item is not None
         ]
@@ -103,8 +101,6 @@ class StuffMixin:
             return "artifact2"
         elif item == self._artifact_3:
             return "artifact3"
-        elif item == self._bag:
-            return "bag"
         for slot, equipped_item in self._equipped_items.items():
             if equipped_item == item:
                 return slot.value
@@ -291,6 +287,7 @@ class StuffMixin:
     async def bagize(self: "Character") -> None:
         try:
             bag_effect = await Encyclopedia.get_effect_by_code("inventory_space")
+            current_bag = self.get_equipped_item_by_slot(EquipentType.BAG)
             best_bag = max(
                 [
                     item
@@ -316,8 +313,8 @@ class StuffMixin:
                         return
 
             if best_bag is not None and (
-                self._bag is None
-                or self._bag.effects.get(bag_effect, 0)
+                current_bag is None
+                or current_bag.effects.get(bag_effect, 0)
                 < best_bag.effects.get(bag_effect, 0)
             ):
                 if not await self.equip(best_bag):
