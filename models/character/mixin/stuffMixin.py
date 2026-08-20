@@ -210,6 +210,7 @@ class StuffMixin:
 
     async def weaponize(self: "Character", monster: Monster) -> None:
         try:
+            has_been_to_bank = False
             async with get_best_equipment(self, monster) as (
                 bank_token,
                 best_equipment_set,
@@ -221,8 +222,10 @@ class StuffMixin:
                     if self.need_deposit(bank_token):
                         await self.deposit_all_in_bank(with_gold=False)
                     await self.withdraw_item_from_bank(bank_token)
+                    has_been_to_bank = True
             await self._equip_set_items(best_equipment_set)
-            await self.deposit_all_in_bank(with_gold=False)
+            if has_been_to_bank:
+                await self.deposit_all_in_bank(with_gold=False)
         except Exception as e:
             print(f"❌ {self.surname} Weaponize : {e}")
 
