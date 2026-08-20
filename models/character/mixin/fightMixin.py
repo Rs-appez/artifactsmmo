@@ -168,3 +168,8 @@ class FightMixin:
         win_rate = simulate(simulateData).win_rate
 
         return win_rate >= 99.0
+
+    async def get_ready_to_fight(self: "Character", mob: Monster):
+        await self.weaponize(mob)
+        if not self.has_food:
+            await self.get_food_from_bank()

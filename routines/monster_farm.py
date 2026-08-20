@@ -33,8 +33,6 @@ async def mob_farm(
         if isinstance(force, str):
             force = force.lower() in ("true", "force", "f")
 
-        await character.weaponize(mob)
-
         iterations = range(nb) if nb > 0 else count()
         for _ in iterations:
             await _fight(character, mob, force)
@@ -121,7 +119,8 @@ async def drop_on_mob_farm(character: Character, item: Item | str, nb: int | str
 async def _fight(character: Character, mob: Monster, force: bool = False) -> dict:
 
     mob_position = await find_nearest_lootable(character, {mob})
-    has_moved = False
+
+    await character.get_ready_to_fight(mob)
 
     if character.is_inventory_full:
         deposit_gold = True if character.gold > 10000 else False
@@ -129,7 +128,6 @@ async def _fight(character: Character, mob: Monster, force: bool = False) -> dic
         await character.deposit_all_in_bank(
             with_gold=deposit_gold, items_to_ignore=food
         )
-        has_moved = True
 
     if not character.will_win_against(mob, max_hp=False):
         if not character.will_win_against(mob, max_hp=True) and not force:
@@ -137,14 +135,11 @@ async def _fight(character: Character, mob: Monster, force: bool = False) -> dic
                 f"❌ {character.surname} will lose against {mob.name} even with full hp"
             )
         need_full_regeneration = not __can_win_with_eco_food(character, mob)
-        has_moved = (
-            await __regenerate_hp(character, full=need_full_regeneration) or has_moved
-        )
+        await __regenerate_hp(character, full=need_full_regeneration)
 
     async with character.plan_move(mob_position) as plan:
         await plan.prepare()
-        if has_moved:
-            await character.weaponize(mob)
+        await character.get_ready_to_fight(mob)
         await plan.execute_move()
 
     fight_result = await character.fight()
