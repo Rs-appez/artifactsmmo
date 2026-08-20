@@ -87,22 +87,19 @@ async def boss_farm(
 
         # await character.weaponize(boss)
         mob_position = await find_nearest_lootable(character, {boss})
-        # if character.is_inventory_full:
-        #     for mate in teammate:
-        #         mate.do_one_time_task(empty_farm)
+        if character.is_inventory_full:
+            for mate in teammate:
+                mate.do_one_time_task(empty_farm)
 
         # if character.hp < 500:
         #     _ = await __regenerate_hp(character)
         if character.hp < character.max_hp:
-            if character.has_food:
-                await character.regenerate_hp(full=True)
-            else:
-                await character.rest()
+            _ = await __regenerate_hp(character)
         _ = await character.move(mob_position)
         await character.set_ready_to_fight()
         if leader:
             while any(not mate.is_ready_to_fight_boss for mate in teammate):
-                await asyncio.sleep(0.2)
+                await asyncio.sleep(0.1)
             _ = await character.fight(teammate)
             for mate in teammate or []:
                 if mate != character:
