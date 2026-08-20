@@ -1,7 +1,7 @@
 from enum import StrEnum, auto
 
 SUB_ZONE_MAP = {
-    "Sandwhisper": ["Empress House", "Sandwhisper Isle"],
+    "Sandwhisper": ["Empress House", "Sandwhisper Isle", "Sandwhisper Mine"],
     "Enchanted Forest": ["Enchanted Forest"],
 }
 
