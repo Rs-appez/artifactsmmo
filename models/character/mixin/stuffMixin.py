@@ -4,12 +4,14 @@ from typing import TYPE_CHECKING
 
 from models import Encyclopedia
 from models.dataclass import Effect, Item, Monster
+from config import MAX_UTILITY_PER_SLOT
 from models.dataclass.bank import (
     Bank,
     get_bag,
     get_best_equipment,
     get_best_stat_item,
     get_tool,
+    get_max_items,
 )
 from models.enums import EquipentType, JobType
 
@@ -326,6 +328,38 @@ class StuffMixin:
 
         except Exception as e:
             print(f"❌ {self.surname} Bagize : {e}")
+
+    async def potionize(
+        self: "Character", potion1: Item, potion2: Item | None = None
+    ) -> None:
+        await self._potionize(potion1, slot=1)
+        if potion2 is not None:
+            await self._potionize(potion2, slot=2)
+
+    async def _potionize(self: "Character", potion: Item, slot: int) -> None:
+        if potion.subtype != "potion":
+            raise ValueError(f"{potion.name} is not a potion")
+
+        current_potion_equip = self.get_utility_items.get(potion, 0)
+        needed_quantity = MAX_UTILITY_PER_SLOT - current_potion_equip
+
+        async with get_max_items(self, potion, max_quantity=needed_quantity) as (
+            bank_token,
+            qty_to_withdraw,
+        ):
+            if qty_to_withdraw == 0:
+                return
+            print(f"󰂔 {self.surname} is going to search {potion.name} in bank")
+
+            if self.need_deposit(bank_token):
+                await self.deposit_all_in_bank()
+            if not await self.withdraw_item_from_bank(bank_token):
+                print(
+                    f"❌ {self.surname} failed to withdraw item from bank for potionize"
+                )
+                return
+
+        await self.equip(potion, quantity=qty_to_withdraw, slot=f"utility{slot}")
 
     async def maximaze_stats(self: "Character", stats: Effect) -> None:
         async with get_best_stat_item(self, stats) as (bank_token, best_item):
