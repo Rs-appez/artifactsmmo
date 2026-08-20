@@ -61,7 +61,7 @@ async def boss_farm(
                 mate.do_one_time_task(empty_farm)
 
         if character.hp < character.max_hp:
-            _ = await __regenerate_hp(character)
+            _ = await __regenerate_hp(character, full=True)
         await character.move(mob_position)
         await character.set_ready_to_fight()
         if leader:
