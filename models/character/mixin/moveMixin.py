@@ -150,6 +150,7 @@ class MovePlan:
             return
         try:
             await self._prepare_items_needed()
+
         except ImpossibleCraftException:
             self._can_shortcut = False
             self._actions_computed.clear()
@@ -164,8 +165,6 @@ class MovePlan:
     async def execute_move(self) -> None:
         if not self.is_ready:
             raise Exception("MovePlan is not ready. Call prepare() first.")
-        for i in self._items_needed:
-            print(f"need item : {i.name} x {self._items_needed[i]}")
 
         if self._has_executed:
             return
@@ -185,7 +184,6 @@ class MovePlan:
             await self._get_gold_needed()
 
     async def _recompute_path(self) -> None:
-        print(self._character.location)
         if self._character.location != self._start_location:
             self._path, self._total_cost = await get_route(
                 self._character.location, self._path[-1]
@@ -291,14 +289,11 @@ class MovePlan:
         if not item.is_gatherable_resource:
             return False
         resources = Resource.from_drop_item(item)
-        print("resources : ", resources)
         found_valid_zone = False
         for resource in resources:
             zones = await LocationRegistry.get_zones_locations(resource)
-            print("zones : ", zones)
             if any(zone != self._path[-1].zone for zone in zones):
                 found_valid_zone = True
-                print(f"Found valid zone for {item.name} : {zones}")
                 break
 
         return found_valid_zone
