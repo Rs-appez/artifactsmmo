@@ -35,7 +35,13 @@ class CraftMixin:
             return False
 
         if not self.has_in_inventory({item: quantity}):
-            print(f"❌ Cannot decraft {quantity}x {item.name}")
+            print(f"❌ Cannot decraft {quantity}x {item.name}, not enough in inventory")
+            return False
+
+        if pay_boost and self.gold < item.enhanced_recycling_price * quantity:
+            print(
+                f"❌ Cannot decraft {quantity}x {item.name} with pay boost, not enough gold"
+            )
             return False
 
         try:
