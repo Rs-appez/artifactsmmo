@@ -45,7 +45,13 @@ async def _xp_craft_skill(
     need_for_level_up = await nb_craft_needed_for_level_up(
         character, item_target, target_level
     )
-    await craft(character, item_target, need_for_level_up, recycling_after=True)
+    await craft(
+        character,
+        item_target,
+        need_for_level_up,
+        recycling_after=True,
+        recycling_pay_boost=True,
+    )
 
 
 async def _xp_gather_skill(character: Character, job: JobType, target_level: int):
