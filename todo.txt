@@ -5,7 +5,7 @@
 (B) 2026-08-09 add command to make ge sell order (for useless stuff) @feature
 (B) 2026-08-09 fix assure dont loosing wisdom stuff when farming for a craft @fix
 (C) 2026-08-13 optimize by not depositing/withdrawing if the items are already in inventory for the trip and avoid unhandled reservations @refactor
-(B) 2026-08-10 better handling food retrieve (take when equip, smart refull when emptyfarm) @refactor
+x 2026-08-20 2026-08-10 better handling food retrieve (take when equip, smart refull when emptyfarm) @refactor
 (A) 2026-08-10 cache bank to reduce api call @refactor
 (B) 2026-08-12 fix auto generate apple @fix
 (B) 2026-08-16 better handling near resource after transition ect @refactor
@@ -14,5 +14,6 @@
 (A) 2026-08-16 setup boss fight farm @feature
 (B) 2026-08-19 handle the infinite loop for trying to gather in a inacessible zone @feature
 (A) 2026-08-19 handle potion @feature
-(A) 2026-08-16 setup boss fight farm with transition @feature
-(A) 2026-08-19 checking the ping from websocket to make sure the connection is still alive @refactor
+x 2026-08-20 2026-08-16 setup boss fight farm with transition @feature
+x 2026-08-20 2026-08-19 checking the ping from websocket to make sure the connection is still alive @refactor
+(B) 2026-08-20 refactor to equip all equipment with 1 call @refactor
