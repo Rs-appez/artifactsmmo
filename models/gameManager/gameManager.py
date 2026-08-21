@@ -1,3 +1,4 @@
+from models.dataclass.bank import Bank
 import asyncio
 from collections.abc import Coroutine, Sequence
 
@@ -22,6 +23,7 @@ class GameManager:
             asyncio.gather(
                 Encyclopedia.initialize(),
                 LocationRegistry.initialize(),
+                Bank.refresh_bank(),
                 self.event_listener.connect(),
                 self.event_handler.refresh_current_events(),
             )
