@@ -23,7 +23,7 @@ class GameManager:
             asyncio.gather(
                 Encyclopedia.initialize(),
                 LocationRegistry.initialize(),
-                Bank.refresh_bank(),
+                Bank.start_refresh_bank(),
                 self.event_listener.connect(),
                 self.event_handler.refresh_current_events(),
             )
