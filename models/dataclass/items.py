@@ -24,9 +24,10 @@ class Item:
     effects: dict[Effect, int]
     job: JobType
     craft_level: int
-    craft_ingredients: list[dict[str, str | int]]
+    craft_ingredients: list[dict[str, int]]
     craft_quantity: int
-    tradeable: bool
+    is_tradeable: bool
+    is_recyclable: bool
 
     def __str__(self):
         return f"{self.name} ({self.code})"
@@ -70,7 +71,8 @@ class Item:
             craft_level=craft_data.get("level", 0),
             craft_ingredients=craft_data.get("items", []),
             craft_quantity=craft_data.get("quantity", 0),
-            tradeable=data["tradeable"] == "true",
+            is_tradeable=data["tradeable"] == "true",
+            is_recyclable=data["recyclable"] == "true",
         )
 
     @property
@@ -84,6 +86,31 @@ class Item:
     @property
     def is_craftable(self) -> bool:
         return len(self.craft_ingredients) > 0
+
+    @property
+    def enhanced_recycling_price(self) -> int:
+        def get_per_ingredient_price() -> int:
+            if self.level <= 20:
+                return 5
+            elif self.level <= 30:
+                return 10
+            elif self.level <= 40:
+                return 15
+            elif self.level <= 45:
+                return 20
+            else:
+                return 25
+
+        if not self.is_recyclable:
+            raise ValueError(
+                f"Item {self.name} ({self.code}) is not recyclable, cannot calculate enhanced recycling price."
+            )
+
+        nb_ingredients = sum(
+            ingredient["quantity"] for ingredient in self.craft_ingredients
+        )
+
+        return get_per_ingredient_price() * nb_ingredients
 
     @property
     def is_gatherable_resource(self) -> bool:
