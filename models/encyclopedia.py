@@ -8,22 +8,22 @@ from models.enums import JobType
 
 class Encyclopedia:
     _items: dict[str, Item] = {}
-    __items_loaded = False
+    __items_loaded = asyncio.Event()
 
     _effects: dict[str, Effect] = {}
-    __effects_loaded = False
+    __effects_loaded = asyncio.Event()
 
     _monsters: dict[str, Monster] = {}
-    __monsters_loaded = False
+    __monsters_loaded = asyncio.Event()
 
     _resources: dict[str, Resource] = {}
-    __resources_loaded = False
+    __resources_loaded = asyncio.Event()
 
     _events: dict[str, Event] = {}
-    __events_loaded = False
+    __events_loaded = asyncio.Event()
 
     __npcs: dict[str, NPC] = {}
-    __npcs_loaded = False
+    __npcs_loaded = asyncio.Event()
 
     @classmethod
     async def initialize(cls):
@@ -38,14 +38,9 @@ class Encyclopedia:
 
     # ITEMS
 
-    @classmethod
-    async def wait_item(cls) -> None:
-        while not cls.__items_loaded:
-            _ = await asyncio.sleep(1)
-
     @staticmethod
     async def get_item_by_code(code: str) -> Item:
-        await Encyclopedia.wait_item()
+        await Encyclopedia.__items_loaded.wait()
 
         item = Encyclopedia._items.get(code)
 
@@ -56,12 +51,12 @@ class Encyclopedia:
 
     @staticmethod
     async def get_all_items_names() -> list[str]:
-        await Encyclopedia.wait_item()
+        await Encyclopedia.__items_loaded.wait()
         return list(Encyclopedia._items)
 
     @staticmethod
     async def get_all_items_by_job(job: JobType, level: int = -1) -> set[Item]:
-        await Encyclopedia.wait_item()
+        await Encyclopedia.__items_loaded.wait()
         return {
             item
             for item in Encyclopedia._items.values()
@@ -70,7 +65,7 @@ class Encyclopedia:
 
     @classmethod
     async def __load_items(cls):
-        if cls.__items_loaded:
+        if cls.__items_loaded.is_set():
             print("Items already loaded, skipping fetch.")
             return
         items_data = await cls.__read_json_file(DATA_DIR + "items_data.json")
@@ -79,19 +74,14 @@ class Encyclopedia:
             item = await Item.from_dict(item_data)
             cls._items[item.code] = item
 
-        cls.__items_loaded = True
+        cls.__items_loaded.set()
         print(f"Loaded {len(cls._items)} items.")
 
     # EFFECTS
 
-    @classmethod
-    async def wait_effect(cls) -> None:
-        while not cls.__effects_loaded:
-            _ = await asyncio.sleep(1)
-
     @staticmethod
     async def get_effect_by_code(code: str) -> Effect:
-        await Encyclopedia.wait_effect()
+        await Encyclopedia.__effects_loaded.wait()
 
         effect = Encyclopedia._effects.get(code)
         if not effect:
@@ -101,7 +91,7 @@ class Encyclopedia:
 
     @classmethod
     async def __load_effects(cls):
-        if cls.__effects_loaded:
+        if cls.__effects_loaded.is_set():
             print("Effects already loaded, skipping fetch.")
             return
 
@@ -111,19 +101,14 @@ class Encyclopedia:
             effect = Effect.from_dict(effect_data)
             cls._effects[effect.code] = effect
 
-        cls.__effects_loaded = True
+        cls.__effects_loaded.set()
         print(f"Loaded {len(cls._effects)} effects.")
 
     # MONSTERS
 
-    @classmethod
-    async def wait_monster(cls) -> None:
-        while not cls.__monsters_loaded:
-            _ = await asyncio.sleep(1)
-
     @staticmethod
     async def get_monster_by_code(code: str) -> Monster:
-        await Encyclopedia.wait_monster()
+        await Encyclopedia.__monsters_loaded.wait()
 
         monster = Encyclopedia._monsters.get(code)
         if not monster:
@@ -133,12 +118,12 @@ class Encyclopedia:
 
     @staticmethod
     async def get_all_monsters_names() -> list[str]:
-        await Encyclopedia.wait_monster()
+        await Encyclopedia.__monsters_loaded.wait()
         return list(Encyclopedia._monsters)
 
     @staticmethod
     async def get_monsters_by_drop(item: Item) -> set[Monster]:
-        await Encyclopedia.wait_monster()
+        await Encyclopedia.__monsters_loaded.wait()
         return {
             monster
             for monster in Encyclopedia._monsters.values()
@@ -147,7 +132,7 @@ class Encyclopedia:
 
     @classmethod
     async def __load_monsters(cls):
-        if cls.__monsters_loaded:
+        if cls.__monsters_loaded.is_set():
             print("Monsters already loaded, skipping fetch.")
             return
 
@@ -157,19 +142,14 @@ class Encyclopedia:
             monster = await Monster.from_dict(monster_data)
             cls._monsters[monster.code] = monster
 
-        cls.__monsters_loaded = True
+        cls.__monsters_loaded.set()
         print(f"Loaded {len(cls._monsters)} monsters.")
 
     # RESOURCES
 
-    @classmethod
-    async def wait_resource(cls) -> None:
-        while not cls.__resources_loaded:
-            _ = await asyncio.sleep(1)
-
     @staticmethod
     async def get_resource_by_code(code: str) -> Resource:
-        await Encyclopedia.wait_resource()
+        await Encyclopedia.__resources_loaded.wait()
 
         resource = Encyclopedia._resources.get(code)
         if not resource:
@@ -179,7 +159,7 @@ class Encyclopedia:
 
     @staticmethod
     async def get_all_resources_by_job(job: JobType, level: int = -1) -> set[Resource]:
-        await Encyclopedia.wait_resource()
+        await Encyclopedia.__resources_loaded.wait()
         return {
             resource
             for resource in Encyclopedia._resources.values()
@@ -188,7 +168,7 @@ class Encyclopedia:
 
     @classmethod
     async def __load_resources(cls):
-        if cls.__resources_loaded:
+        if cls.__resources_loaded.is_set():
             print("Resources already loaded, skipping fetch.")
             return
 
@@ -198,19 +178,14 @@ class Encyclopedia:
             resource = await Resource.from_dict(resource_data)
             cls._resources[resource.code] = resource
 
-        cls.__resources_loaded = True
+        cls.__resources_loaded.set()
         print(f"Loaded {len(cls._resources)} resources.")
 
     # EVENTS
 
-    @classmethod
-    async def wait_event(cls) -> None:
-        while not cls.__events_loaded:
-            _ = await asyncio.sleep(1)
-
     @staticmethod
     async def get_event_by_code(code: str) -> Event:
-        await Encyclopedia.wait_event()
+        await Encyclopedia.__events_loaded.wait()
 
         event = Encyclopedia._events.get(code)
         if not event:
@@ -220,12 +195,12 @@ class Encyclopedia:
 
     @staticmethod
     async def get_all_events() -> set[Event]:
-        await Encyclopedia.wait_event()
+        await Encyclopedia.__events_loaded.wait()
         return set(Encyclopedia._events.values())
 
     @classmethod
     async def __load_events(cls):
-        if cls.__events_loaded:
+        if cls.__events_loaded.is_set():
             print("Events already loaded, skipping fetch.")
             return
         events_data = await cls.__read_json_file(DATA_DIR + "events_data.json")
@@ -233,19 +208,14 @@ class Encyclopedia:
             event = await Event.from_dict(event_data)
             cls._events[event.code] = event
 
-        cls.__events_loaded = True
+        cls.__events_loaded.set()
         print(f"Loaded {len(cls._events)} events.")
 
     # NPCS
 
-    @classmethod
-    async def wait_npc(cls) -> None:
-        while not cls.__npcs_loaded:
-            _ = await asyncio.sleep(1)
-
     @staticmethod
     async def get_npc_by_code(code: str) -> NPC:
-        await Encyclopedia.wait_npc()
+        await Encyclopedia.__npcs_loaded.wait()
 
         npc = Encyclopedia.__npcs.get(code)
         if not npc:
@@ -255,7 +225,7 @@ class Encyclopedia:
 
     @classmethod
     async def __load_npcs(cls):
-        if cls.__npcs_loaded:
+        if cls.__npcs_loaded.is_set():
             print("NPCs already loaded, skipping fetch.")
             return
 
@@ -264,7 +234,7 @@ class Encyclopedia:
             npc = await NPC.from_dict(npc_data)
             cls.__npcs[npc.code] = npc
 
-        cls.__npcs_loaded = True
+        cls.__npcs_loaded.set()
         print(f"Loaded {len(cls.__npcs)} NPCs.")
 
     @staticmethod

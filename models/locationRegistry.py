@@ -10,7 +10,7 @@ from models.enums import JobType, Layer, TaskType, ZoneType
 
 
 class LocationRegistry:
-    __maps_loaded = False
+    __maps_loaded = asyncio.Event()
     __neighboors_generated = asyncio.Event()
     __drop_locations: defaultdict[Resource | Monster, set[Map]] = defaultdict(set)
     __bank_locations: set[Map] = set()
@@ -28,11 +28,6 @@ class LocationRegistry:
         await cls._generate_adjacent_maps()
 
     @classmethod
-    async def wait_location(cls) -> None:
-        while not cls.__maps_loaded:
-            _ = await asyncio.sleep(1)
-
-    @classmethod
     async def get_adjacent_maps(cls, map: Map) -> set[Map]:
         await cls.__neighboors_generated.wait()
         return cls._adjacent_maps_from_coordinates.get(map.coordinates, set())
@@ -45,7 +40,7 @@ class LocationRegistry:
 
     @staticmethod
     async def get_locations(entity: Resource | Monster) -> set[Map]:
-        await LocationRegistry.wait_location()
+        await LocationRegistry.__maps_loaded.wait()
         return LocationRegistry.__drop_locations.get(entity, set())
 
     @staticmethod
@@ -54,41 +49,41 @@ class LocationRegistry:
 
     @staticmethod
     async def get_map_by_id(map_id: int) -> Map:
-        await LocationRegistry.wait_location()
+        await LocationRegistry.__maps_loaded.wait()
         return LocationRegistry.__maps[map_id]
 
     @staticmethod
     async def get_bank_locations() -> set[Map]:
-        await LocationRegistry.wait_location()
+        await LocationRegistry.__maps_loaded.wait()
         return LocationRegistry.__bank_locations.difference(
             {await LocationRegistry.get_map_by_id(1234)}
         )
 
     @staticmethod
     async def get_npc_locations(npc: NPC) -> set[Map]:
-        await LocationRegistry.wait_location()
+        await LocationRegistry.__maps_loaded.wait()
         return LocationRegistry.__npc_locations.get(npc, set())
 
     @staticmethod
     async def get_workshop_locations(job: JobType) -> set[Map]:
-        await LocationRegistry.wait_location()
+        await LocationRegistry.__maps_loaded.wait()
         return LocationRegistry.__workshop_locations.get(job, set())
 
     @staticmethod
     async def get_grand_exchange_locations() -> set[Map]:
-        await LocationRegistry.wait_location()
+        await LocationRegistry.__maps_loaded.wait()
         return LocationRegistry.__grand_exchange_locations
 
     @staticmethod
     async def get_tasks_master_locations(task_type: TaskType | None = None) -> set[Map]:
-        await LocationRegistry.wait_location()
+        await LocationRegistry.__maps_loaded.wait()
         if task_type is None:
             return set.union(*LocationRegistry.__tasks_masters_locations.values())
         return LocationRegistry.__tasks_masters_locations.get(task_type, set())
 
     @staticmethod
     async def get_transition_locations(layer: Layer) -> set[Map]:
-        await LocationRegistry.wait_location()
+        await LocationRegistry.__maps_loaded.wait()
         maps_id = LocationRegistry.__transition_locations.get(layer, set())
         return {LocationRegistry.__maps[map_id] for map_id in maps_id}
 
@@ -116,7 +111,7 @@ class LocationRegistry:
 
     @classmethod
     async def __load_locations(cls):
-        if cls.__maps_loaded:
+        if cls.__maps_loaded.is_set():
             print("Maps already loaded.")
             return
 
@@ -184,7 +179,7 @@ class LocationRegistry:
                 page += 1
                 max_pages = data["pages"]
 
-            cls.__maps_loaded = True
+            cls.__maps_loaded.set()
             print(f"Loaded {len(cls.__maps)} maps.")
 
     @classmethod
