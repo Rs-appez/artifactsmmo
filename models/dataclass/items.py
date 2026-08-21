@@ -71,8 +71,8 @@ class Item:
             craft_level=craft_data.get("level", 0),
             craft_ingredients=craft_data.get("items", []),
             craft_quantity=craft_data.get("quantity", 0),
-            is_tradeable=data["tradeable"] == "true",
-            is_recyclable=data["recyclable"] == "true",
+            is_tradeable=bool(data["tradeable"]),
+            is_recyclable=bool(data["recyclable"]),
         )
 
     @property
