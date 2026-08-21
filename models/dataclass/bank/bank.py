@@ -52,23 +52,63 @@ class Bank:
     _slots: int
     _expansions: int
     _expansion_cost: int
-    _items: dict[Item, int]
+    __items: dict[Item, int]
 
     @classmethod
     def locked(cls) -> Lock:
         return cls.__bankelock
 
-    @property
-    def gold(self) -> int:
-        return self._gold
+    @classmethod
+    async def refresh_bank(cls) -> None:
+        async with cls.locked():
+            load = asyncio.gather(
+                cls.__get_details(),
+                cls.__get_items(),
+            )
 
-    @property
-    def items(self) -> dict[Item, int]:
+            details, items = await load
+            cls._gold = details["gold"]
+            cls._slots = details["slots"]
+            cls._expansions = details["expansions"]
+            cls._expansion_cost = details["next_expansion_cost"]
+            cls.__items = items
+
+    @classmethod
+    async def gold(cls) -> int:
+        async with cls.locked():
+            return cls._gold
+
+    @classmethod
+    @asynccontextmanager
+    async def items(cls) -> AsyncGenerator[dict[Item, int], None]:
+        async with cls.locked():
+            yield cls._items()
+
+    @classmethod
+    def _items(cls) -> dict[Item, int]:
         return {
             item: qty
-            for item, quantity in self._items.items()
-            if (qty := max(quantity - self.__reserved_items[item], 0)) > 0
+            for item, quantity in cls.__items.items()
+            if (qty := max(quantity - cls.__reserved_items[item], 0)) > 0
         }
+
+    @classmethod
+    async def _deposit_gold(cls, quantity: int) -> None:
+        cls._gold += quantity
+
+    @classmethod
+    async def _withdraw_gold(cls, quantity: int) -> None:
+        cls._gold -= quantity
+
+    @classmethod
+    async def _deposit_items(cls, items: dict[Item, int]) -> None:
+        for item, quantity in items.items():
+            cls.__items[item] = cls.__items.get(item, 0) + quantity
+
+    @classmethod
+    async def _withdraw_items(cls, items: dict[Item, int]) -> None:
+        for item, quantity in items.items():
+            cls.__items[item] -= quantity
 
     @classmethod
     @asynccontextmanager
@@ -98,12 +138,9 @@ class Bank:
         cls,
         items: dict[Item, int],
         imediately_needed: bool = True,
-        bank: "Bank | None" = None,
         inventory: dict[Item, int] | None = None,
     ) -> uuid.UUID:
-        if bank is None:
-            bank = await cls._check_bank()
-        missing_items = bank.__get_missing_items(items, inventory=inventory)
+        missing_items = cls.__get_missing_items(items, inventory=inventory)
 
         if imediately_needed and missing_items:
             raise NotEnoughInBankException(
@@ -147,27 +184,12 @@ class Bank:
         return Bank.__missing_promises.get(token, {}).copy()
 
     @classmethod
-    async def _check_bank(cls) -> "Bank":
-        load = asyncio.gather(
-            cls.__get_details(),
-            cls.__get_items(),
-        )
-
-        details, items = await load
-        return cls(
-            _gold=details["gold"],
-            _slots=details["slots"],
-            _expansions=details["expansions"],
-            _expansion_cost=details["next_expansion_cost"],
-            _items=items,
-        )
-
     def __get_missing_items(
-        self, items: dict[Item, int], inventory: dict[Item, int] | None = None
+        cls, items: dict[Item, int], inventory: dict[Item, int] | None = None
     ) -> dict[Item, int]:
         missing_item: dict[Item, int] = {}
         for item, quantity in items.items():
-            quantity_in_bank = self.items.get(item, 0)
+            quantity_in_bank = cls._items().get(item, 0)
             quantity_in_inventory = (
                 inventory.get(item, 0) if inventory is not None else 0
             )
@@ -175,10 +197,6 @@ class Bank:
                 missing_item[item] = quantity - quantity_in_bank - quantity_in_inventory
 
         return missing_item
-
-    @classmethod
-    def _get_reserved_items(cls, token: uuid.UUID) -> dict[Item, int]:
-        return cls.__tokens.get(token, {}).copy()
 
     @classmethod
     @asynccontextmanager
