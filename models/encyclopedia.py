@@ -1,8 +1,7 @@
 import asyncio
+import json
 
-import httpx
-
-from config import ARTIFACTSMMO_URL, HEADERS
+from config import DATA_DIR
 from models.dataclass import NPC, Effect, Event, Item, Monster, Resource
 from models.enums import JobType
 
@@ -74,31 +73,11 @@ class Encyclopedia:
         if cls.__items_loaded:
             print("Items already loaded, skipping fetch.")
             return
-        async with httpx.AsyncClient() as client:
-            page = 1
-            max_pages = 2
-            while page <= max_pages:
-                response = await client.get(
-                    f"{ARTIFACTSMMO_URL}/items",
-                    headers=HEADERS,
-                    params={"size": 600, "page": page},
-                    timeout=30.0,
-                )
-                if response.status_code != 200:
-                    raise Exception(
-                        f"Failed to fetch items: {response.status_code} - {response.text}"
-                    )
+        items_data = await cls.__read_json_file(DATA_DIR + "items_data.json")
 
-                items_data = response.json()
-                if not items_data:
-                    break  # No more items to fetch
-
-                for item_data in items_data["data"]:
-                    item = await Item.from_dict(item_data)
-                    cls._items[item.code] = item
-
-                page += 1
-                max_pages = items_data["pages"]
+        for item_data in items_data:
+            item = await Item.from_dict(item_data)
+            cls._items[item.code] = item
 
         cls.__items_loaded = True
         print(f"Loaded {len(cls._items)} items.")
@@ -126,28 +105,11 @@ class Encyclopedia:
             print("Effects already loaded, skipping fetch.")
             return
 
-        async with httpx.AsyncClient() as client:
-            page = 1
-            max_pages = 2
-            while page <= max_pages:
-                response = await client.get(
-                    f"{ARTIFACTSMMO_URL}/effects",
-                    headers=HEADERS,
-                    params={"size": 100},
-                    timeout=30.0,
-                )
-                if response.status_code != 200:
-                    raise Exception(
-                        f"Failed to fetch effects: {response.status_code} - {response.text}"
-                    )
+        effects_data = await cls.__read_json_file(DATA_DIR + "effects_data.json")
 
-                effects_data = response.json()
-                for effect_data in effects_data["data"]:
-                    effect = Effect.from_dict(effect_data)
-                    cls._effects[effect.code] = effect
-
-                page += 1
-                max_pages = effects_data["pages"]
+        for effect_data in effects_data:
+            effect = Effect.from_dict(effect_data)
+            cls._effects[effect.code] = effect
 
         cls.__effects_loaded = True
         print(f"Loaded {len(cls._effects)} effects.")
@@ -189,28 +151,11 @@ class Encyclopedia:
             print("Monsters already loaded, skipping fetch.")
             return
 
-        async with httpx.AsyncClient() as client:
-            page = 1
-            max_pages = 2
-            while page <= max_pages:
-                response = await client.get(
-                    f"{ARTIFACTSMMO_URL}/monsters",
-                    headers=HEADERS,
-                    params={"size": 100, "page": page},
-                    timeout=30.0,
-                )
-                if response.status_code != 200:
-                    raise Exception(
-                        f"Failed to fetch monsters: {response.status_code} - {response.text}"
-                    )
+        monsters_data = await cls.__read_json_file(DATA_DIR + "monsters_data.json")
 
-                monsters_data = response.json()
-                for monster_data in monsters_data["data"]:
-                    monster = await Monster.from_dict(monster_data)
-                    cls._monsters[monster.code] = monster
-
-                page += 1
-                max_pages = monsters_data["pages"]
+        for monster_data in monsters_data:
+            monster = await Monster.from_dict(monster_data)
+            cls._monsters[monster.code] = monster
 
         cls.__monsters_loaded = True
         print(f"Loaded {len(cls._monsters)} monsters.")
@@ -247,28 +192,11 @@ class Encyclopedia:
             print("Resources already loaded, skipping fetch.")
             return
 
-        async with httpx.AsyncClient() as client:
-            page = 1
-            max_pages = 2
-            while page <= max_pages:
-                response = await client.get(
-                    f"{ARTIFACTSMMO_URL}/resources",
-                    headers=HEADERS,
-                    params={"size": 50, "page": page},
-                    timeout=30.0,
-                )
-                if response.status_code != 200:
-                    raise Exception(
-                        f"Failed to fetch resources: {response.status_code} - {response.text}"
-                    )
+        resources_data = await cls.__read_json_file(DATA_DIR + "resources_data.json")
 
-                resources_data = response.json()
-                for resource_data in resources_data["data"]:
-                    resource = await Resource.from_dict(resource_data)
-                    cls._resources[resource.code] = resource
-
-                page += 1
-                max_pages = resources_data["pages"]
+        for resource_data in resources_data:
+            resource = await Resource.from_dict(resource_data)
+            cls._resources[resource.code] = resource
 
         cls.__resources_loaded = True
         print(f"Loaded {len(cls._resources)} resources.")
@@ -300,28 +228,10 @@ class Encyclopedia:
         if cls.__events_loaded:
             print("Events already loaded, skipping fetch.")
             return
-
-        async with httpx.AsyncClient() as client:
-            page = 1
-            max_pages = 2
-            while page <= max_pages:
-                response = await client.get(
-                    f"{ARTIFACTSMMO_URL}/events",
-                    headers=HEADERS,
-                    params={"size": 50, "page": page},
-                )
-                if response.status_code != 200:
-                    raise Exception(
-                        f"Failed to fetch events: {response.status_code} - {response.text}"
-                    )
-
-                events_data = response.json()
-                for event_data in events_data["data"]:
-                    event = await Event.from_dict(event_data)
-                    cls._events[event.code] = event
-
-                page += 1
-                max_pages = events_data["pages"]
+        events_data = await cls.__read_json_file(DATA_DIR + "events_data.json")
+        for event_data in events_data:
+            event = await Event.from_dict(event_data)
+            cls._events[event.code] = event
 
         cls.__events_loaded = True
         print(f"Loaded {len(cls._events)} events.")
@@ -349,27 +259,27 @@ class Encyclopedia:
             print("NPCs already loaded, skipping fetch.")
             return
 
-        async with httpx.AsyncClient() as client:
-            page = 1
-            max_pages = 2
-            while page <= max_pages:
-                response = await client.get(
-                    f"{ARTIFACTSMMO_URL}/npcs/details",
-                    headers=HEADERS,
-                    params={"size": 50, "page": page},
-                )
-                if response.status_code != 200:
-                    raise Exception(
-                        f"Failed to fetch NPCs: {response.status_code} - {response.text}"
-                    )
-
-                npcs_data = response.json()
-                for npc_data in npcs_data["data"]:
-                    npc = await NPC.from_dict(npc_data)
-                    cls.__npcs[npc.code] = npc
-
-                page += 1
-                max_pages = npcs_data["pages"]
+        npcs_data = await cls.__read_json_file(DATA_DIR + "npcs_data.json")
+        for npc_data in npcs_data:
+            npc = await NPC.from_dict(npc_data)
+            cls.__npcs[npc.code] = npc
 
         cls.__npcs_loaded = True
         print(f"Loaded {len(cls.__npcs)} NPCs.")
+
+    @staticmethod
+    async def __read_json_file(filepath: str) -> dict:
+        """Read JSON file asynchronously without blocking the event loop."""
+
+        def _read():
+            with open(filepath, "r") as f:
+                return json.load(f)
+
+        try:
+            res = await asyncio.to_thread(_read)
+        except Exception as e:
+            print(f"❌ Failed to read JSON file {filepath}: {e}")
+            print("Launch fecth first")
+            raise e
+
+        return res
