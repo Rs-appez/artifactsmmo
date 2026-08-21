@@ -54,9 +54,51 @@ class Bank:
     _expansion_cost: int
     __items: dict[Item, int]
 
+    __refresh_task: asyncio.Task[None] | None = None
+    __refresh_stop = asyncio.Event()
+
     @classmethod
     def locked(cls) -> Lock:
         return cls.__bankelock
+
+    @classmethod
+    async def start_refresh_bank(cls, interval: int = 3600) -> None:
+        if cls.__refresh_task and not cls.__refresh_task.done():
+            return
+
+        cls.__refresh_stop = asyncio.Event()
+        loop = asyncio.get_running_loop()
+
+        async def _runner() -> None:
+            next_run = loop.time()
+            while not cls.__refresh_stop.is_set():
+                try:
+                    await cls.refresh_bank()
+                except Exception as e:
+                    print(f"❌ Bank auto-refresh failed: {e}")
+
+                next_run += interval
+                delay = max(0, next_run - loop.time())
+                try:
+                    await asyncio.wait_for(cls.__refresh_stop.wait(), timeout=delay)
+                except asyncio.TimeoutError:
+                    pass
+
+        cls.__refresh_task = asyncio.create_task(_runner(), name="bank-auto-refresh")
+
+    @classmethod
+    async def stop_auto_refresh_bank(cls) -> None:
+        if not cls.__refresh_task:
+            return
+
+        cls.__refresh_stop.set()
+        cls.__refresh_task.cancel()
+        try:
+            await cls.__refresh_task
+        except asyncio.CancelledError:
+            pass
+        finally:
+            cls.__refresh_task = None
 
     @classmethod
     async def refresh_bank(cls) -> None:
