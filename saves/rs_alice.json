@@ -1,6 +1,8 @@
 {
-    "routine_name": "boss_farm",
-    "routine_module": "routines.monster_farm",
+    "routine_name": "gather",
+    "routine_module": "routines.gather",
     "routine_args": [
-        [
-            
+        "palm_wood"
+    ],
+    "routine_kwargs": {}
+}
