@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+
+tmux new-session -d -s runbot "while true; do sh; done"
+tmux send-keys -t runbot "./main.py" C-m
+ttyd -W tmux attach-session -t runbot

@@ -3,4 +3,6 @@ services:
     build: .
     env_file:
       - .env.prod
+    ports:
+      - "14555:7681"
     restart: unless-stopped

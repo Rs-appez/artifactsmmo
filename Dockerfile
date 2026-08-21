@@ -14,10 +14,10 @@ WORKDIR /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-group cli --no-install-project
+    uv sync --locked --group cli --no-install-project
 COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked
+    uv sync --locked --group cli
 
 RUN rm  -f uv.lock pyproject.toml
 
@@ -29,10 +29,20 @@ ENV TZ="Europe/Brussels"
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+
+ENV SANDBOX True
+ENV CLI True
+
+RUN apk add --no-cache ttyd tmux
+
 COPY --from=builder /app /app
 
 ENV PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app
 
-CMD ["python3", "main.py"]
+EXPOSE 7681
+
+CMD ["sh","entrypoint"]

@@ -1,7 +1,7 @@
 from decouple import config
 from zoneinfo import ZoneInfo
 
-LOCAL = config("LOCAL", default=False, cast=bool)
+CLI = config("CLI", default=False, cast=bool)
 SANDBOX = config("SANDBOX", default=False, cast=bool)
 
 ARTIFACTSMMO_URL = (

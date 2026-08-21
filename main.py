@@ -3,7 +3,7 @@ import asyncio
 import signal
 import sys
 
-from config import LOCAL
+from config import CLI
 from models import GameManager
 
 
@@ -18,7 +18,7 @@ async def main(first_run=False):
     character_tasks = await manager.start()
     tasks = list(character_tasks)
 
-    if LOCAL:
+    if CLI:
         from cli import cli
 
         tasks.append(cli(manager))
