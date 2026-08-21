@@ -21,6 +21,7 @@ HEADERS = {
     "Authorization": f"Bearer {ARTIFACTSMMO_API_KEY}",
 }
 TIMEZONE = ZoneInfo("Europe/Brussels")
+DATA_DIR = "game_datas/"
 
 
 # Game constants
