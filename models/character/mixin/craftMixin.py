@@ -27,7 +27,9 @@ class CraftMixin:
             print(f"❌ {self.surname} Craft : {e}")
             return False
 
-    async def decraft(self: "Character", item: Item, quantity: int) -> bool:
+    async def decraft(
+        self: "Character", item: Item, quantity: int, pay_boost: bool = False
+    ) -> bool:
         if quantity <= 0:
             print(f"❌ Cannot decraft non-positive quantity of items: {quantity}")
             return False
@@ -38,7 +40,12 @@ class CraftMixin:
 
         try:
             await self.post_api(
-                "/recycling", json_data={"code": item.code, "quantity": quantity}
+                "/recycling",
+                json_data={
+                    "code": item.code,
+                    "quantity": quantity,
+                    "enhanced": pay_boost,
+                },
             )
             print(f"󰑌 {self.surname} Decrafted {quantity}x {item.name}")
             return True
