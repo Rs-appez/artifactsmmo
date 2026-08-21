@@ -37,14 +37,18 @@ class MoveMixin:
     async def plan_move(
         self: "Character", destination: Map
     ) -> AsyncGenerator[MovePlan]:
+        try:
+            if destination == self.location:
+                yield MovePlan(self, ([destination], 0))
+                return
 
-        if destination == self.location:
-            yield MovePlan(self, ([], 0))
-            return
+            path = await get_route(self.location, destination)
+            with MovePlan(self, path) as plan:
+                yield plan
 
-        path = await get_route(self.location, destination)
-        with MovePlan(self, path) as plan:
-            yield plan
+        except Exception as e:
+            print(f"❌ {self.surname} failed to plan move : {e}")
+            raise e
 
     async def _move(self: "Character", destination: Map) -> None:
         if destination == self.location:
