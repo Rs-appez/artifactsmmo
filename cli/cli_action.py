@@ -143,3 +143,8 @@ async def move_to(character: Character, map_id: str):
         await character.move(map)
 
     character.do_one_time_task(move, map)
+
+
+async def refresh_bank(_):
+    await Bank.refresh_bank()
+    print("🏦 Bank refreshed")

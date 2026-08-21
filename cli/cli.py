@@ -34,6 +34,7 @@ dict_all = {
 
 dict_special = {
     "reserved_bank": cli_action.reserved_bank,
+    "refresh_bank": cli_action.refresh_bank,
     "refresh_events": cli_action.refresh_events,
 }
 
