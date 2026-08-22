@@ -171,5 +171,8 @@ class FightMixin:
 
     async def get_ready_to_fight(self: "Character", mob: Monster):
         await self.weaponize(mob)
-        if not self.has_food:
-            await self.get_food_from_bank()
+        try:
+            if not self.has_food:
+                await self.get_food_from_bank()
+        except Exception:
+            pass
