@@ -11,6 +11,7 @@ from .stuffMixin import StuffMixin
 from .saveMixin import SaveMixin
 from .inventoryMixin import InventoryMixin
 from .npcMixin import NpcMixin
+from .grandExchangeMixin import GrandExchangeMixin
 
 __all__ = [
     "BankMixin",
@@ -26,4 +27,5 @@ __all__ = [
     "JobMixin",
     "NpcMixin",
     "ApiMixin",
+    "GrandExchangeMixin",
 ]
