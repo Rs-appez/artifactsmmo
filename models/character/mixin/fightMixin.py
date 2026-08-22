@@ -136,8 +136,8 @@ class FightMixin:
             return
         missing_hp = self.missing_hp
 
-        for item, quantity in sorted(
-            food.items(), key=lambda x: x[0].heal, reverse=True
+        for i, (item, quantity) in enumerate(
+            sorted(food.items(), key=lambda x: x[0].heal, reverse=True)
         ):
             qty_to_eat = min(quantity, missing_hp // item.heal)
             if missing_hp % item.heal != 0 and quantity > qty_to_eat and full:
@@ -150,7 +150,7 @@ class FightMixin:
                 print(f" {self.surname} eats {qty_to_eat} {item.name} to recover hp")
                 if missing_hp <= 0:
                     break
-            else:
+            elif i == 0:
                 raise Exception(
                     f"{item.name} cannot heal any more hp for {self.surname}"
                 )
