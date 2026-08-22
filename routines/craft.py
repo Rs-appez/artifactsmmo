@@ -41,10 +41,6 @@ async def craft(
         ingredient: qty * quantity for ingredient, qty in ingredients.items()
     }
 
-    if character.will_gain_xp_with(item):
-        wisdom = await Encyclopedia.get_effect_by_code("wisdom")
-        await character.maximaze_stats(wisdom)
-
     retry = True
     while retry:
         retry = False
@@ -53,6 +49,10 @@ async def craft(
                 reserved_ingredients,
                 inventory=character.inventory,
             ) as bank_token:
+                if character.will_gain_xp_with(item):
+                    wisdom = await Encyclopedia.get_effect_by_code("wisdom")
+                    await character.maximaze_stats(wisdom)
+
                 (
                     nb_trips,
                     (nb_craft_per_trip, ingredients_for_trip),
