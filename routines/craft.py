@@ -40,6 +40,11 @@ async def craft(
     reserved_ingredients = {
         ingredient: qty * quantity for ingredient, qty in ingredients.items()
     }
+
+    if character.will_gain_xp_with(item):
+        wisdom = await Encyclopedia.get_effect_by_code("wisdom")
+        await character.maximaze_stats(wisdom)
+
     retry = True
     while retry:
         retry = False
@@ -61,10 +66,6 @@ async def craft(
                 print(
                     f"⚒️ {character.surname} needs to make {nb_trips} trips to craft {quantity}x {item.name}"
                 )
-
-                if character.will_gain_xp_with(item):
-                    wisdom = await Encyclopedia.get_effect_by_code("wisdom")
-                    await character.maximaze_stats(wisdom)
 
                 for _ in range(nb_trips - 1):
                     async with Bank.get_reserved_items_partial(
