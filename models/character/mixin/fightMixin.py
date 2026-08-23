@@ -171,10 +171,20 @@ class FightMixin:
 
         return win_rate >= 99.0
 
+    def need_food_to_farm(self: "Character", monster: Monster) -> bool:
+
+        simulateData = SimulateData.from_models(self, monster)
+        nb_turns = simulate(simulateData).average_turns
+        if nb_turns == 1:
+            return False
+
+        return True
+
     async def get_ready_to_fight(self: "Character", mob: Monster):
         await self.weaponize(mob)
-        try:
-            if not self.has_food:
-                await self.get_food_from_bank()
-        except Exception:
-            pass
+        if self.need_food_to_farm(mob):
+            try:
+                if not self.has_food:
+                    await self.get_food_from_bank()
+            except Exception:
+                pass
