@@ -117,6 +117,11 @@ async def cli(game_manager: GameManager):
                             for monster in await Encyclopedia.get_all_monsters_names()
                         }
                         if routine == "mob_farm"
+                        else {
+                            food.code: None
+                            for food in await Encyclopedia.get_all_food()
+                        }
+                        if routine == "make_food"
                         else {}
                     )
                     for routine in routine_names

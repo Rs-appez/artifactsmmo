@@ -55,6 +55,11 @@ class Encyclopedia:
         return list(Encyclopedia._items)
 
     @staticmethod
+    async def get_all_food() -> set[Item]:
+        await Encyclopedia.__items_loaded.wait()
+        return {item for item in Encyclopedia._items.values() if item.is_food}
+
+    @staticmethod
     async def get_all_items_by_job(job: JobType, level: int = -1) -> set[Item]:
         await Encyclopedia.__items_loaded.wait()
         return {

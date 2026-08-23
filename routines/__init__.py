@@ -7,6 +7,7 @@ from .exchange_coin import exchange_task_coin
 from .npc_trade import buy_from_npc
 from .level_up_skill import xp_skill
 from .sell_to_ge import sell_item_to_ge
+from .make_food import make_food
 
 __all__ = [
     "mob_farm",
@@ -20,4 +21,5 @@ __all__ = [
     "buy_from_npc",
     "xp_skill",
     "sell_item_to_ge",
+    "make_food",
 ]
