@@ -70,3 +70,10 @@ async def find_nearest_transition(postion: Map, layer: Layer, from_layer: Layer)
 async def find_nearest_npc(character: Character, npc: NPC) -> Map:
     npc_locations = await LocationRegistry.get_npc_locations(npc)
     return __find_nearest_location(npc_locations, character.location)
+
+
+async def find_nearest_grand_exchange(character: Character) -> Map:
+    grand_exchange_locations = await LocationRegistry.get_grand_exchange_locations()
+    if not grand_exchange_locations:
+        raise ValueError("No grand exchange locations found")
+    return __find_nearest_location(grand_exchange_locations, character.location)
