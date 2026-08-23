@@ -25,6 +25,7 @@ dict_actions = {
     "gomission": cli_action.asign_mission,
     "nbcraft": cli_action.nb_craft_needed_calculator,
     "move": cli_action.move_to,
+    "sell": cli_action.sell_to_ge,
 }
 
 dict_all = {
@@ -90,6 +91,13 @@ async def cli(game_manager: GameManager):
                 for name in characters.keys()
             },
             "nbCraft": {
+                name: {
+                    item_code: None
+                    for item_code in await Encyclopedia.get_all_items_names()
+                }
+                for name in characters.keys()
+            },
+            "sell": {
                 name: {
                     item_code: None
                     for item_code in await Encyclopedia.get_all_items_names()

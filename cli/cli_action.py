@@ -148,3 +148,14 @@ async def move_to(character: Character, map_id: str):
 async def refresh_bank(_):
     await Bank.refresh_bank()
     print("🏦 Bank refreshed")
+
+
+@_check_freshness
+async def sell_to_ge(character: Character, item_code: str, quantity: str, price: str):
+    item = await Encyclopedia.get_item_by_code(item_code)
+    character.do_one_time_task(
+        routines.sell_item_to_ge, item, int(quantity), int(price)
+    )
+    print(
+        f"💰 {character.surname} will sell {quantity}x {item.code} to the Grand Exchange for {price} each"
+    )
