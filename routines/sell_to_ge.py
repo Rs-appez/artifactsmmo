@@ -55,3 +55,10 @@ async def sell_item_to_ge(
 
     except Exception as e:
         print(f"❌ Failed to sell {quantity}x {item.name} to GE: {e}")
+
+
+async def sell_item_to_ge_buy_order(
+    character: "Character", item: Item, quantity: int, price: int
+) -> None:
+
+    pass
