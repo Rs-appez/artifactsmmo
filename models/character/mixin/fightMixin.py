@@ -102,6 +102,8 @@ class FightMixin:
             return (False, {})
 
     async def rest(self: "Character") -> bool:
+        if self.hp >= self.max_hp:
+            return True
         try:
             await self.post_api("/rest")
             return True
