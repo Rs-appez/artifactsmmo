@@ -1,7 +1,6 @@
 from config import MAX_ITEM_PER_ORDER
 from typing import TYPE_CHECKING
 
-from models import Encyclopedia
 from models.dataclass import Item
 from models.dataclass.bank import Bank
 from utils.find_nearest import find_nearest_grand_exchange
@@ -11,7 +10,7 @@ if TYPE_CHECKING:
 
 
 async def sell_item_to_ge(
-    character: "Character", item: Item | str, quantity: int, price: int
+    character: "Character", item: Item, quantity: int, price: int
 ):
 
     try:
@@ -19,9 +18,6 @@ async def sell_item_to_ge(
             raise ValueError("Quantity must be greater than 0.")
         if price <= 0:
             raise ValueError("Price must be greater than 0.")
-
-        if isinstance(item, str):
-            item = await Encyclopedia.get_item_by_code(item)
 
         ge_map = await find_nearest_grand_exchange(character)
 
@@ -58,4 +54,4 @@ async def sell_item_to_ge(
                     remain -= trip_quantity
 
     except Exception as e:
-        print(f"❌ Failed to sell {quantity}x {item} to GE: {e}")
+        print(f"❌ Failed to sell {quantity}x {item.name} to GE: {e}")
