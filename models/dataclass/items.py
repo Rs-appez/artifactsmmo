@@ -24,7 +24,7 @@ class Item:
     effects: dict[Effect, int]
     job: JobType
     craft_level: int
-    craft_ingredients: list[dict[str, int]]
+    craft_ingredients: list[dict[str, int | str]]
     craft_quantity: int
     is_tradeable: bool
     is_recyclable: bool
