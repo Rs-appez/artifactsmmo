@@ -1,7 +1,6 @@
 from itertools import count
 from typing import TYPE_CHECKING
 
-from exceptions import NeedToRefreshStuffException
 from models import Encyclopedia
 from models.dataclass import Item, Resource
 from utils.find_nearest import find_nearest_lootable
