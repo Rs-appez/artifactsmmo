@@ -1,4 +1,4 @@
-from .enums import Element, EquipentType, Layer, NPCType, TaskType
+from .enums import Element, EquipentType, Layer, NPCType, TaskType, OrderType
 from .jobEnum import JobType
 from .zoneEnum import ZoneType
 
@@ -10,4 +10,5 @@ __all__ = [
     "EquipentType",
     "NPCType",
     "ZoneType",
+    "OrderType",
 ]

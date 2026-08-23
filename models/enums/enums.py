@@ -36,3 +36,8 @@ class EquipentType(Enum):
 class NPCType(Enum):
     TRADER = "trader"
     MERCHANT = "merchant"
+
+
+class OrderType(Enum):
+    SELL = "sell"
+    BUY = "buy"
