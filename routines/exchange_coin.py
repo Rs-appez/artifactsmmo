@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 async def exchange_task_coin(character: Character) -> None:
 
     task_coin = await Encyclopedia.get_item_by_code("tasks_coin")
-    task_master_pos = await find_nearest_tasks_master(character)
 
     try:
         while True:
@@ -26,6 +25,7 @@ async def exchange_task_coin(character: Character) -> None:
                 if not await character.withdraw_item_from_bank(token):
                     print("Failed to withdraw task coin from bank")
                     return
+                task_master_pos = await find_nearest_tasks_master(character)
                 await character.move(task_master_pos)
                 while await character.exchange_task_coin():
                     pass
