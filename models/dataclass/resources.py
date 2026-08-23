@@ -34,7 +34,7 @@ class Resource:
             code=data["code"],
             level=data["level"],
             skill=JobType(data["skill"]),
-            drops=drops,  # ty:ignore[invalid-argument-type]
+            drops=drops,
         )
         for item in drops:
             cls._drop_item[item].add(resource)
