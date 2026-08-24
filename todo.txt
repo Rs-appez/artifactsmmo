@@ -3,7 +3,7 @@
 (D) 2026-08-08 handle auto withdraw pending item on the "best" character @feature
 (B) 2026-08-09 better handling recycle in xp_skill craft @feature
 (B) 2026-08-09 fix assure dont loosing wisdom stuff when farming for a craft @fix
-(C) 2026-08-13 optimize by not depositing/withdrawing if the items are already in inventory for the trip and avoid unhandled reservations @refactor
+x 2026-08-24 2026-08-13 optimize by not depositing/withdrawing if the items are already in inventory for the trip and avoid unhandled reservations @refactor
 (B) 2026-08-12 fix auto generate apple @fix
 (B) 2026-08-16 better handling near resource after transition ect @refactor
 (C) 2026-08-16 use food if need hp to equip a item @refactor

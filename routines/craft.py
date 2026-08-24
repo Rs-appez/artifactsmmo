@@ -68,25 +68,33 @@ async def craft(
                 )
 
                 for _ in range(nb_trips - 1):
+                    ingredients_to_withdraw = __get_withdraw_quantity_per_trip(
+                        character, ingredients_for_trip
+                    )
                     async with Bank.get_reserved_items_partial(
-                        bank_token, ingredients_for_trip
+                        bank_token, ingredients_to_withdraw
                     ) as trip_token:
                         await __make_trip(
                             character,
                             nearest_workshop,
                             trip_token,
+                            ingredients_for_trip,
                             item,
                             nb_craft_per_trip,
                             recycling_after,
                             recycling_pay_boost=recycling_pay_boost,
                         )
+                ingredients_to_withdraw = __get_withdraw_quantity_per_trip(
+                    character, ingredients_for_last_trip
+                )
                 async with Bank.get_reserved_items_partial(
-                    bank_token, ingredients_for_last_trip
+                    bank_token, ingredients_to_withdraw
                 ) as last_trip_token:
                     await __make_trip(
                         character,
                         nearest_workshop,
                         last_trip_token,
+                        ingredients_for_last_trip,
                         item,
                         nb_craft_last_trip,
                         recycling_after,
@@ -150,12 +158,16 @@ async def __make_trip(
     character: "Character",
     workshop_location: Map,
     bank_token: uuid.UUID,
+    ingredients: dict[Item, int],
     item: Item,
     quantity: int,
     recycling_after: bool,
     recycling_pay_boost: bool,
 ):
-    _ = await character.deposit_all_in_bank(comeback=False)
+    if character.need_deposit(bank_token):
+        await character.deposit_all_in_bank(
+            items_to_ignore=ingredients, with_gold=False
+        )
     if not await character.withdraw_item_from_bank(bank_token):
         print(
             f"❌ {character.surname} failed to withdraw ingredients from bank for crafting {item.name}"
@@ -177,3 +189,16 @@ async def __make_trip(
     ):
         print(f"❌ {character.surname} failed to decraft {quantity}x {item.name}")
         return
+
+
+def __get_withdraw_quantity_per_trip(
+    character: Character, ingredients: dict[Item, int]
+) -> dict[Item, int]:
+
+    ingredients_to_withdraw = {}
+    for ingredient, quantity in ingredients.items():
+        in_inventory = character.inventory.get(ingredient, 0)
+        if in_inventory < quantity:
+            ingredients_to_withdraw[ingredient] = quantity - in_inventory
+
+    return ingredients_to_withdraw
