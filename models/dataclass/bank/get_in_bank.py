@@ -139,8 +139,7 @@ async def get_best_stat_item(
             (item for item in all_items if item.type == EquipentType.ARTIFACT.value),
             key=lambda item: (
                 item.effects.get(wanted_effect, 0),
-                item.level,
-                all_items[item],
+                -item.level,
                 item.code,
             ),
         )
