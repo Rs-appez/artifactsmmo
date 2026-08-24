@@ -17,7 +17,7 @@ class BankMixin:
         self: "Character",
         with_gold: bool = True,
         comeback: bool = False,
-        items_to_ignore: set[Item] | None = None,
+        items_to_ignore: set[Item] | dict[Item, int] | None = None,
     ):
         if with_gold and self.gold > 0:
             if not await self.deposit_gold_in_bank(self.gold, comeback=comeback):
@@ -25,12 +25,22 @@ class BankMixin:
                 return
 
         if self.inventory:
+            if isinstance(items_to_ignore, set):
+                items_to_ignore = {
+                    item: self.inventory.get(item, 0) for item in items_to_ignore
+                }
+            if items_to_ignore is None:
+                items_to_ignore = {}
+
             if not await self.deposit_item_in_bank(
                 comeback=comeback,
                 items={
-                    item: quantity
+                    item: quantity_to_deposit
                     for item, quantity in self.inventory.items()
-                    if items_to_ignore is None or item not in items_to_ignore
+                    if (
+                        quantity_to_deposit := quantity - (items_to_ignore.get(item, 0))
+                    )
+                    > 0
                 },
             ):
                 print("❌ Failed to deposit items in bank")
