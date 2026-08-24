@@ -21,7 +21,12 @@ class CharacterManager:
             print(f"❌ Invalid event content for hunting: {event.content}")
             return
         monster = event.content
-        if monster.is_boss:
+        if monster.is_boss or monster.code in [
+            "corrupted_ogre",
+            "bandit_lizard",
+            "demon",
+            "full_moon_vampire",
+        ]:
             return
             # TODO: Implement boss hunting logic
 
