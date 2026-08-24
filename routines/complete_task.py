@@ -151,8 +151,12 @@ async def __monster_task(character: Character) -> None:
         print("❌ Task cible is not a monster")
         return
 
-    while character.task_resources_left > 0:
-        await mob_farm(character, monster, character.task_resources_left)
+    try:
+        while character.task_resources_left > 0:
+            await mob_farm(character, monster, character.task_resources_left)
+    except ImpossibleCombatException:
+        await __give_up_task(character, TaskType.MONSTER)
+        raise NotWorthableTaskException(f"{monster.name} is too strong")
 
 
 def __is_worth_it(item: Item) -> bool:
