@@ -95,7 +95,7 @@ async def complete_task(
             continue
         except ImpossibleCombatException as e:
             print(f"⚠️ {character.surname} cannot complete the task because : {e}")
-            return
+            raise e
         except Exception as e:
             print(f"❌ {character.surname} failed to complete the task : {e}")
             return

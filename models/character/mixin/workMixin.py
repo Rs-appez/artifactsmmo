@@ -1,8 +1,9 @@
-from types import FunctionType
 import asyncio
 from collections import deque
-
+from types import FunctionType
 from typing import TYPE_CHECKING
+
+from routines import make_food
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -114,7 +115,7 @@ class WorkMixin:
                 except Exception as e:
                     print(f"❌ {self.surname} work error : {e}")
                     if not self._routine.is_paused:
-                        self.seek_the_meaning_of_life()
+                        self.make_default_routine()
 
         except asyncio.CancelledError:
             pass
@@ -129,6 +130,9 @@ class WorkMixin:
 
     def seek_the_meaning_of_life(self: "Character"):
         self._routine = WorkRoutine(seeking_the_meaning_of_life, is_routine=True)
+
+    def make_default_routine(self: "Character"):
+        self._routine = WorkRoutine(make_food, "cooked_salmon", is_routine=True)
 
     def stop(self: "Character"):
         self._previous_routine = self._routine
