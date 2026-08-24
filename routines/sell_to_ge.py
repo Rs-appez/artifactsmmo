@@ -36,7 +36,7 @@ async def sell_item_to_ge(
                 async with Bank.get_reserved_items_partial(
                     bank_token, {item: nb_to_withdraw}
                 ) as partial_bank_token:
-                    if character.inventory_free_space < (per_trip - in_inventory):
+                    if character.need_deposit(partial_bank_token):
                         await character.deposit_all_in_bank(
                             items_to_ignore={item}, with_gold=False
                         )
