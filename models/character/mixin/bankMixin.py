@@ -113,6 +113,8 @@ class BankMixin:
         success = False
         try:
             items = Bank.get_token_info(bank_token)
+            if not items:
+                return True
             await self.post_api(
                 "/bank/withdraw/item",
                 json_data=[
