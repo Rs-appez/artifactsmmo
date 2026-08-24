@@ -79,6 +79,10 @@ class ApiMixin:
                 attempt = await self._retry(attempt, e)
 
             except httpx.RequestError as e:
+                await self.refresh()
+                if self.cooldown > 0:
+                    print("Request timeout but succeded")
+                    raise TimeoutButSuccessException("Request timeout but succeded")
                 attempt = await self._retry(attempt, e)
         else:
             raise Exception("Failed to post API after 3 attempts.")
