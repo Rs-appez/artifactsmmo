@@ -168,7 +168,8 @@ async def __make_trip(
         await character.deposit_all_in_bank(
             items_to_ignore=ingredients, with_gold=False
         )
-    if not await character.withdraw_item_from_bank(bank_token):
+    token_info = Bank.get_token_info(bank_token)
+    if token_info and not await character.withdraw_item_from_bank(bank_token):
         print(
             f"❌ {character.surname} failed to withdraw ingredients from bank for crafting {item.name}"
         )

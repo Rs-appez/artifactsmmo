@@ -73,8 +73,9 @@ class InventoryMixin:
         Check if the character needs to deposit items in the bank before withdrawing reserved items.
         Returns True if the character needs to deposit items, False otherwise.
         """
-        nb_items_to_withdraw = sum(Bank.get_token_info(token).values())
-        nb_slots_to_withdraw = len(Bank.get_token_info(token))
+        token_info = Bank.get_token_info(token)
+        nb_items_to_withdraw = sum(token_info.values())
+        nb_slots_to_withdraw = len(token_info)
 
         if (
             self.inventory_free_space < nb_items_to_withdraw
