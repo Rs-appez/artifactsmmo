@@ -32,10 +32,10 @@ ENV PYTHONUNBUFFERED 1
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-ENV SANDBOX True
-ENV CLI True
+# ENV SANDBOX True
+ENV CLI False
 
-RUN apk add --no-cache ttyd tmux
+# RUN apk add --no-cache ttyd tmux
 
 COPY --from=builder /app /app
 
@@ -43,6 +43,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app
 
-EXPOSE 7681
+# EXPOSE 7681
 
 CMD ["sh","entrypoint"]
