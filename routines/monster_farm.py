@@ -61,14 +61,15 @@ async def boss_farm(
                 mate.do_one_time_task(empty_farm)
 
         if character.hp < character.max_hp:
-            _ = await __regenerate_hp(character, full=True)
+            await __regenerate_hp(character, full=True)
+
         await character.move(mob_position)
         await character.set_ready_to_fight()
         if leader:
             while any(not mate.is_ready_to_fight_boss for mate in teammate):
                 await asyncio.sleep(0.1)
             _ = await character.fight(teammate)
-            for mate in teammate or []:
+            for mate in teammate:
                 if mate != character:
                     await mate.refresh()
                 mate.is_ready_to_fight_boss = False
@@ -77,6 +78,45 @@ async def boss_farm(
 
     except Exception as e:
         print(f"❌ {character.surname} failed to combat boss : {e}")
+    finally:
+        character.is_ready_to_fight_boss = False
+
+
+async def raid_farm(
+    character: Character,
+    teammate: list[Character],
+    raid_boss: Monster,
+    leader: bool = False,
+):
+    try:
+        mob_position = await find_nearest_lootable(character, {raid_boss})
+
+        if leader and character.hp < character.max_hp:
+            _ = await __regenerate_hp(character, full=True)
+        await character.move(mob_position)
+        if leader:
+            await character.set_ready_to_fight()
+            while any(not mate.is_ready_to_fight_boss for mate in teammate):
+                await asyncio.sleep(0.1)
+            _ = await character.fight(teammate)
+            for mate in teammate or []:
+                if mate != character:
+                    await mate.refresh()
+                mate.is_ready_to_fight_boss = False
+        else:
+            splash_potion = await Encyclopedia.get_item_by_code("health_splash_potion")
+            nb_splash_potions_equiped = character.get_utility_items[splash_potion]
+            nb_splash_potions_inventory = character.inventory.get(splash_potion, 0)
+            nb_to_equip = min(
+                100 - nb_splash_potions_equiped, nb_splash_potions_inventory
+            )
+            if nb_to_equip > 0:
+                await character.equip(splash_potion, nb_to_equip, slot="utility2")
+            await character.set_ready_to_fight()
+            await character.waiting_for_fight
+
+    except Exception as e:
+        print(f"❌ {character.surname} failed to combat raid boss : {e}")
     finally:
         character.is_ready_to_fight_boss = False
 
