@@ -1,8 +1,8 @@
 {
-    "routine_name": "gather",
-    "routine_module": "routines.gather",
+    "routine_name": "complete_task",
+    "routine_module": "routines.complete_task",
     "routine_args": [
-        "swordfish"
+        "monsters"
     ],
     "routine_kwargs": {}
 }
