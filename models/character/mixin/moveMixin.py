@@ -228,6 +228,8 @@ class MovePlan:
 
         if self._character.has_in_inventory(self._items_needed):
             return
+        if all(item in self._character.equipped_items for item in self._items_needed):
+            return
 
         retry = True
         while retry:
