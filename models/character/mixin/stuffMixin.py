@@ -109,6 +109,9 @@ class StuffMixin:
         return None
 
     async def _healh_if_needed_to_equip(self: "Character", slot: str) -> None:
+        # ugly hack i hope i will refactor this one day
+        if "utility" in slot:
+            return
 
         current_item = self.get_equipped_item_by_slot(slot)
         hp_effect = await Encyclopedia.get_effect_by_code("hp")
