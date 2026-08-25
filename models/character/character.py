@@ -281,7 +281,7 @@ class Character(
             if util:
                 item = await Encyclopedia.get_item_by_code(util)
                 if item:
-                    qty = data.get(f"utility{i}_quantity", 0)
+                    qty = data.get(f"utility{i}_slot_quantity", 0)
                     utility_items[item] = qty
 
         return utility_items
