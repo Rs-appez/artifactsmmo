@@ -16,20 +16,35 @@ if TYPE_CHECKING:
 
 @asynccontextmanager
 async def get_max_items(
-    character: Character, item: Item, keep_free_slots: int = 0, per_stack: int = 1
+    character: Character,
+    item: Item,
+    keep_free_slots: int = 0,
+    per_stack: int = 1,
+    max_quantity: int = -1,
 ) -> AsyncGenerator[tuple[uuid.UUID, int], None]:
+    if per_stack <= 0:
+        raise ValueError("per_stack must be > 0")
+    if keep_free_slots < 0:
+        raise ValueError("keep_free_slots must be >= 0")
+
     async with Bank.items() as bank_items:
-        item_quantity = min(
-            bank_items.get(item, 0), character.inventory_max_items - keep_free_slots
+        available_in_bank = bank_items.get(item, 0)
+        inventory_capacity = max(0, character.inventory_max_items - keep_free_slots)
+
+        capped_by_user = (
+            min(available_in_bank, max_quantity)
+            if max_quantity > 0
+            else available_in_bank
         )
-        item_quantity = (item_quantity // per_stack) * per_stack
-        if item_quantity <= 0:
-            raise Exception(f"No {item.name} found in bank for character")
+        reservable_quantity = min(capped_by_user, inventory_capacity)
+
+        reservable_quantity -= reservable_quantity % per_stack
+
         token = await Bank._reserve_items(
-            {item: item_quantity}, inventory=character.inventory
+            {item: reservable_quantity}, inventory=character.inventory
         )
     try:
-        yield token, item_quantity
+        yield token, reservable_quantity
     finally:
         Bank._unreserve_items(token)
 
