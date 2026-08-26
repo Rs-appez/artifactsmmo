@@ -365,18 +365,24 @@ class StuffMixin:
         await self.equip(potion, quantity=qty_to_withdraw, slot=f"utility{slot}")
 
     async def maximaze_stats(self: "Character", stats: Effect) -> None:
+        need_bank_visit = False
         async with get_best_stat_item(self, stats) as (bank_token, best_item):
-            if len(Bank.get_token_info(bank_token)) == 0:
-                return
-            print(f"👚 {self.surname} is going to search {stats.name} items in bank")
+            if len(Bank.get_token_info(bank_token)) != 0:
+                need_bank_visit = True
 
-            if self.need_deposit(bank_token):
-                await self.deposit_all_in_bank()
-            if not await self.withdraw_item_from_bank(bank_token):
+            if need_bank_visit:
                 print(
-                    f"❌ {self.surname} failed to withdraw item from bank for maximaze stats"
+                    f"👚 {self.surname} is going to search {stats.name} items in bank"
                 )
-                return
+
+                if self.need_deposit(bank_token):
+                    await self.deposit_all_in_bank()
+                if not await self.withdraw_item_from_bank(bank_token):
+                    print(
+                        f"❌ {self.surname} failed to withdraw item from bank for maximaze stats"
+                    )
+                    return
 
         await self._equip_set_items(best_item)
-        await self.deposit_all_in_bank()
+        if need_bank_visit:
+            await self.deposit_all_in_bank()
