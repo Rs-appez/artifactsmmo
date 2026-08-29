@@ -13,6 +13,7 @@ NEEDED_ENDPOINTS = [
     "resources",
     "events",
     "npcs/details",
+    "raids",
 ]
 
 
