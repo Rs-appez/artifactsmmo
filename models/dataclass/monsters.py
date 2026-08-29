@@ -87,6 +87,9 @@ class Monster:
     def is_boss(self) -> bool:
         return self.type == "boss"
 
+    def is_raid_boss(self) -> bool:
+        return self.type == "raid_boss"
+
     def drop_rate(self, item: "Item") -> float:
         for drop in self.drops:
             if item in drop:
