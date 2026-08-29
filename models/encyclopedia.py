@@ -2,7 +2,7 @@ import asyncio
 import json
 
 from config import DATA_DIR
-from models.dataclass import NPC, Effect, Event, Item, Monster, Resource
+from models.dataclass import NPC, Effect, Event, Item, Monster, Resource, Raid
 from models.enums import JobType
 
 
@@ -25,6 +25,9 @@ class Encyclopedia:
     __npcs: dict[str, NPC] = {}
     __npcs_loaded = asyncio.Event()
 
+    _raids: dict[str, Raid] = {}
+    __raids_loaded = asyncio.Event()
+
     @classmethod
     async def initialize(cls):
         _ = await asyncio.gather(
@@ -34,6 +37,7 @@ class Encyclopedia:
             cls.__load_resources(),
             cls.__load_npcs(),
             cls.__load_events(),
+            cls.__load_raids(),
         )
 
     # ITEMS
@@ -241,6 +245,32 @@ class Encyclopedia:
 
         cls.__npcs_loaded.set()
         print(f"Loaded {len(cls.__npcs)} NPCs.")
+
+    # RAID
+
+    @staticmethod
+    async def get_raid_by_code(code: str) -> Raid:
+        await Encyclopedia.__raids_loaded.wait()
+
+        raid = Encyclopedia._raids.get(code)
+        if not raid:
+            raise ValueError(f"Raid with code '{code}' not found.")
+
+        return raid
+
+    @classmethod
+    async def __load_raids(cls):
+        if cls.__raids_loaded.is_set():
+            print("Raids already loaded, skipping fetch.")
+            return
+
+        raids_data = await cls.__read_json_file(DATA_DIR + "raids_data.json")
+        for raid_data in raids_data:
+            raid = await Raid.from_dict(raid_data)
+            cls._raids[raid.code] = raid
+
+        cls.__raids_loaded.set()
+        print(f"Loaded {len(cls._raids)} Raids.")
 
     @staticmethod
     async def __read_json_file(filepath: str) -> dict:
