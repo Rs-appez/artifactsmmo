@@ -36,3 +36,13 @@ class EquipentType(Enum):
 class NPCType(Enum):
     TRADER = "trader"
     MERCHANT = "merchant"
+
+
+class Day(Enum):
+    MONDAY = "monday"
+    TUESDAY = "tuesday"
+    WEDNESDAY = "wednesday"
+    THURSDAY = "thursday"
+    FRIDAY = "friday"
+    SATURDAY = "saturday"
+    SUNDAY = "sunday"
