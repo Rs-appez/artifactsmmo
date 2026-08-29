@@ -98,8 +98,9 @@ class Map:
             return True
 
         if (
-            self.access_type == map.access_type
-            and self.zone == map.zone
+            # needed for avoiding issues with maps under enchanted forest, but block access to the rosenblood map
+            # self.access_type == map.access_type and
+            self.zone == map.zone
             and self.layer == map.layer
             and abs(self.x - map.x) + abs(self.y - map.y) <= 1
         ):
