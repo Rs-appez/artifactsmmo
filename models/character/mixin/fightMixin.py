@@ -180,8 +180,11 @@ class FightMixin:
 
         return True
 
-    async def get_ready_to_fight(self: "Character", mob: Monster):
-        await self.weaponize(mob)
+    async def get_ready_to_fight(
+        self: "Character", mob: Monster, need_auto_stuff: bool = True
+    ):
+        if need_auto_stuff:
+            await self.weaponize(mob)
         if self.need_food_to_farm(mob):
             try:
                 if not self.has_food:

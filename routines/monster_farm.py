@@ -18,6 +18,7 @@ async def mob_farm(
     mob: Monster | str,
     nb: int | str = -1,
     force: bool | str = False,
+    need_auto_stuff: bool | str = True,
 ):
     try:
         if isinstance(mob, str):
@@ -31,11 +32,14 @@ async def mob_farm(
                 return
 
         if isinstance(force, str):
-            force = force.lower() in ("true", "force", "f")
+            force = force.lower() in ("true", "force", "f", "1", "yes", "y")
+
+        if isinstance(need_auto_stuff, str):
+            need_auto_stuff = need_auto_stuff.lower() in ("true", "yes", "y", "1")
 
         iterations = range(nb) if nb > 0 else count()
         for _ in iterations:
-            await _fight(character, mob, force)
+            await _fight(character, mob, force=force, need_auto_stuff=need_auto_stuff)
 
     except ImpossibleCombatException as e:
         raise e
@@ -156,11 +160,16 @@ async def drop_on_mob_farm(character: Character, item: Item | str, nb: int | str
                 break
 
 
-async def _fight(character: Character, mob: Monster, force: bool = False) -> dict:
+async def _fight(
+    character: Character,
+    mob: Monster,
+    force: bool = False,
+    need_auto_stuff: bool = True,
+) -> dict:
 
     mob_position = await find_nearest_lootable(character, {mob})
 
-    await character.get_ready_to_fight(mob)
+    await character.get_ready_to_fight(mob, need_auto_stuff=need_auto_stuff)
 
     if character.is_inventory_full:
         deposit_gold = True if character.gold > 10000 else False
@@ -179,7 +188,7 @@ async def _fight(character: Character, mob: Monster, force: bool = False) -> dic
 
     async with character.plan_move(mob_position) as plan:
         await plan.prepare()
-        await character.get_ready_to_fight(mob)
+        await character.get_ready_to_fight(mob, need_auto_stuff=need_auto_stuff)
         await plan.execute_move()
 
     fight_result = await character.fight()
