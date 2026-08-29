@@ -1,5 +1,5 @@
 from models import Character
-from models.dataclass import Event, Monster, Resource
+from models.dataclass import Event, Monster, Raid, Resource
 from routines import gather, mob_farm
 from routines.monster_farm import raid_farm
 
@@ -8,12 +8,14 @@ class CharacterManager:
     def __init__(self, characters: dict[str, Character]):
         self.characters = characters
 
-    def start_raid(self, raid_boss: Monster):
+    def start_raid(self, raid: Raid):
 
-        raise NotImplementedError("Raid functionality is not yet implemented.")
+        # tmp implementation
 
-        dave = self.characters.get("dave")
+        raid_boss = raid.boss
+
         charlie = self.characters.get("charlie")
+        dave = self.characters.get("dave")
         eve = self.characters.get("eve")
 
         teammates = [charlie, eve, dave]

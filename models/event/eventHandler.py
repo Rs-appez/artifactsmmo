@@ -55,5 +55,5 @@ class EventHandler:
         LocationRegistry.remove_event_location(map, event)
 
     async def start_raid(self, raid_boss_code: str) -> None:
-        boss = await Encyclopedia.get_monster_by_code(raid_boss_code)
-        self.character_manager.start_raid(boss)
+        raid = await Encyclopedia.get_raid_by_code(raid_boss_code)
+        self.character_manager.start_raid(raid)
