@@ -49,7 +49,7 @@ class CharacterManager:
             # TODO: Implement boss hunting logic
 
         for character in self.characters.values():
-            if character.work_on == "boss_farm":
+            if character.work_on in ["raid_farm", "boss_farm"]:
                 continue
             if character.level >= monster.level:
                 character.do_one_time_task(mob_farm, monster)
@@ -60,7 +60,7 @@ class CharacterManager:
             return
         item = min(event.content.drops.items(), key=lambda d: d[1]["rate"])[0]
         for character in self.characters.values():
-            if character.work_on == "boss_farm":
+            if character.work_on in ["raid_farm", "boss_farm"]:
                 continue
             if character.has_job(item.job, item.level):
                 character.do_one_time_task(gather, item)
