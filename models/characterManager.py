@@ -1,11 +1,29 @@
 from models import Character
 from models.dataclass import Event, Monster, Resource
 from routines import gather, mob_farm
+from routines.monster_farm import raid_farm
 
 
 class CharacterManager:
     def __init__(self, characters: dict[str, Character]):
         self.characters = characters
+
+    def start_raid(self, raid_boss: Monster):
+
+        raise NotImplementedError("Raid functionality is not yet implemented.")
+
+        dave = self.characters.get("dave")
+        charlie = self.characters.get("charlie")
+        eve = self.characters.get("eve")
+
+        teammates = [charlie, eve, dave]
+
+        if not dave or not charlie or not eve:
+            print("❌ Missing characters for the test")
+            return
+        dave.assign_routine(raid_farm, teammates, raid_boss, True)
+        charlie.assign_routine(raid_farm, teammates, raid_boss, False)
+        eve.assign_routine(raid_farm, teammates, raid_boss, False)
 
     def new_event_occurred(self, event: Event):
         match event.content:

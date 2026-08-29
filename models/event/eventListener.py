@@ -72,6 +72,10 @@ class EventListener:
                 else:
                     await self._event_handler.remove_event(event, map)
 
+            case SubscriptionsType.RAID_STARTED:
+                pass
+                # await self._event_handler.start_raid(data["raid"]["monster"])
+
             case _:
                 pass
 

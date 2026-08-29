@@ -1,7 +1,7 @@
 from httpx import AsyncClient
 
 from config import ARTIFACTSMMO_URL, HEADERS
-from models import CharacterManager, LocationRegistry
+from models import CharacterManager, LocationRegistry, Encyclopedia
 from models.dataclass import Event, Map
 
 
@@ -53,3 +53,7 @@ class EventHandler:
             (e, m) for e, m in self.current_events if not (e == event and m == map)
         ]
         LocationRegistry.remove_event_location(map, event)
+
+    async def start_raid(self, raid_boss_code: str) -> None:
+        boss = await Encyclopedia.get_monster_by_code(raid_boss_code)
+        self.character_manager.start_raid(boss)
