@@ -171,7 +171,12 @@ class LocationRegistry:
                                     )
                                     cls.__npc_locations[npc].add(map)
                                 case "raid":
-                                    pass
+                                    raid = await Encyclopedia.get_raid_by_code(
+                                        content["code"]
+                                    )
+                                    monster = raid.boss
+                                    cls.__drop_locations[monster].add(map)
+
                                 case _:
                                     raise Exception(
                                         f"Unknown interaction type: {interaction['content']['type']}"
