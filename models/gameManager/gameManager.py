@@ -1,4 +1,3 @@
-from models.dataclass.bank import Bank
 import asyncio
 from collections.abc import Coroutine, Sequence
 
@@ -6,8 +5,9 @@ import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS, SANDBOX
 from models import Character, CharacterManager, Encyclopedia, LocationRegistry
+from models.dataclass.bank import Bank
 from models.event import EventHandler, EventListener
-from routines.monster_farm import boss_farm
+from routines.monster_farm import boss_farm, raid_farm
 from utils.initialize import initialize_characters
 from utils.test_sandbox import test
 
@@ -69,18 +69,16 @@ class GameManager:
             character.save()
 
     async def __asign_boss(self):
-        boss = await Encyclopedia.get_monster_by_code("goblin_priestess")
-        alice = self.characters.get("alice")
-        bob = self.characters.get("bob")
+        boss = await Encyclopedia.get_monster_by_code("pixie")
+        dave = self.characters.get("dave")
         charlie = self.characters.get("charlie")
+        eve = self.characters.get("eve")
 
-        team = [alice, bob, charlie]
+        teammates = [charlie, eve, dave]
 
-        if alice:
-            alice.assign_routine(boss_farm, team, boss, True)
-
-        if bob:
-            bob.assign_routine(boss_farm, team, boss, False)
-
-        if charlie:
-            charlie.assign_routine(boss_farm, team, boss, False)
+        if not dave or not charlie or not eve:
+            print("❌ Missing characters for the test")
+            return
+        dave.assign_routine(raid_farm, teammates, boss, True)
+        charlie.assign_routine(raid_farm, teammates, boss, False)
+        eve.assign_routine(raid_farm, teammates, boss, False)
