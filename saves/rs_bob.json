@@ -1,8 +1,8 @@
 {
-    "routine_name": "complete_task",
-    "routine_module": "routines.complete_task",
+    "routine_name": "gather",
+    "routine_module": "routines.gather",
     "routine_args": [
-        "monsters"
+        "mithril_ore"
     ],
     "routine_kwargs": {}
 }

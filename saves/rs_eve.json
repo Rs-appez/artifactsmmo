@@ -1,8 +1,8 @@
 {
-    "routine_name": "make_food",
-    "routine_module": "routines.make_food",
+    "routine_name": "gather",
+    "routine_module": "routines.gather",
     "routine_args": [
-        "cooked_salmon"
+        "mithril_ore"
     ],
     "routine_kwargs": {}
 }
