@@ -71,11 +71,7 @@ async def __get_currency_item(
 
 async def buy_from_npc(character: "Character", item: "Item" | str, quantity: int | str):
     if isinstance(item, str):
-        item_object = await Encyclopedia.get_item_by_code(item)
-        if not item_object:
-            print(f"❌ Item {item} not found")
-            return
-        item = item_object
+        item = await Encyclopedia.get_item_by_code(item)
 
     if isinstance(quantity, str):
         try:
