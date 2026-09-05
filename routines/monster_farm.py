@@ -109,7 +109,9 @@ async def raid_farm(
                 mate.is_ready_to_fight_boss = False
         else:
             splash_potion = await Encyclopedia.get_item_by_code("health_splash_potion")
-            nb_splash_potions_equiped = character.get_utility_items[splash_potion]
+            nb_splash_potions_equiped = character.get_utility_items.get(
+                splash_potion, 0
+            )
             nb_splash_potions_inventory = character.inventory.get(splash_potion, 0)
             nb_to_equip = min(
                 100 - nb_splash_potions_equiped, nb_splash_potions_inventory
