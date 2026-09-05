@@ -1,8 +1,9 @@
 from contextlib import contextmanager
 from dataclasses import dataclass
-from math import ceil
+from math import ceil, floor
 from typing import TYPE_CHECKING, Generator
 
+from config import BERSERKER_RAGE_THRESHOLD, GREED_THRESHOLD
 from models.dataclass import Effect, Monster
 from models.enums import Element
 
@@ -34,11 +35,43 @@ class _EntityMetadata:
     nb_turns: int = 0
     has_critical_strike: bool = False
 
+    previous_hp: int = 0
+
     effect_burn: float = 0
     effect_shield: int = 0
+    has_trigger_berserker_rage: bool = False
 
     def __post_init__(self):
+        self.previous_hp = self.hp_left
         self.effect_burn = sum(value for value in self.attack.values())
+
+    def compute_greed(self, value: int) -> None:
+        if self.nb_turns == 0:
+            return
+        last_pourcent_hp = (
+            ceil((self.previous_hp / self.max_hp) * 100) // GREED_THRESHOLD
+        )
+        current_pourcent_hp = (
+            ceil((self.hp_left / self.max_hp) * 100) // GREED_THRESHOLD
+        )
+
+        diff = last_pourcent_hp - current_pourcent_hp
+        self.attack = {
+            element: floor(atk * ((value / 100) * diff + 1) + 0.5)
+            for element, atk in self.attack.items()
+        }
+
+    def compute_berserker_rage(self, value: int) -> None:
+        if self.has_trigger_berserker_rage:
+            return
+        current_pourcent_hp = ceil((self.hp_left / self.max_hp) * 100)
+
+        if current_pourcent_hp < BERSERKER_RAGE_THRESHOLD:
+            self.has_trigger_berserker_rage = True
+            self.attack = {
+                element: floor(atk * ((value / 100) + 1) + 0.5)
+                for element, atk in self.attack.items()
+            }
 
 
 class FightMetadata:
@@ -105,10 +138,16 @@ class FightMetadata:
 
         damage = handle_shield(damage)
 
+        self.entities[self.entities_map[is_player]].previous_hp = self.entities[
+            self.entities_map[is_player]
+        ].hp_left
+
         self.entities[self.entities_map[is_player]].hp_left = min(
             self.entities[self.entities_map[is_player]].hp_left - damage,
             self.entities[self.entities_map[is_player]].max_hp,
         )
+
+        self.handle_lost_hp_effects(is_player)
 
     # memory
 
@@ -136,6 +175,17 @@ class FightMetadata:
         self.entities[self.entities_map[is_player]].hp_left = self.entities[
             self.entities_map[is_player]
         ].max_hp
+
+    def handle_lost_hp_effects(self, is_player: bool) -> None:
+        attacker_effects = self.get_effects(is_player)
+        for effect, value in attacker_effects.items():
+            match effect.code:
+                case "greed":
+                    self.entities[self.entities_map[is_player]].compute_greed(value)
+                case "berserker_rage":
+                    self.entities[self.entities_map[is_player]].compute_berserker_rage(
+                        value
+                    )
 
 
 @dataclass(frozen=True)
