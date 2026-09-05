@@ -8,6 +8,7 @@ from .npc_trade import buy_from_npc
 from .level_up_skill import xp_skill
 from .sell_to_ge import sell_item_to_ge
 from .make_food import make_food
+from .stuff import stuff
 
 __all__ = [
     "mob_farm",
@@ -22,4 +23,5 @@ __all__ = [
     "xp_skill",
     "sell_item_to_ge",
     "make_food",
+    "stuff",
 ]
