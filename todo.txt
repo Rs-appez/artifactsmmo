@@ -19,3 +19,4 @@
 (B) 2026-11-16 handle craft offering and autogenerate other offrering @feature
 (A) 2026-11-16 handle job artifacts @feature
 (B) 2026-09-07 fix antidote potion handling
+(B) 2026-09-08 fix greed effect handling (%dmg add not multiply)
