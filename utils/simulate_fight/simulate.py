@@ -30,10 +30,10 @@ def _is_player_start(data: FightMetadata) -> bool:
 
 def _compute_damage(char_turn: bool, data: FightMetadata) -> int:
     damage = 0
-    attacks = data.get_attacks(char_turn)
+    final_atk = data.get_final_attacks(char_turn)
     target_resistances = data.get_resistances(not char_turn)
 
-    for element, attack_value in attacks.items():
+    for element, attack_value in final_atk.items():
         if attack_value <= 0:
             continue
         resistance = target_resistances.get(element, 0)
