@@ -3,9 +3,10 @@ from dataclasses import dataclass
 from math import ceil, floor
 from typing import TYPE_CHECKING, Generator
 
-from config import BERSERKER_RAGE_THRESHOLD, GREED_THRESHOLD
+from config import BERSERKER_RAGE_THRESHOLD, BURN_REDUCTION, GREED_THRESHOLD
 from models.dataclass import Effect, Monster
 from models.enums import Element
+from utils.math_fight import calc_attack
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -18,6 +19,8 @@ class _EntityData:
     _initiative: int
     _resistance: frozenset[tuple[Element, int]]
     _attack: frozenset[tuple[Element, int]]
+    _atk_bonus: int
+    _elemental_bonus: frozenset[tuple[Element, int]]
     _critical_strike: int
     _effects: frozenset[tuple[Effect, int]]
 
@@ -30,6 +33,8 @@ class _EntityMetadata:
     effects: dict[Effect, int]
     resistance: dict[Element, int]
     attack: dict[Element, int]
+    atk_bonus: int
+    elemental_bonus: dict[Element, int]
     critical_strike: int
 
     nb_turns: int = 0
@@ -43,7 +48,13 @@ class _EntityMetadata:
 
     def __post_init__(self):
         self.previous_hp = self.hp_left
-        self.effect_burn = sum(value for value in self.attack.values())
+        self.effect_burn = sum(value for value in self.compute_final_attack().values())
+
+    def compute_final_attack(self) -> dict[Element, int]:
+        return {
+            element: calc_attack(atk, self.atk_bonus + self.elemental_bonus[element])
+            for element, atk in self.attack.items()
+        }
 
     def compute_greed(self, value: int) -> None:
         if self.nb_turns == 0:
@@ -87,6 +98,8 @@ class FightMetadata:
                 effects=dict(entity._effects),
                 resistance=dict(entity._resistance),
                 attack=dict(entity._attack),
+                atk_bonus=entity._atk_bonus,
+                elemental_bonus=dict(entity._elemental_bonus),
                 critical_strike=entity._critical_strike,
             )
             for name, entity in data
@@ -101,6 +114,15 @@ class FightMetadata:
 
     def get_attacks(self, is_player: bool) -> dict[Element, int]:
         return self.entities[self.entities_map[is_player]].attack
+
+    def get_atk_bonus(self, is_player: bool) -> int:
+        return self.entities[self.entities_map[is_player]].atk_bonus
+
+    def get_elemental_bonus(self, is_player: bool) -> dict[Element, int]:
+        return self.entities[self.entities_map[is_player]].elemental_bonus
+
+    def get_final_attacks(self, is_player: bool) -> dict[Element, int]:
+        return self.entities[self.entities_map[is_player]].compute_final_attack()
 
     def get_critical_strike(self, is_player: bool) -> int:
         return self.entities[self.entities_map[is_player]].critical_strike
@@ -166,7 +188,9 @@ class FightMetadata:
         return self.entities[self.entities_map[is_player]].effect_burn
 
     def reduce_burn_damage(self, is_player: bool) -> None:
-        self.entities[self.entities_map[is_player]].effect_burn *= 0.9
+        self.entities[self.entities_map[is_player]].effect_burn *= (
+            1 - BURN_REDUCTION / 100
+        )
 
     def gain_shield(self, is_player: bool, value: int) -> None:
         self.entities[self.entities_map[is_player]].effect_shield += value
@@ -213,6 +237,8 @@ class SimulateData:
             _initiative=char.initiative,
             _resistance=frozenset(char.resistance.items()),
             _attack=frozenset(char.attack.items()),
+            _atk_bonus=char.atk_bonus,
+            _elemental_bonus=frozenset(char.elemental_bonus.items()),
             _critical_strike=char.critical_strike,
             _effects=frozenset(char.effects.items()),
         )
@@ -222,6 +248,8 @@ class SimulateData:
             _initiative=monster.initiative,
             _resistance=frozenset(monster.resistance.items()),
             _attack=frozenset(monster.attack.items()),
+            _atk_bonus=0,
+            _elemental_bonus=frozenset((elem, 0) for elem in Element),
             _critical_strike=monster.critical_strike,
             _effects=frozenset(monster.effects.items()),
         )

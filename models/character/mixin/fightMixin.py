@@ -19,6 +19,8 @@ class FightMixin:
     _initiative: int = 0
     _resistance: dict[Element, int] = field(default_factory=dict)
     _attack: dict[Element, int] = field(default_factory=dict)
+    _atk_bonus: int = 0
+    _elemental_bonus: dict[Element, int] = field(default_factory=dict)
     _critical_strike: int = 0
 
     _ready_to_fight_boss: bool = False
@@ -42,6 +44,14 @@ class FightMixin:
     @property
     def attack(self) -> dict[Element, int]:
         return self._attack.copy()
+
+    @property
+    def atk_bonus(self) -> int:
+        return self._atk_bonus
+
+    @property
+    def elemental_bonus(self) -> dict[Element, int]:
+        return self._elemental_bonus.copy()
 
     @property
     def critical_strike(self) -> int:

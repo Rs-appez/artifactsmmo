@@ -144,21 +144,19 @@ class Character(
             Element.FIRE: data.get("res_fire", 0),
             Element.WATER: data.get("res_water", 0),
         }
-        dmg_boost = data.get("dmg", 0)
 
         attack = {
-            Element.AIR: calc_attack(
-                data.get("attack_air", 0), data.get("dmg_air", 0) + dmg_boost
-            ),
-            Element.EARTH: calc_attack(
-                data.get("attack_earth", 0), data.get("dmg_earth", 0) + dmg_boost
-            ),
-            Element.FIRE: calc_attack(
-                data.get("attack_fire", 0), data.get("dmg_fire", 0) + dmg_boost
-            ),
-            Element.WATER: calc_attack(
-                data.get("attack_water", 0), data.get("dmg_water", 0) + dmg_boost
-            ),
+            Element.AIR: data.get("attack_air", 0),
+            Element.EARTH: data.get("attack_earth", 0),
+            Element.FIRE: data.get("attack_fire", 0),
+            Element.WATER: data.get("attack_water", 0),
+        }
+
+        elemental_bonus = {
+            Element.AIR: data.get("dmg_air", 0),
+            Element.EARTH: data.get("dmg_earth", 0),
+            Element.FIRE: data.get("dmg_fire", 0),
+            Element.WATER: data.get("dmg_water", 0),
         }
 
         effects = {
@@ -233,6 +231,8 @@ class Character(
             _task=await TaskQuest.from_dict(task_dict) if task_dict["task"] else None,
             _resistance=resistance,
             _attack=attack,
+            _atk_bonus=data.get("dmg", 0),
+            _elemental_bonus=elemental_bonus,
             _critical_strike=data.get("critical_strike", 0),
             _initiative=data.get("initiative", 0),
             _effects=effects,

@@ -59,3 +59,11 @@ def compute_effects(attacker: bool, raw_dmg: int, data: FightMetadata) -> int:
                         data.reduce_resistance(not attacker, element, value)
 
     return dmg
+
+
+def add_start_combat_effects(data: FightMetadata) -> None:
+    """
+    Add effects that are applied at the start of the combat
+    """
+
+    pass
