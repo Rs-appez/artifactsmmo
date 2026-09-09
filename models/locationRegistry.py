@@ -55,6 +55,7 @@ class LocationRegistry:
     @staticmethod
     async def get_bank_locations() -> set[Map]:
         await LocationRegistry.__maps_loaded.wait()
+        return LocationRegistry.__bank_locations
         return LocationRegistry.__bank_locations.difference(
             {await LocationRegistry.get_map_by_id(1234)}
         )
