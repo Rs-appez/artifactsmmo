@@ -14,3 +14,4 @@ x 2026-08-24 2026-08-13 optimize by not depositing/withdrawing if the items are 
 (B) 2026-08-20 refactor to equip all equipment with 1 call @refactor
 (B) 2026-08-22 handle equip item that remove pods when chara is full pods
 (C) 2026-08-23 refactor how item ingredient are stored @refactor
+(B) 2026-09-09 handle achivement for the desert bank
