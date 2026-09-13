@@ -37,7 +37,7 @@ def compute_effects(attacker: bool, raw_dmg: int, data: FightMetadata) -> int:
         match effect.code:
             # damage effect
             case "poison":
-                if data.get_nb_turns(not attacker) > 0:
+                if data.has_played(not attacker):
                     antipoison = sum(
                         attacker_effects[effect]
                         for effect in attacker_effects
@@ -45,7 +45,7 @@ def compute_effects(attacker: bool, raw_dmg: int, data: FightMetadata) -> int:
                     )
                     dmg += max(0, value - antipoison)
             case "burn":
-                if data.get_nb_turns(not attacker) > 0:
+                if data.has_played(not attacker):
                     dmg += floor(
                         (value / 100) * data.get_burn_damage(not attacker) + 0.5
                     )
