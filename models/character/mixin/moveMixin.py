@@ -206,8 +206,9 @@ class MovePlan:
                     await self._setup_potion("enchanted_potion")
                 case ZoneType.SANDWHISPER:
                     # ugly hack before handling correctly the return cost
-                    potion = await Encyclopedia.get_item_by_code("forest_bank_potion")
-                    self.add_item_needed(potion, 1)
+                    # potion = await Encyclopedia.get_item_by_code("forest_bank_potion")
+                    # self.add_item_needed(potion, 1)
+                    await self._setup_potion("sandwhisper_potion")
                     pass
                     # TODO : need to handle achievement for this potion
                 case ZoneType.DEFAULT:
