@@ -46,6 +46,7 @@ class CharacterManager:
             "bandit_lizard",
             "demon",
             "full_moon_vampire",
+            "cultist_emperor",
         ]:
             return
             # TODO: Implement boss hunting logic
