@@ -109,6 +109,9 @@ class FightMetadata:
     def get_turns(self) -> int:
         return sum(entity.nb_turns for entity in self.entities.values())
 
+    def has_played(self, is_player: bool) -> bool:
+        return self.entities[self.entities_map[is_player]].nb_turns > 0
+
     def get_initiative(self, is_player: bool) -> int:
         return self.entities[self.entities_map[is_player]].initiative
 
