@@ -1,7 +1,9 @@
 from typing import TYPE_CHECKING
+
 from models.dataclass import NPC, Map, Monster, Resource
 from models.enums import JobType, Layer, TaskType
 from models.locationRegistry import LocationRegistry
+from utils.pathfinding import get_route
 
 if TYPE_CHECKING:
     from models.character import Character
@@ -16,6 +18,27 @@ def __find_nearest_location(locations: set[Map], target: Map) -> Map:
         locations,
         key=lambda pos: __manhattan_distance((pos.x, pos.y), (target.x, target.y)),
     )
+
+
+async def __find_cheapest_location(locations: set[Map], target: Map) -> set[Map]:
+
+    cheapest_location: set[Map] = set()
+    cheapest_cost = float("inf")
+
+    for location in locations:
+        _, cost = await get_route(location, target)
+        if not len(cheapest_location):
+            cheapest_location = {location}
+            cheapest_cost = cost
+
+        elif cost < cheapest_cost:
+            cheapest_location = {location}
+            cheapest_cost = cost
+
+        elif cost == cheapest_cost:
+            cheapest_location.add(location)
+
+    return cheapest_location
 
 
 async def find_nearest_lootable(
@@ -41,7 +64,9 @@ async def find_nearest_bank(location: Map) -> Map:
     bank_locations = await LocationRegistry.get_bank_locations()
     if not bank_locations:
         raise ValueError("No bank locations found")
-    return __find_nearest_location(bank_locations, location)
+
+    cheapest_locations = await __find_cheapest_location(bank_locations, location)
+    return __find_nearest_location(cheapest_locations, location)
 
 
 async def find_nearest_tasks_master(
