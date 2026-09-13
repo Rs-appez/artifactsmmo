@@ -5,7 +5,7 @@ from random import choice, randint
 from config import CRITICAL_STRIKE_MULTIPLIER
 from utils.math_fight import calc_resistance
 
-from .computeEffect import compute_effects
+from .computeEffect import add_start_combat_effects, compute_effects
 from .simulateData import FightMetadata, SimulateData, SimulateResult
 
 
@@ -50,6 +50,8 @@ def _fight(data: FightMetadata):
     char_turn = _is_player_start(data)
     while data.get_hp(True) > 0 and data.get_hp(False) > 0 and data.get_turns < 100:
         data.increment_turns(char_turn)
+
+        add_start_combat_effects(char_turn, data)
 
         has_crit = randint(1, 100) <= data.get_critical_strike(char_turn)
         data.set_critical_strike(char_turn, has_crit)

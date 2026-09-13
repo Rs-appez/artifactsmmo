@@ -214,6 +214,13 @@ class FightMetadata:
                         value
                     )
 
+    # potions
+
+    def add_max_hp(self, is_player: bool, value: int) -> None:
+        entity = self.entities[self.entities_map[is_player]]
+        entity.max_hp += value
+        entity.hp_left += value
+
 
 @dataclass(frozen=True)
 class SimulateData:
