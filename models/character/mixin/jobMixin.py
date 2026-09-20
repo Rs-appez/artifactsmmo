@@ -29,8 +29,10 @@ class JobMixin:
         item_level = item.craft_level or item.level
         return job_level >= item_level
 
-    def will_gain_xp_with(self: "Character", item: Item) -> bool:
-        return nb_xp_per_action(self.get_job_level(item.job), self.wisdom, item) > 0
+    def will_gain_xp_with(self: "Character", item: Item, job: JobType | None) -> bool:
+        if job is None:
+            job = item.job
+        return nb_xp_per_action(self.get_job_level(job), self.wisdom, item) > 0
 
     def nb_action_needed_for_level_up(self: "Character", item: Item) -> int:
 
