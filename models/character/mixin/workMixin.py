@@ -3,6 +3,7 @@ from collections import deque
 from types import FunctionType
 from typing import TYPE_CHECKING
 
+from config import SANDBOX
 from routines import make_food
 
 if TYPE_CHECKING:
@@ -114,8 +115,10 @@ class WorkMixin:
                     self._interrupted = False
                 except Exception as e:
                     print(f"❌ {self.surname} work error : {e}")
-                    if not self._routine.is_paused:
+                    if not SANDBOX:
                         self.make_default_routine()
+                    else:
+                        self.seek_the_meaning_of_life()
 
         except asyncio.CancelledError:
             pass
