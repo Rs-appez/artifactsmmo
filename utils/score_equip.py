@@ -12,7 +12,7 @@ WEIGHTS = {
     "dmg": 3.5,
     "elemental_dmg": 3.5,
     "elemental_res": 1.2,
-    "hp": 0.01,
+    "hp": 0.15,
     "critical_strike": 0.05,
     "initiative": 0.02,
     "haste": 0.50,
