@@ -47,6 +47,7 @@ class CharacterManager:
             "demon",
             "full_moon_vampire",
             "cultist_emperor",
+            "echoless_bat",
         ]:
             return
             # TODO: Implement boss hunting logic
