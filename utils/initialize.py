@@ -7,8 +7,8 @@ CHARACTERS = {
     "alice": "women2",
     "bob": "goblin",
     "charlie": "men1",
-    "dave": "men3",
-    "eve": "women3",
+    "dave": "founder",
+    "eve": "purple_sorceress",
 }
 SUFFIX = "_t" if SANDBOX else ""
 
