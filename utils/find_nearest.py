@@ -27,11 +27,7 @@ async def __find_cheapest_location(locations: set[Map], target: Map) -> set[Map]
 
     for location in locations:
         _, cost = await get_route(location, target)
-        if not len(cheapest_location):
-            cheapest_location = {location}
-            cheapest_cost = cost
-
-        elif cost < cheapest_cost:
+        if not len(cheapest_location) or cost < cheapest_cost:
             cheapest_location = {location}
             cheapest_cost = cost
 
