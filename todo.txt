@@ -14,3 +14,4 @@
 (B) 2026-08-22 handle equip item that remove pods when chara is full pods
 (C) 2026-08-23 refactor how item ingredient are stored @refactor
 (B) 2026-09-09 handle achivement for the desert bank
+(B) 2026-11-02 better handle craft/gather for level up job @refactor

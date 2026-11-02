@@ -25,14 +25,14 @@ async def xp_skill(
     wisdom = await Encyclopedia.get_effect_by_code("wisdom")
     await character.maximaze_stats(wisdom)
 
-    if job.is_crafting:
+    if job.is_gathering and not item_target:
+        await _xp_gather_skill(character, job, target_level)
+    elif job.is_crafting:
         if item_target is None:
             raise ValueError("item_target must be provided for crafting jobs.")
         if isinstance(item_target, str):
             item_target = await Encyclopedia.get_item_by_code(item_target)
         await _xp_craft_skill(character, job, target_level, item_target)
-    elif job.is_gathering:
-        await _xp_gather_skill(character, job, target_level)
     else:
         raise ValueError(f"Job {job} is neither crafting nor gathering.")
 
