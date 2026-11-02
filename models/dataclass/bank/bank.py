@@ -304,7 +304,7 @@ class Bank:
                     response = await client.get(
                         f"{cls.__url}/items",
                         headers=HEADERS,
-                        params={"size": 100, "page": page},
+                        params={"size": 1000, "page": page},
                         timeout=5.0,
                     )
                     data = response.json()
