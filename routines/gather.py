@@ -52,7 +52,7 @@ async def _get_ready_to_gather(character: Character, item: Item) -> None:
     job = next(
         iter({job for resource in resources if (job := resource.skill).is_gathering})
     )
-    await character.toolize(job)
+    await character.toolize(job, for_gathering=True)
 
     if character.will_gain_xp_with(item, job):
         wisdom = await Encyclopedia.get_effect_by_code("wisdom")

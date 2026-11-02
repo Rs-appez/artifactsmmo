@@ -234,11 +234,12 @@ class StuffMixin:
         except Exception as e:
             print(f"❌ {self.surname} Weaponize : {e}")
 
-    async def toolize(self: Character, job: JobType) -> None:
+    async def toolize(self: Character, job: JobType, for_gathering: bool) -> None:
         try:
             best_tool = (
                 self.weapon
-                if self.weapon is not None and self.weapon.is_for_job(job)
+                if self.weapon is not None
+                and self.weapon.is_for_job(job, for_gathering)
                 else None
             )
 
@@ -246,7 +247,7 @@ class StuffMixin:
                 [
                     item
                     for item in self.inventory
-                    if item.is_for_job(job) and item.can_be_used_by(self)
+                    if item.is_for_job(job, for_gathering) and item.can_be_used_by(self)
                 ],
                 key=lambda item: item.effects.get(job.value, 0),
                 default=None,
@@ -261,7 +262,10 @@ class StuffMixin:
                 best_tool = best_tool_in_inventory
 
             has_go_to_bank = False
-            async with get_tool(self, job) as (bank_token, best_tool_in_bank):
+            async with get_tool(self, job, for_gathering) as (
+                bank_token,
+                best_tool_in_bank,
+            ):
                 if bank_token is not None and (
                     best_tool is None
                     or (

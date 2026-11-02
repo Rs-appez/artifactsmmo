@@ -52,6 +52,7 @@ async def craft(
                 if character.will_gain_xp_with(item):
                     wisdom = await Encyclopedia.get_effect_by_code("wisdom")
                     await character.maximaze_stats(wisdom)
+                await character.toolize(item.job, for_gathering=False)
 
                 (
                     nb_trips,

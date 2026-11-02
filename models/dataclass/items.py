@@ -167,12 +167,12 @@ class Item:
                 elements.add(element)
         return elements
 
-    def is_for_job(self, job: JobType) -> bool:
+    def is_for_job(self, job: JobType, for_gathering: bool) -> bool:
         if not self.is_tool:
             return False
 
         for effect in self.effects:
-            if effect.get_job == job:
+            if effect.code == job.get_job_effect_name(for_gathering):
                 return True
 
         return False

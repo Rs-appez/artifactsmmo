@@ -81,19 +81,21 @@ async def get_food(
 
 @asynccontextmanager
 async def get_tool(
-    character: Character, job: JobType
+    character: Character, job: JobType, for_gathering: bool = True
 ) -> AsyncGenerator[tuple[uuid.UUID, Item] | tuple[None, None]]:
     async with Bank.items() as bank_items:
         tool_items = {
             item
             for item in bank_items
-            if item.is_for_job(job) and item.can_be_used_by(character)
+            if item.is_for_job(job, for_gathering) and item.can_be_used_by(character)
         }
         if not tool_items:
             yield None, None
             return
 
-        job_effect = await Encyclopedia.get_effect_by_code(job.get_job_effect_name())
+        job_effect = await Encyclopedia.get_effect_by_code(
+            job.get_job_effect_name(for_gathering)
+        )
         best_tool = min(tool_items, key=lambda item: item.effects.get(job_effect, 0))
         token = await Bank._reserve_items({best_tool: 1})
     try:
