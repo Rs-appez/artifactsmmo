@@ -172,7 +172,7 @@ class Item:
             return False
 
         for effect in self.effects:
-            if effect.code == job.value:
+            if effect.get_job == job:
                 return True
 
         return False
@@ -181,8 +181,7 @@ class Item:
         jobs = []
         for effect in self.effects:
             try:
-                job = JobType(effect.code)
-                jobs.append(job)
+                jobs.append(effect.get_job)
             except ValueError:
                 continue
         return jobs
@@ -212,7 +211,9 @@ class Item:
 
         return True
 
-    async def is_better_for_job_than(self, other: "Item", job: JobType) -> bool:
+    async def is_better_for_job_than(
+        self, other: Item, job: JobType, for_gathering: bool
+    ) -> bool:
         from models import Encyclopedia
 
         self_jobs = self.get_jobs()
@@ -223,7 +224,9 @@ class Item:
                 f"Cannot compare items {self.name} and {other.name} for job {job.value}"
             )
 
-        job_effect = await Encyclopedia.get_effect_by_code(job.value)
+        job_effect = await Encyclopedia.get_effect_by_code(
+            job.get_job_effect_name(for_gathering)
+        )
 
         return self.effects.get(job_effect, 0) < other.effects.get(job_effect, 0)
 

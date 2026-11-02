@@ -78,6 +78,14 @@ class JobType(Enum):
         else:
             return 1
 
+    def get_job_effect_name(self, gathering_job=True) -> str:
+        if gathering_job and self.is_gathering:
+            return f"{self.value}_gathering"
+        elif not gathering_job and self.is_crafting:
+            return f"{self.value}_crafting"
+
+        raise ValueError(f"JobType {self.value} is neither gathering nor crafting.")
+
     @staticmethod
     def character_job_types() -> list["JobType"]:
         return [

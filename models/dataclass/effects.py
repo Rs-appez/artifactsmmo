@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import override
 
-from models.enums import Element
+from models.enums import Element, JobType
 
 
 @dataclass(frozen=True)
@@ -58,3 +58,11 @@ class Effect:
         for element in Element:
             if self.code.startswith(f"dmg_{element.value}"):
                 return element
+
+    @property
+    def get_job(self) -> JobType:
+        for job in JobType:
+            if self.code.startswith(job.value):
+                return job
+
+        return JobType.NO_JOB

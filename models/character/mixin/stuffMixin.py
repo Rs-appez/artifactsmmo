@@ -234,7 +234,7 @@ class StuffMixin:
         except Exception as e:
             print(f"❌ {self.surname} Weaponize : {e}")
 
-    async def toolize(self: "Character", job: JobType) -> None:
+    async def toolize(self: Character, job: JobType) -> None:
         try:
             best_tool = (
                 self.weapon
@@ -253,7 +253,7 @@ class StuffMixin:
             )
             if best_tool is not None and best_tool_in_inventory is not None:
                 if not await best_tool.is_better_for_job_than(
-                    best_tool_in_inventory, job
+                    best_tool_in_inventory, job, for_gathering
                 ):
                     best_tool = best_tool_in_inventory
 
@@ -261,26 +261,26 @@ class StuffMixin:
                 best_tool = best_tool_in_inventory
 
             has_go_to_bank = False
-            try:
-                async with get_tool(self, job) as (bank_token, best_tool_in_bank):
-                    if best_tool is None or (
+            async with get_tool(self, job) as (bank_token, best_tool_in_bank):
+                if bank_token is not None and (
+                    best_tool is None
+                    or (
                         best_tool_in_bank is not None
                         and await best_tool_in_bank.is_better_for_job_than(
-                            best_tool, job
+                            best_tool, job, for_gathering
                         )
-                    ):
-                        best_tool = best_tool_in_bank
-                        if self.inventory_free_space < 1:
-                            _ = await self.deposit_all_in_bank(with_gold=False)
+                    )
+                ):
+                    best_tool = best_tool_in_bank
+                    if self.inventory_free_space < 1:
+                        _ = await self.deposit_all_in_bank(with_gold=False)
 
-                        if not await self.withdraw_item_from_bank(bank_token):
-                            print(
-                                f"❌ {self.surname} failed to withdraw tool from bank for toolize"
-                            )
-                            return
-                        has_go_to_bank = True
-            except Exception:
-                pass
+                    if not await self.withdraw_item_from_bank(bank_token):
+                        print(
+                            f"❌ {self.surname} failed to withdraw tool from bank for toolize"
+                        )
+                        return
+                    has_go_to_bank = True
 
             if best_tool is not None and best_tool != self.weapon:
                 if not await self.equip(best_tool):
