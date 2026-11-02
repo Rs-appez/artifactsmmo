@@ -1,4 +1,5 @@
 from enum import Enum
+from math import sqrt
 from typing import TYPE_CHECKING
 
 from config import MAX_LEVEL_JOB
@@ -65,21 +66,18 @@ class JobType(Enum):
     def max_level(self) -> int:
         return MAX_LEVEL_JOB
 
-    @property
-    def job_xp_multiplier(self) -> float:
-        if self in {JobType.MINING, JobType.WOODCUTTING, JobType.FISHING}:
+    def get_crafting_xp_multiplier(self, item: Item) -> float:
+        if not item.is_craftable:
+            raise ValueError(f"Item {item.name} is not craftable.")
+
+        if self in {JobType.MINING, JobType.WOODCUTTING}:
             return 0.1
-        elif self in {
-            JobType.WEAPONCRAFTING,
-            JobType.GEARCRAFTING,
-            JobType.JEWELRYCRAFTING,
-            JobType.ALCHEMY,
-        }:
-            return 1
-        elif self == JobType.COOKING:
-            return 0.5
-        else:
-            return 1
+
+        nb_ingredients = sum(
+            int(ingredient["quantity"]) for ingredient in item.craft_ingredients
+        )
+        raw_value = 0.2832 + 0.2171 * sqrt(max(1, nb_ingredients))
+        return max(0.5, min(raw_value, 1.5))
 
     def get_job_effect_name(self, gathering_job=True) -> str:
         if gathering_job and self.is_gathering:

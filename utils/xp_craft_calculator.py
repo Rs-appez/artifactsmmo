@@ -11,7 +11,11 @@ if TYPE_CHECKING:
 
 def nb_xp_per_action(character_job_level: int, wisdom: int, item: Item) -> int:
     item_level = item.craft_level or item.level
-    xp_multiplier = item.job.job_xp_multiplier if item.craft_level else 1
+
+    if item.craft_level:
+        xp_multiplier = item.job.get_crafting_xp_multiplier(item)
+    else:
+        xp_multiplier = 1
 
     if (
         character_job_level == item.job.max_level
