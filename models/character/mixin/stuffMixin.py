@@ -2,16 +2,16 @@ from dataclasses import dataclass, field
 from itertools import chain
 from typing import TYPE_CHECKING
 
+from config import MAX_UTILITY_PER_SLOT
 from models import Encyclopedia
 from models.dataclass import Effect, Item, Monster
-from config import MAX_UTILITY_PER_SLOT
 from models.dataclass.bank import (
     Bank,
     get_bag,
     get_best_equipment,
     get_best_stat_item,
-    get_tool,
     get_max_items,
+    get_tool,
 )
 from models.enums import EquipentType, JobType
 
@@ -34,7 +34,7 @@ class StuffMixin:
 
     _utility_items: dict[Item, int] = field(default_factory=dict)
 
-    def __init_stuff_mixin__(self: "Character"):
+    def __init_stuff_mixin__(self: Character):
         self._init_utility_items_effects()
 
     @property
@@ -108,7 +108,7 @@ class StuffMixin:
                 return slot.value
         return None
 
-    async def _healh_if_needed_to_equip(self: "Character", slot: str) -> None:
+    async def _healh_if_needed_to_equip(self: Character, slot: str) -> None:
         # ugly hack i hope i will refactor this one day
         if "utility" in slot:
             return
@@ -122,13 +122,13 @@ class StuffMixin:
             # TODO : grab food from bank if needed
             await self.rest()
 
-    def _init_utility_items_effects(self: "Character") -> None:
+    def _init_utility_items_effects(self: Character) -> None:
         for item in self._utility_items:
             for effect, value in item.effects.items():
                 self._effects[effect] = self._effects.get(effect, 0) + value
 
     async def equip(
-        self: "Character", item: Item, quantity: int = 1, slot: str | None = None
+        self: Character, item: Item, quantity: int = 1, slot: str | None = None
     ) -> bool:
         slot = item.type if slot is None else slot
         try:
@@ -148,7 +148,7 @@ class StuffMixin:
             print(f"❌ {self.surname} equip : {e}")
             return False
 
-    async def unequip(self: "Character", slot: str, quantity: int = 1) -> bool:
+    async def unequip(self: Character, slot: str, quantity: int = 1) -> bool:
         try:
             await self.post_api(
                 "/unequip",
@@ -162,7 +162,7 @@ class StuffMixin:
             print(f"❌ {self.surname} unequip : {e}")
             return False
 
-    async def _equip_set_items(self: "Character", items: dict[Item, int]) -> None:
+    async def _equip_set_items(self: Character, items: dict[Item, int]) -> None:
         for item, quantity in items.items():
             if item.type == EquipentType.RING.value:
                 rings = self.get_rings
@@ -213,7 +213,7 @@ class StuffMixin:
                 if slot is not None:
                     await self.unequip(slot)
 
-    async def weaponize(self: "Character", monster: Monster) -> None:
+    async def weaponize(self: Character, monster: Monster) -> None:
         try:
             has_been_to_bank = False
             async with get_best_equipment(self, monster) as (
@@ -296,7 +296,7 @@ class StuffMixin:
         except Exception as e:
             print(f"❌ {self.surname} Toolize : {e}")
 
-    async def bagize(self: "Character") -> None:
+    async def bagize(self: Character) -> None:
         try:
             bag_effect = await Encyclopedia.get_effect_by_code("inventory_space")
             current_bag = self.get_equipped_item_by_slot(EquipentType.BAG)
@@ -337,13 +337,13 @@ class StuffMixin:
             print(f"❌ {self.surname} Bagize : {e}")
 
     async def potionize(
-        self: "Character", potion1: Item, potion2: Item | None = None
+        self: Character, potion1: Item, potion2: Item | None = None
     ) -> None:
         await self._potionize(potion1, slot=1)
         if potion2 is not None:
             await self._potionize(potion2, slot=2)
 
-    async def _potionize(self: "Character", potion: Item, slot: int) -> None:
+    async def _potionize(self: Character, potion: Item, slot: int) -> None:
         if potion.subtype != "potion":
             raise ValueError(f"{potion.name} is not a potion")
 
@@ -368,7 +368,7 @@ class StuffMixin:
 
         await self.equip(potion, quantity=qty_to_withdraw, slot=f"utility{slot}")
 
-    async def maximaze_stats(self: "Character", stats: Effect) -> None:
+    async def maximaze_stats(self: Character, stats: Effect) -> None:
         need_bank_visit = False
         async with get_best_stat_item(self, stats) as (bank_token, best_item):
             if len(Bank.get_token_info(bank_token)) != 0:
