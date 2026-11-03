@@ -117,7 +117,7 @@ class StuffMixin:
         hp_effect = await Encyclopedia.get_effect_by_code("hp")
         if current_item and current_item.effects.get(hp_effect, 0) >= self.hp:
             print(
-                f"⚕️ {self.surname} is going to heal before equip {slot} item (current hp: {self.hp}, needed: {current_item.effects.get(hp_effect, 0)})"
+                f"⚕️ {self.surname} is going to heal before unequip {slot} item (current hp: {self.hp}, needed: {current_item.effects.get(hp_effect, 0)})"
             )
             # TODO : grab food from bank if needed
             await self.rest()
@@ -150,6 +150,7 @@ class StuffMixin:
 
     async def unequip(self: Character, slot: str, quantity: int = 1) -> bool:
         try:
+            await self._healh_if_needed_to_equip(slot)
             await self.post_api(
                 "/unequip",
                 json_data=[
