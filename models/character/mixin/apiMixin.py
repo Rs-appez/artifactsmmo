@@ -1,11 +1,11 @@
-from exceptions import TimeoutButSuccessException
 import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import httpx
 
-from config import ARTIFACTSMMO_URL, HEADERS
+from config import ARTIFACTSMMO_URL, HEADERS, MAX_RETRY_ATTEMPTS
+from exceptions import TimeoutButSuccessException, TimeoutNotSuccessException
 from models.character.decorators import refresh_after, request_action
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class ApiMixin:
     _client: httpx.AsyncClient | None = None
 
-    def __init_api_mixin__(self: "Character"):
+    def __init_api_mixin__(self: Character):
         self._client = httpx.AsyncClient(
             timeout=30.0,
             follow_redirects=True,
@@ -35,22 +35,23 @@ class ApiMixin:
     @request_action
     @refresh_after
     async def post_api(
-        self: "Character",
+        self: Character,
         endpoint: str,
         json_data: dict | list[dict] | None = None,
         retreive_data: dict[str, dict] | None = None,
     ) -> dict:
         attempt = 0
-        while attempt < 3:
+        while attempt < MAX_RETRY_ATTEMPTS:
             try:
                 response = await self.client.post(endpoint, json=json_data, timeout=5.0)
                 data = response.json()
 
                 if "error" in data:
-                    match data["error"]["code"]:
-                        case _:
-                            print("data : ", data)
-                            raise Exception(data["error"]["message"])
+                    if "code" in data["error"]:
+                        match data["error"]["code"]:
+                            case _:
+                                raise Exception(data["error"]["message"])
+                    raise TimeoutNotSuccessException(data["error"])
 
                 data = data["data"]
                 character_data = {}
@@ -70,7 +71,7 @@ class ApiMixin:
 
                 break
 
-            except httpx.TimeoutException as e:
+            except (httpx.TimeoutException, TimeoutNotSuccessException) as e:
                 print(f"Attempt {attempt} failed: Timeout occurred. Retrying...")
                 await self.refresh()
                 if self.cooldown > 0:
@@ -81,11 +82,11 @@ class ApiMixin:
             except httpx.RequestError as e:
                 await self.refresh()
                 if self.cooldown > 0:
-                    print("Request timeout but succeded")
+                    print("Request error but succeded")
                     raise TimeoutButSuccessException("Request timeout but succeded")
                 attempt = await self._retry(attempt, e)
         else:
-            raise Exception("Failed to post API after 3 attempts.")
+            raise Exception(f"Failed to post API after {MAX_RETRY_ATTEMPTS} attempts.")
 
         return character_data
 
