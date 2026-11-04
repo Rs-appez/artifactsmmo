@@ -169,12 +169,10 @@ async def _fight(
     need_auto_stuff: bool = True,
 ) -> dict:
 
-    mob_position = await find_nearest_lootable(character, {mob})
-
     await character.get_ready_to_fight(mob, need_auto_stuff=need_auto_stuff)
 
     if character.is_inventory_full:
-        deposit_gold = True if character.gold > 10000 else False
+        deposit_gold = character.gold > 10000
         food = {item for item in character.inventory if item.is_food}
         await character.deposit_all_in_bank(
             with_gold=deposit_gold, items_to_ignore=food
@@ -187,6 +185,8 @@ async def _fight(
             )
         need_full_regeneration = not __can_win_with_eco_food(character, mob)
         await __regenerate_hp(character, full=need_full_regeneration)
+
+    mob_position = await find_nearest_lootable(character, {mob})
 
     async with character.plan_move(mob_position) as plan:
         await plan.prepare()
