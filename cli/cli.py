@@ -7,6 +7,7 @@ from prompt_toolkit.patch_stdout import patch_stdout
 
 import routines
 from models import Encyclopedia, GameManager
+from models.enums import TaskType
 
 from . import cli_action
 
@@ -109,6 +110,8 @@ async def cli(game_manager: GameManager):
                             for food in await Encyclopedia.get_all_food()
                         }
                         if routine == "make_food"
+                        else {task_type.value: None for task_type in TaskType}
+                        if routine == "complete_task"
                         else {}
                     )
                     for routine in routine_names
@@ -128,6 +131,8 @@ async def cli(game_manager: GameManager):
                             for monster in await Encyclopedia.get_all_monsters_names()
                         }
                         if routine == "mob_farm"
+                        else {task_type.value: None for task_type in TaskType}
+                        if routine == "complete_task"
                         else {}
                     )
                     for routine in routine_names
