@@ -2,11 +2,12 @@ import asyncio
 import inspect
 
 from prompt_toolkit import PromptSession
-from prompt_toolkit.completion import NestedCompleter, FuzzyCompleter
+from prompt_toolkit.completion import FuzzyCompleter, NestedCompleter
 from prompt_toolkit.patch_stdout import patch_stdout
 
-from models import Encyclopedia, GameManager
 import routines
+from models import Encyclopedia, GameManager
+
 from . import cli_action
 
 dict_single = {
@@ -40,7 +41,7 @@ dict_special = {
 
 async def cli(game_manager: GameManager):
     characters = game_manager.characters
-    character_names = {name: None for name in characters.keys()}
+    character_names = {name: None for name in characters}
 
     routine_names = [
         name
@@ -50,22 +51,15 @@ async def cli(game_manager: GameManager):
     # Initial completer without items
     completer_dict = {
         **{cmd: character_names for cmd in dict_single},
-        **{"craft": {name: {} for name in characters.keys()}},
-        **{"move": {name: {} for name in characters.keys()}},
+        "craft": {name: {} for name in characters},
+        "move": {name: {} for name in characters},
+        "goMission": {
+            name: {routine: {} for routine in routine_names} for name in characters
         },
-        **{
-            "goMission": {
-                name: {routine: {} for routine in routine_names}
-                for name in characters.keys()
-            }
+        "goRoutine": {
+            name: {routine: {} for routine in routine_names} for name in characters
         },
-        **{
-            "goRoutine": {
-                name: {routine: {} for routine in routine_names}
-                for name in characters.keys()
-            }
-        },
-        **{"nbCraft": {name: {} for name in characters.keys()}},
+        "nbCraft": {name: {} for name in characters},
         **{cmd: None for cmd in dict_all},
         **{cmd: None for cmd in dict_special},
     }
@@ -81,21 +75,21 @@ async def cli(game_manager: GameManager):
                     item_code: None
                     for item_code in await Encyclopedia.get_all_items_names()
                 }
-                for name in characters.keys()
+                for name in characters
             },
             "nbCraft": {
                 name: {
                     item_code: None
                     for item_code in await Encyclopedia.get_all_items_names()
                 }
-                for name in characters.keys()
+                for name in characters
             },
             "sell": {
                 name: {
                     item_code: None
                     for item_code in await Encyclopedia.get_all_items_names()
                 }
-                for name in characters.keys()
+                for name in characters
             },
             "goRoutine": {
                 name: {
@@ -119,7 +113,7 @@ async def cli(game_manager: GameManager):
                     )
                     for routine in routine_names
                 }
-                for name in characters.keys()
+                for name in characters
             },
             "goMission": {
                 name: {
@@ -138,7 +132,7 @@ async def cli(game_manager: GameManager):
                     )
                     for routine in routine_names
                 }
-                for name in characters.keys()
+                for name in characters
             },
         }
         completer_dict.update(updated_actions)
