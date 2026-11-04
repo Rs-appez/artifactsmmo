@@ -18,10 +18,10 @@ class LocationRegistry:
     )
     __bank_locations: ClassVar[set[Map]] = set()
     __workshop_locations: ClassVar[dict[JobType, set[Map]]] = defaultdict(set)
-    __grand_exchange_locations: ClassVar[set[Map]] = set()
     __tasks_masters_locations: ClassVar[dict[TaskType, set[Map]]] = defaultdict(set)
     __transition_locations: ClassVar[dict[Layer, set[int]]] = defaultdict(set)
     __npc_locations: ClassVar[defaultdict[NPC, set[Map]]] = defaultdict(set)
+    __misc_locations: ClassVar[defaultdict[str, set[Map]]] = defaultdict(set)
     __maps: ClassVar[dict[int, Map]] = {}
     _adjacent_maps_from_coordinates: ClassVar[dict[Map, set[Map]]] = {}
 
@@ -76,7 +76,12 @@ class LocationRegistry:
     @staticmethod
     async def get_grand_exchange_locations() -> set[Map]:
         await LocationRegistry.__maps_loaded.wait()
-        return LocationRegistry.__grand_exchange_locations
+        return LocationRegistry.__misc_locations.get("grand_exchange", set())
+
+    @staticmethod
+    async def get_seasonal_altar_locations() -> set[Map]:
+        await LocationRegistry.__maps_loaded.wait()
+        return LocationRegistry.__misc_locations.get("seasonal_altar", set())
 
     @staticmethod
     async def get_tasks_master_locations(task_type: TaskType | None = None) -> set[Map]:
@@ -165,7 +170,7 @@ class LocationRegistry:
                                     job_type = JobType(content["code"])
                                     cls.__workshop_locations[job_type].add(map)
                                 case "grand_exchange":
-                                    cls.__grand_exchange_locations.add(map)
+                                    cls.__misc_locations["grand_exchange"].add(map)
                                 case "tasks_master":
                                     task_type = TaskType(content["code"])
                                     cls.__tasks_masters_locations[task_type].add(map)
@@ -181,7 +186,7 @@ class LocationRegistry:
                                     monster = raid.boss
                                     cls.__drop_locations[monster].add(map)
                                 case "seasonal_altar":
-                                    pass
+                                    cls.__misc_locations["seasonal_altar"].add(map)
                                 case _:
                                     raise Exception(
                                         f"Unknown interaction type: {interaction['content']['type']}"
