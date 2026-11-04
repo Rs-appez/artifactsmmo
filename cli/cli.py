@@ -42,108 +42,67 @@ dict_special = {
 
 async def cli(game_manager: GameManager):
     characters = game_manager.characters
-    character_names = {name: None for name in characters}
 
     routine_names = [
         name
         for name, obj in inspect.getmembers(routines)
         if inspect.isfunction(obj) and not name.startswith("_")
     ]
-    # Initial completer without items
-    completer_dict = {
-        **{cmd: character_names for cmd in dict_single},
-        "craft": {name: {} for name in characters},
-        "move": {name: {} for name in characters},
-        "goMission": {
-            name: {routine: {} for routine in routine_names} for name in characters
-        },
-        "goRoutine": {
-            name: {routine: {} for routine in routine_names} for name in characters
-        },
-        "nbCraft": {name: {} for name in characters},
-        **{cmd: None for cmd in dict_all},
-        **{cmd: None for cmd in dict_special},
-    }
 
-    completer = FuzzyCompleter(NestedCompleter.from_nested_dict(completer_dict))
-    session: PromptSession = PromptSession("> ", completer=completer)
+    def per_character(value_factory):
+        return {name: value_factory() for name in characters}
+
+    def names_completion(names):
+        return {name: None for name in names}
+
+    def routine_completion(routine_args=None):
+        routine_args = routine_args or {}
+        return {
+            routine: names_completion(routine_args.get(routine, []))
+            for routine in routine_names
+        }
+
+    def build_completer_dict(items=None, routine_args=None):
+        items = items or {}
+        item_commands = {
+            "craft": "craft",
+            "nbCraft": "craft",
+            "sell": "all",
+        }
+        return {
+            **{cmd: per_character(lambda: None) for cmd in dict_single},
+            **{
+                cmd: per_character(
+                    lambda t=item_type: names_completion(items.get(t, []))
+                )
+                for cmd, item_type in item_commands.items()
+            },
+            "move": per_character(lambda: None),
+            "goMission": per_character(lambda: routine_completion(routine_args)),
+            "goRoutine": per_character(lambda: routine_completion(routine_args)),
+            **{cmd: None for cmd in (*dict_all, *dict_special)},
+        }
+
+    def make_completer(completer_dict):
+        return FuzzyCompleter(NestedCompleter.from_nested_dict(completer_dict))
+
+    session: PromptSession = PromptSession(
+        "> ", completer=make_completer(build_completer_dict())
+    )
 
     # Load items in background
     async def load_items():
-        updated_actions = {
-            "craft": {
-                name: {
-                    item_code: None
-                    for item_code in await Encyclopedia.get_all_items_names()
-                }
-                for name in characters
-            },
-            "nbCraft": {
-                name: {
-                    item_code: None
-                    for item_code in await Encyclopedia.get_all_items_names()
-                }
-                for name in characters
-            },
-            "sell": {
-                name: {
-                    item_code: None
-                    for item_code in await Encyclopedia.get_all_items_names()
-                }
-                for name in characters
-            },
-            "goRoutine": {
-                name: {
-                    routine: (
-                        {
-                            monster: None
-                            for monster in await Encyclopedia.get_all_items_names()
-                        }
-                        if routine == "gather"
-                        else {
-                            monster: None
-                            for monster in await Encyclopedia.get_all_monsters_names()
-                        }
-                        if routine == "mob_farm"
-                        else {
-                            food.code: None
-                            for food in await Encyclopedia.get_all_food()
-                        }
-                        if routine == "make_food"
-                        else {task_type.value: None for task_type in TaskType}
-                        if routine == "complete_task"
-                        else {}
-                    )
-                    for routine in routine_names
-                }
-                for name in characters
-            },
-            "goMission": {
-                name: {
-                    routine: (
-                        {
-                            monster: None
-                            for monster in await Encyclopedia.get_all_items_names()
-                        }
-                        if routine == "gather"
-                        else {
-                            monster: None
-                            for monster in await Encyclopedia.get_all_monsters_names()
-                        }
-                        if routine == "mob_farm"
-                        else {task_type.value: None for task_type in TaskType}
-                        if routine == "complete_task"
-                        else {}
-                    )
-                    for routine in routine_names
-                }
-                for name in characters
-            },
+        items = {
+            "all": await Encyclopedia.get_all_items_names(),
+            "craft": await Encyclopedia.get_all_craftable_items_names(),
         }
-        completer_dict.update(updated_actions)
-        session.completer = FuzzyCompleter(
-            NestedCompleter.from_nested_dict(completer_dict)
-        )
+        routine_args = {
+            "gather": await Encyclopedia.get_all_gatherable_items_names(),
+            "mob_farm": await Encyclopedia.get_all_monsters_names(),
+            "make_food": await Encyclopedia.get_all_food_names(),
+            "complete_task": [task_type.value for task_type in TaskType],
+        }
+        session.completer = make_completer(build_completer_dict(items, routine_args))
 
     _ = asyncio.create_task(load_items())
 
