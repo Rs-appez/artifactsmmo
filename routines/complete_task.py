@@ -53,8 +53,8 @@ async def complete_task(
             case TaskType.ITEM:
                 task_master = await find_nearest_tasks_master(character, TaskType.ITEM)
 
-    iterations = range(nb) if nb > 0 else count()
-    for _ in iterations:
+    counter = 0
+    while counter < nb or nb == -1:
         if character.task is None:
             if isinstance(type, str):
                 try:
@@ -85,17 +85,15 @@ async def complete_task(
 
             await character.move(task_master)
 
-            if await character.complete_task():
-                print(f"  {character.surname} completed the task")
-            else:
-                print(f"❌ {character.surname} failed to complete the task")
+            if not await character.complete_task():
+                raise Exception("Failed to complete task to task master")
+
+            print(f"  {character.surname} completed the task")
+            counter += 1
 
         except NotWorthableTaskException as e:
             print(f"⚠️ {character.surname} skipped the task : {e}")
             continue
-        except ImpossibleCombatException as e:
-            print(f"⚠️ {character.surname} cannot complete the task because : {e}")
-            raise e
         except Exception as e:
             print(f"❌ {character.surname} failed to complete the task : {e}")
             return
