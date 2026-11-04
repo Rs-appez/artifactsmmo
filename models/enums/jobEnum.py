@@ -88,7 +88,7 @@ class JobType(Enum):
         raise ValueError(f"JobType {self.value} is neither gathering nor crafting.")
 
     @staticmethod
-    def character_job_types() -> list["JobType"]:
+    def character_job_types() -> list[JobType]:
         return [
             JobType.MINING,
             JobType.WOODCUTTING,
