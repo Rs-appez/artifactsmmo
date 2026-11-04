@@ -1,5 +1,6 @@
 import asyncio
 from collections import defaultdict
+from typing import ClassVar
 
 import httpx
 
@@ -12,15 +13,17 @@ from models.enums import JobType, Layer, TaskType, ZoneType
 class LocationRegistry:
     __maps_loaded = asyncio.Event()
     __neighboors_generated = asyncio.Event()
-    __drop_locations: defaultdict[Resource | Monster, set[Map]] = defaultdict(set)
-    __bank_locations: set[Map] = set()
-    __workshop_locations: dict[JobType, set[Map]] = defaultdict(set)
-    __grand_exchange_locations: set[Map] = set()
-    __tasks_masters_locations: dict[TaskType, set[Map]] = defaultdict(set)
-    __transition_locations: dict[Layer, set[int]] = defaultdict(set)
-    __npc_locations: defaultdict[NPC, set[Map]] = defaultdict(set)
-    __maps: dict[int, Map] = {}
-    _adjacent_maps_from_coordinates: dict[Map, set[Map]] = {}
+    __drop_locations: ClassVar[defaultdict[Resource | Monster, set[Map]]] = defaultdict(
+        set
+    )
+    __bank_locations: ClassVar[set[Map]] = set()
+    __workshop_locations: ClassVar[dict[JobType, set[Map]]] = defaultdict(set)
+    __grand_exchange_locations: ClassVar[set[Map]] = set()
+    __tasks_masters_locations: ClassVar[dict[TaskType, set[Map]]] = defaultdict(set)
+    __transition_locations: ClassVar[dict[Layer, set[int]]] = defaultdict(set)
+    __npc_locations: ClassVar[defaultdict[NPC, set[Map]]] = defaultdict(set)
+    __maps: ClassVar[dict[int, Map]] = {}
+    _adjacent_maps_from_coordinates: ClassVar[dict[Map, set[Map]]] = {}
 
     @classmethod
     async def initialize(cls):
@@ -177,7 +180,8 @@ class LocationRegistry:
                                     )
                                     monster = raid.boss
                                     cls.__drop_locations[monster].add(map)
-
+                                case "seasonal_altar":
+                                    pass
                                 case _:
                                     raise Exception(
                                         f"Unknown interaction type: {interaction['content']['type']}"

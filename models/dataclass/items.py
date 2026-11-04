@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from typing import override
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from models.dataclass import Effect
-from models.enums import EquipentType, JobType, Element
+from models.enums import Element, EquipentType, JobType
 
 if TYPE_CHECKING:
     from models.character.character import Character

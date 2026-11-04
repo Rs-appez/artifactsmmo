@@ -1,31 +1,32 @@
 import asyncio
 import json
+from typing import ClassVar
 
 from config import DATA_DIR
-from models.dataclass import NPC, Effect, Event, Item, Monster, Resource, Raid
+from models.dataclass import NPC, Effect, Event, Item, Monster, Raid, Resource
 from models.enums import JobType
 
 
 class Encyclopedia:
-    _items: dict[str, Item] = {}
+    _items: ClassVar[dict[str, Item]] = {}
     __items_loaded = asyncio.Event()
 
-    _effects: dict[str, Effect] = {}
+    _effects: ClassVar[dict[str, Effect]] = {}
     __effects_loaded = asyncio.Event()
 
-    _monsters: dict[str, Monster] = {}
+    _monsters: ClassVar[dict[str, Monster]] = {}
     __monsters_loaded = asyncio.Event()
 
-    _resources: dict[str, Resource] = {}
+    _resources: ClassVar[dict[str, Resource]] = {}
     __resources_loaded = asyncio.Event()
 
-    _events: dict[str, Event] = {}
+    _events: ClassVar[dict[str, Event]] = {}
     __events_loaded = asyncio.Event()
 
-    __npcs: dict[str, NPC] = {}
+    __npcs: ClassVar[dict[str, NPC]] = {}
     __npcs_loaded = asyncio.Event()
 
-    _raids: dict[str, Raid] = {}
+    _raids: ClassVar[dict[str, Raid]] = {}
     __raids_loaded = asyncio.Event()
 
     @classmethod
@@ -285,6 +286,6 @@ class Encyclopedia:
         except Exception as e:
             print(f"❌ Failed to read JSON file {filepath}: {e}")
             print("Launch fecth first")
-            raise e
+            raise
 
         return res
