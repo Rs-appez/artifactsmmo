@@ -13,14 +13,12 @@ dict_single = {
     "stop": cli_action.stop,
     "resume": cli_action.resume,
     "gobank": cli_action.go_bank,
-    "gotask": cli_action.complete_task,
     "exchange_coin": cli_action.exchange_task_coin,
     "bagize": cli_action.bagize,
 }
 
 dict_actions = {
     "craft": cli_action.craft,
-    "gotask": cli_action.complete_task,
     "goroutine": cli_action.asign_routine,
     "gomission": cli_action.asign_mission,
     "nbcraft": cli_action.nb_craft_needed_calculator,
@@ -54,11 +52,6 @@ async def cli(game_manager: GameManager):
         **{cmd: character_names for cmd in dict_single},
         **{"craft": {name: {} for name in characters.keys()}},
         **{"move": {name: {} for name in characters.keys()}},
-        **{
-            "gotask": {
-                name: {task: None for task in ["items", "monsters"]}
-                for name in characters.keys()
-            }
         },
         **{
             "goMission": {
