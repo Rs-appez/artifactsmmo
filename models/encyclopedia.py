@@ -65,6 +65,25 @@ class Encyclopedia:
         return {item for item in Encyclopedia._items.values() if item.is_food}
 
     @staticmethod
+    async def get_all_food_names() -> list[str]:
+        await Encyclopedia.__items_loaded.wait()
+        return [code for code, item in Encyclopedia._items.items() if item.is_food]
+
+    @staticmethod
+    async def get_all_gatherable_items_names() -> list[str]:
+        await Encyclopedia.__items_loaded.wait()
+        return [
+            code
+            for code, item in Encyclopedia._items.items()
+            if item.is_gatherable_resource
+        ]
+
+    @staticmethod
+    async def get_all_craftable_items_names() -> list[str]:
+        await Encyclopedia.__items_loaded.wait()
+        return [code for code, item in Encyclopedia._items.items() if item.is_craftable]
+
+    @staticmethod
     async def get_all_items_by_job(job: JobType, level: int = -1) -> set[Item]:
         await Encyclopedia.__items_loaded.wait()
         return {
