@@ -56,7 +56,10 @@ def _score_weapon(weapon: Item, monster: Monster) -> float:
             critical_strike += value
         elif effect.code in WEIGHTS:
             score += value * WEIGHTS[effect.code]
-    return score + (dmg * CRITICAL_STRIKE_MULTIPLIER * critical_strike / 100)
+
+    crit_chance = min(critical_strike, 100) / 100
+    expected = dmg * (1 + crit_chance * (CRITICAL_STRIKE_MULTIPLIER - 1))
+    return score + expected
 
 
 def score_weapon(weapon: Item, monster: Monster) -> float:
