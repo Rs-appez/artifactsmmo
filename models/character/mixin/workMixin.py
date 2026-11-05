@@ -135,7 +135,7 @@ class WorkMixin:
         self._routine = WorkRoutine(seeking_the_meaning_of_life, is_routine=True)
 
     def make_default_routine(self: Character):
-        self._routine = WorkRoutine(make_food, "cooked_salmon", is_routine=True)
+        self._routine = WorkRoutine(make_food, is_routine=True)
 
     def stop(self: Character):
         self._previous_routine = self._routine
