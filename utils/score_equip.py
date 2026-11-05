@@ -28,11 +28,11 @@ SLOT_RULES: dict[str, tuple[int, bool]] = {  # slot: (qty, duplicates_allowed)
 DEFAULT_RULE = (1, False)
 
 
-def _damage_multiplier(element: Element, monster: "Monster") -> float:
+def _damage_multiplier(element: Element, monster: Monster) -> float:
     return max(0, 100 - monster.resistance.get(element, 0)) / 100
 
 
-def _weapon_attacks(weapon: "Item") -> frozenset[tuple[Element, float]]:
+def _weapon_attacks(weapon: Item) -> frozenset[tuple[Element, float]]:
     """(element, base attack) pairs dealt by the weapon each turn."""
     return frozenset(
         (elem, value)
@@ -42,7 +42,7 @@ def _weapon_attacks(weapon: "Item") -> frozenset[tuple[Element, float]]:
 
 
 @lru_cache(maxsize=128)
-def _score_weapon(weapon: "Item", monster: "Monster") -> float:
+def _score_weapon(weapon: Item, monster: Monster) -> float:
     if not weapon.is_weapon:
         raise ValueError(f"Item {weapon.name} is not a weapon")
     score = 0.0
@@ -59,15 +59,15 @@ def _score_weapon(weapon: "Item", monster: "Monster") -> float:
     return score + (dmg * CRITICAL_STRIKE_MULTIPLIER * critical_strike / 100)
 
 
-def score_weapon(weapon: "Item", monster: "Monster") -> float:
+def score_weapon(weapon: Item, monster: Monster) -> float:
     """Score a weapon against a monster. Higher is better."""
     return _score_weapon(weapon, monster)
 
 
 @lru_cache(maxsize=1280)
 def _score_equipment(
-    equipment: "Item",
-    monster: "Monster",
+    equipment: Item,
+    monster: Monster,
     weapon_attacks: frozenset[tuple[Element, float]],  # was weapon_elems
 ) -> float:
     if not equipment.is_equipment:
@@ -92,8 +92,8 @@ def _score_equipment(
 
 
 def score_equipment(
-    equipment: "Item",
-    monster: "Monster",
+    equipment: Item,
+    monster: Monster,
     weapon_elems: frozenset[tuple[Element, float]],
 ) -> float:
     """Score a piece of equipment against a monster. Higher is better."""
@@ -101,19 +101,19 @@ def score_equipment(
 
 
 def _best_picks(
-    candidates: frozenset[tuple["Item", int]],
-    monster: "Monster",
+    candidates: frozenset[tuple[Item, int]],
+    monster: Monster,
     weapon_elems: frozenset[tuple[Element, float]],
     count: int,
     allow_duplicates: bool,
-) -> list["Item"]:
+) -> list[Item]:
     """Top `count` picks from a slot, honouring quantities and uniqueness."""
     ranked = sorted(
         candidates,
         key=lambda c: score_equipment(c[0], monster, weapon_elems),
         reverse=True,
     )
-    picks: list["Item"] = []
+    picks: list[Item] = []
     for item, qty in ranked:
         remaining = count - len(picks)
         if remaining <= 0:
@@ -125,13 +125,13 @@ def _best_picks(
 
 @lru_cache(maxsize=1280)
 def __build_set(
-    weapon: "Item",
-    armor_by_slot: frozenset[frozenset[tuple["Item", int]]],
-    monster: "Monster",
-) -> tuple[dict["Item", int], float]:
+    weapon: Item,
+    armor_by_slot: frozenset[frozenset[tuple[Item, int]]],
+    monster: Monster,
+) -> tuple[dict[Item, int], float]:
     """Best armor set around one weapon. Returns ({item: qty}, total_score)."""
     elems = _weapon_attacks(weapon)
-    equipment: dict["Item", int] = {weapon: 1}
+    equipment: dict[Item, int] = {weapon: 1}
     total = score_weapon(weapon, monster)
 
     for candidates in armor_by_slot:
@@ -145,24 +145,24 @@ def __build_set(
 
 
 def _build_set(
-    weapon: "Item",
-    armor_by_slot: frozenset[frozenset[tuple["Item", int]]],
-    monster: "Monster",
-) -> tuple[dict["Item", int], float]:
+    weapon: Item,
+    armor_by_slot: frozenset[frozenset[tuple[Item, int]]],
+    monster: Monster,
+) -> tuple[dict[Item, int], float]:
     """Best armor set around one weapon. Returns (set, total_score)."""
     return __build_set(weapon, armor_by_slot, monster)
 
 
 @lru_cache(maxsize=1280)
 def _best_equips_for_monster(
-    monster: "Monster", items: frozenset[tuple["Item", int]], top_k: int
-) -> dict["Item", int]:
+    monster: Monster, items: frozenset[tuple[Item, int]], top_k: int
+) -> dict[Item, int]:
     weapons = [i[0] for i in items if i[0].is_weapon]
     if not weapons:
         return {}
     weapons.sort(key=lambda w: score_weapon(w, monster), reverse=True)
 
-    armor_by_slot: dict[str, list[tuple["Item", int]]] = {}
+    armor_by_slot: dict[str, list[tuple[Item, int]]] = {}
     for item, qty in items:
         if (
             item.is_equipment
@@ -175,7 +175,7 @@ def _best_equips_for_monster(
     armor_by_slot_set = frozenset(frozenset(v) for v in armor_by_slot.values())
 
     # try top K weapons, keep the best full combo
-    best_set: dict["Item", int] = {}
+    best_set: dict[Item, int] = {}
     best_total = float("-inf")
     for weapon in weapons[:top_k]:
         equipment, total = _build_set(weapon, armor_by_slot_set, monster)
@@ -187,9 +187,9 @@ def _best_equips_for_monster(
 
 
 def best_equips_for_monster(
-    monster: "Monster",
-    items: frozenset[tuple["Item", int]],
+    monster: Monster,
+    items: frozenset[tuple[Item, int]],
     top_k: int = TOP_K_WEAPONS,
-) -> dict["Item", int]:
+) -> dict[Item, int]:
     """Best equipment set for a character against a monster. Returns a dict of slot -> item."""
     return _best_equips_for_monster(monster, items, top_k)
