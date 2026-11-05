@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
-async def make_food(character: "Character", food: Item | str):
+async def make_food(character: Character, food: Item | str):
     try:
         if isinstance(food, str):
             food = await Encyclopedia.get_item_by_code(food)
@@ -39,7 +39,7 @@ async def make_food(character: "Character", food: Item | str):
         print(f"❌ {character.surname} failed to make food : {e}")
 
 
-async def _gather_and_make_food(character: "Character", food: Item, ingredient: Item):
+async def _gather_and_make_food(character: Character, food: Item, ingredient: Item):
 
     while True:
         while not character.is_inventory_full:

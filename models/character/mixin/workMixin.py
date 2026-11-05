@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from models.character import Character
 
 
-async def seeking_the_meaning_of_life(character: "Character"):
+async def seeking_the_meaning_of_life(character: Character):
     print(f"🤔 {character.surname} is seeking the meaning of life...")
     await asyncio.sleep(float("inf"))
 
@@ -25,7 +25,7 @@ class WorkRoutine:
         self._is_paused = False
         self._task = task
 
-    def __call__(self, character: "Character") -> asyncio.Future:
+    def __call__(self, character: Character) -> asyncio.Future:
         return self._task(character, *self.args, **self.kwargs)
 
     @property
@@ -55,7 +55,7 @@ class WorkMixin:
     _priority_tasks: deque[WorkRoutine]
     _character_lock: asyncio.Lock
 
-    def __init_work_mixin__(self: "Character"):
+    def __init_work_mixin__(self: Character):
         try:
             self._routine = self.load_routine()
         except Exception as e:
@@ -91,7 +91,7 @@ class WorkMixin:
             "routine_kwargs": self._routine.kwargs or {},
         }
 
-    async def start(self: "Character"):
+    async def start(self: Character):
         async with self._character_lock:
             if self._work_task is not None:
                 print("❌ Character is already started")
@@ -125,19 +125,19 @@ class WorkMixin:
         finally:
             self._work_task = None
 
-    def do_one_time_task(self: "Character", task: FunctionType, *args, **kwargs):
+    def do_one_time_task(self: Character, task: FunctionType, *args, **kwargs):
         mission = WorkRoutine(task, *args, **kwargs)
         self._priority_tasks.append(mission)
         if not self._routine.is_paused:
             self._interrupt_routine()
 
-    def seek_the_meaning_of_life(self: "Character"):
+    def seek_the_meaning_of_life(self: Character):
         self._routine = WorkRoutine(seeking_the_meaning_of_life, is_routine=True)
 
-    def make_default_routine(self: "Character"):
+    def make_default_routine(self: Character):
         self._routine = WorkRoutine(make_food, "cooked_salmon", is_routine=True)
 
-    def stop(self: "Character"):
+    def stop(self: Character):
         self._previous_routine = self._routine
         if not self._routine.is_paused and self.is_working:
             self.seek_the_meaning_of_life()
@@ -145,7 +145,7 @@ class WorkMixin:
         print("previous routine was:")
         print(self._previous_routine.name)
 
-    async def resume(self: "Character"):
+    async def resume(self: Character):
         if self.is_working:
             print("❌ Character is already working on a routine")
             return
@@ -162,12 +162,12 @@ class WorkMixin:
         self._routine = self._previous_routine
         self._interrupt_routine()
 
-    def _interrupt_routine(self: "Character"):
+    def _interrupt_routine(self: Character):
         if self._work_task is not None:
             self._interrupted = True
             _ = self._work_task.cancel()
 
-    def assign_routine(self: "Character", task: FunctionType, *args, **kwargs):
+    def assign_routine(self: Character, task: FunctionType, *args, **kwargs):
 
         self._interrupt_routine()
         self._routine = WorkRoutine(task, *args, is_routine=True, **kwargs)
