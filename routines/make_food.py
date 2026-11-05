@@ -2,14 +2,17 @@ from typing import TYPE_CHECKING
 
 from models import Encyclopedia
 from models.dataclass import Item
+from models.enums import JobType
 from routines import craft, gather
 
 if TYPE_CHECKING:
     from models.character import Character
 
 
-async def make_food(character: Character, food: Item | str):
+async def make_food(character: Character, food: Item | str | None = None):
     try:
+        if not food:
+            food = await _find_best_food_to_make(character)
         if isinstance(food, str):
             food = await Encyclopedia.get_item_by_code(food)
         if not food.is_food:
@@ -50,3 +53,25 @@ async def _gather_and_make_food(character: Character, food: Item, ingredient: It
             await craft(character, food, nb_ingredient_in_inventory)
 
         await character.deposit_all_in_bank()
+
+
+async def _find_best_food_to_make(character: Character) -> Item:
+    fishing_level = character.get_job_level(JobType.FISHING)
+    cooking_level = character.get_job_level(JobType.COOKING)
+    target_level = min(fishing_level, cooking_level)
+
+    return max(
+        [
+            food
+            for food in await Encyclopedia.get_all_food()
+            if food.craft_level <= target_level
+            and len(food.craft_ingredients) == 1
+            and (
+                await Encyclopedia.get_item_by_code(
+                    str(food.craft_ingredients[0]["code"])
+                )
+            ).job
+            == JobType.FISHING
+        ],
+        key=lambda food: food.craft_level,
+    )
