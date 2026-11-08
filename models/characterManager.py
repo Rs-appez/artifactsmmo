@@ -9,6 +9,7 @@ class CharacterManager:
         self.characters = characters
 
     def start_raid(self, raid: Raid):
+        return
 
         # tmp implementation
 
@@ -41,14 +42,15 @@ class CharacterManager:
             print(f"❌ Invalid event content for hunting: {event.content}")
             return
         monster = event.content
-        if monster.is_boss or monster.code in [
-            "corrupted_ogre",
-            "bandit_lizard",
-            "demon",
-            "full_moon_vampire",
-            "cultist_emperor",
-            "echoless_bat",
-        ]:
+        if monster.is_boss:
+            #     or monster.code in [
+            #     "corrupted_ogre",
+            #     "bandit_lizard",
+            #     "demon",
+            #     "full_moon_vampire",
+            #     "cultist_emperor",
+            #     "echoless_bat",
+            # ]:
             return
             # TODO: Implement boss hunting logic
 
