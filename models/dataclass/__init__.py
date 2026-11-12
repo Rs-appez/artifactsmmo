@@ -7,6 +7,7 @@ from .resources import Resource
 from .task import TaskQuest
 from .events import Event
 from .maps import Map
+from .offerings import Offering
 
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     "NPC",
     "Event",
     "Raid",
+    "Offering",
 ]

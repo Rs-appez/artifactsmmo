@@ -1,5 +1,6 @@
 from .encyclopedia import Encyclopedia
 from .locationRegistry import LocationRegistry
+from .altar import Altar
 from .character import Character
 from .characterManager import CharacterManager
 from .gameManager import GameManager
@@ -10,4 +11,5 @@ __all__ = [
     "Encyclopedia",
     "LocationRegistry",
     "CharacterManager",
+    "Altar",
 ]

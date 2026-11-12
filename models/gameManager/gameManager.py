@@ -4,7 +4,7 @@ from collections.abc import Coroutine, Sequence
 import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS, SANDBOX
-from models import Character, CharacterManager, Encyclopedia, LocationRegistry
+from models import Altar, Character, CharacterManager, Encyclopedia, LocationRegistry
 from models.dataclass.bank import Bank
 from models.event import EventHandler, EventListener
 from routines.monster_farm import boss_farm, raid_farm
@@ -19,7 +19,8 @@ class GameManager:
     event_listener = EventListener(event_handler)
 
     def __init__(self):
-        _ = asyncio.ensure_future(
+        Altar.sync_altar()
+        asyncio.ensure_future(
             asyncio.gather(
                 Encyclopedia.initialize(),
                 LocationRegistry.initialize(),
