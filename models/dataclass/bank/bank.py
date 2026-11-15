@@ -3,10 +3,10 @@ import functools
 import uuid
 from asyncio import Lock
 from collections import defaultdict
-from collections.abc import Awaitable, Callable
+from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, AsyncGenerator, Concatenate, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Concatenate, ParamSpec, TypeVar
 
 from httpx import AsyncClient
 
@@ -81,7 +81,7 @@ class Bank:
                 delay = max(0, next_run - loop.time())
                 try:
                     await asyncio.wait_for(cls.__refresh_stop.wait(), timeout=delay)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     pass
 
         cls.__refresh_task = asyncio.create_task(_runner(), name="bank-auto-refresh")
@@ -122,7 +122,7 @@ class Bank:
 
     @classmethod
     @asynccontextmanager
-    async def items(cls) -> AsyncGenerator[dict[Item, int], None]:
+    async def items(cls) -> AsyncGenerator[dict[Item, int]]:
         async with cls.locked():
             yield cls._items()
 
@@ -161,7 +161,7 @@ class Bank:
         inventory: dict[Item, int] | None = None,
         tokens_to_revoke: set[uuid.UUID] | None = None,
         auto_unreserve_token: bool = True,
-    ) -> AsyncGenerator[uuid.UUID, None]:
+    ) -> AsyncGenerator[uuid.UUID]:
         async with cls.locked():
             if tokens_to_revoke:
                 for token in tokens_to_revoke:
@@ -244,7 +244,7 @@ class Bank:
     @asynccontextmanager
     async def get_reserved_items_partial(
         cls, token: uuid.UUID, items: dict[Item, int]
-    ) -> AsyncGenerator[uuid.UUID, None]:
+    ) -> AsyncGenerator[uuid.UUID]:
         async with cls.locked():
             new_token = cls.__get_reserved_items_partial(token, items)
         try:
