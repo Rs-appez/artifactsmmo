@@ -2,7 +2,7 @@
     "routine_name": "xp_skill",
     "routine_module": "routines.level_up_skill",
     "routine_args": [
-        "woodcutting"
+        "mining"
     ],
     "routine_kwargs": {}
 }
