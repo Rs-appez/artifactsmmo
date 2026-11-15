@@ -7,7 +7,6 @@ from config import ARTIFACTSMMO_URL, TIMEZONE
 from models import Encyclopedia, LocationRegistry
 from models.dataclass import Item, TaskQuest
 from models.enums import Element, EquipentType, JobType
-from utils.math_fight import calc_attack
 
 from .decorators import refresh_after
 from .mixin import (
