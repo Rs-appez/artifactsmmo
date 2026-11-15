@@ -10,11 +10,13 @@ from models.enums import Element, EquipentType, JobType
 
 from .decorators import refresh_after
 from .mixin import (
+    AltarMixin,
     ApiMixin,
     BankMixin,
     CraftMixin,
     FightMixin,
     GatherMixin,
+    GrandExchangeMixin,
     InventoryMixin,
     JobMixin,
     MoveMixin,
@@ -23,7 +25,6 @@ from .mixin import (
     StuffMixin,
     TaskMixin,
     WorkMixin,
-    GrandExchangeMixin,
 )
 
 
@@ -43,6 +44,7 @@ class Character(
     NpcMixin,
     MoveMixin,
     GrandExchangeMixin,
+    AltarMixin,
 ):
     _: KW_ONLY
     _name: str

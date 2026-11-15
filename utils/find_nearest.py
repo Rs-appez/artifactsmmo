@@ -98,3 +98,10 @@ async def find_nearest_grand_exchange(character: Character) -> Map:
     if not grand_exchange_locations:
         raise ValueError("No grand exchange locations found")
     return __find_nearest_location(grand_exchange_locations, character.location)
+
+
+async def find_nearest_altar(character: Character) -> Map:
+    altar_locations = await LocationRegistry.get_altar_locations()
+    if not altar_locations:
+        raise ValueError("No altar locations found")
+    return __find_nearest_location(altar_locations, character.location)

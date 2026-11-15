@@ -79,7 +79,7 @@ class LocationRegistry:
         return LocationRegistry.__misc_locations.get("grand_exchange", set())
 
     @staticmethod
-    async def get_seasonal_altar_locations() -> set[Map]:
+    async def get_altar_locations() -> set[Map]:
         await LocationRegistry.__maps_loaded.wait()
         return LocationRegistry.__misc_locations.get("seasonal_altar", set())
 

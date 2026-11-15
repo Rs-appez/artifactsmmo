@@ -5,7 +5,7 @@ from typing import ClassVar
 import httpx
 
 from config import ARTIFACTSMMO_URL, HEADERS
-from models.dataclass import Offering
+from models.dataclass import Item, Monster, Offering, Resource
 from models.enums import JobType
 
 
@@ -28,6 +28,13 @@ class Altar:
     async def has_job(cls, job: JobType) -> bool:
         await cls._is_syncing.wait()
         return job in cls._jobs
+
+    @classmethod
+    async def get_offering(cls, target: Resource | Monster | Item) -> Offering | None:
+        await cls._is_syncing.wait()
+        return next(
+            (offering for offering in cls._offerings if offering.target == target), None
+        )
 
     @classmethod
     def sync_altar(cls) -> None:
