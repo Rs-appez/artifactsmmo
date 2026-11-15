@@ -1,4 +1,3 @@
-from itertools import count
 from typing import TYPE_CHECKING
 
 from exceptions import (
