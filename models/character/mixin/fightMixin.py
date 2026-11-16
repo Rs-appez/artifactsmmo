@@ -179,7 +179,7 @@ class FightMixin:
         )
         win_rate = simulate(simulateData).win_rate
 
-        return win_rate >= 95.0
+        return win_rate >= 98.0
 
     def need_food_to_farm(self: "Character", monster: Monster) -> bool:
 
