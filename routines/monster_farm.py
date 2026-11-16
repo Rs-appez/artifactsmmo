@@ -41,8 +41,8 @@ async def mob_farm(
         for _ in iterations:
             await _fight(character, mob, force=force, need_auto_stuff=need_auto_stuff)
 
-    except ImpossibleCombatException as e:
-        raise e
+    except ImpossibleCombatException:
+        raise
     except Exception as e:
         print(f"❌ {character.surname} failed to combat : {e}")
 

@@ -1,3 +1,4 @@
+from exceptions import ImpossibleCombatException
 import asyncio
 from collections import deque
 from types import FunctionType
@@ -113,12 +114,20 @@ class WorkMixin:
                         raise
                     _ = await self.refresh()
                     self._interrupted = False
+                except ImpossibleCombatException:
+                    if self._routine.is_paused:
+                        print(
+                            f"⚠️ {self.surname} interrupted mission {self.work_on} due to impossible combat"
+                        )
+                    else:
+                        print(
+                            f"⚠️ {self.surname} failed routine {self.work_on} due to impossible combat"
+                        )
+                        self.make_default_routine()
+
                 except Exception as e:
                     print(f"❌ {self.surname} work error : {e}")
-                    if not SANDBOX:
-                        self.make_default_routine()
-                    else:
-                        self.seek_the_meaning_of_life()
+                    self.make_default_routine()
 
         except asyncio.CancelledError:
             pass
@@ -135,7 +144,10 @@ class WorkMixin:
         self._routine = WorkRoutine(seeking_the_meaning_of_life, is_routine=True)
 
     def make_default_routine(self: Character):
-        self._routine = WorkRoutine(make_food, is_routine=True)
+        if not SANDBOX:
+            self._routine = WorkRoutine(make_food, is_routine=True)
+        else:
+            self.seek_the_meaning_of_life()
 
     def stop(self: Character):
         self._previous_routine = self._routine
