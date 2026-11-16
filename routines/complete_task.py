@@ -8,7 +8,7 @@ from exceptions import (
 from models import Encyclopedia
 from models.dataclass import Item, Monster
 from models.dataclass.bank import Bank
-from models.enums import TaskType
+from models.enums import JobType, TaskType
 from routines import generate_missing_items, mob_farm
 from utils.find_nearest import find_nearest_tasks_master
 
@@ -159,6 +159,8 @@ async def __monster_task(character: Character) -> None:
 def __is_worth_it(item: Item) -> bool:
     # TODO : add more logic to determine if the task is worth it or not
     if item.level == 35 or item.level == 50:
+        return False
+    if item.is_food or item.job is JobType.FISHING:
         return False
     return True
 
