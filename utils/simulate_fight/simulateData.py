@@ -105,6 +105,19 @@ class FightMetadata:
             for name, entity in data
         }
 
+    def __str__(self) -> str:
+        char = self.entities[self.entities_map[True]]
+        monster = self.entities[self.entities_map[False]]
+        return (
+            f"Turn {self.get_turns} :\n"
+            f"Char : {char.hp_left}/{char.max_hp} HP, {char.initiative} initiative, "
+            f"{char.attack} attack, {char.resistance} resistance, "
+            f"{char.effects} effects\n"
+            f"Monster : {monster.hp_left}/{monster.max_hp} HP, {monster.initiative} initiative, "
+            f"{monster.attack} attack, {monster.resistance} resistance, "
+            f"{monster.effects} effects"
+        )
+
     @property
     def get_turns(self) -> int:
         return sum(entity.nb_turns for entity in self.entities.values())
