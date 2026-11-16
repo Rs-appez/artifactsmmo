@@ -62,24 +62,24 @@ class FightMixin:
         return self._initiative
 
     @property
-    def is_ready_to_fight_boss(self: "Character"):
+    def is_ready_to_fight_boss(self: Character):
         return self._ready_to_fight_boss
 
     @is_ready_to_fight_boss.setter
-    def is_ready_to_fight_boss(self: "Character", value: bool):
+    def is_ready_to_fight_boss(self: Character, value: bool):
         self._ready_to_fight_boss = value
 
     @property
-    async def waiting_for_fight(self: "Character"):
+    async def waiting_for_fight(self: Character):
         while self._ready_to_fight_boss:
             await asyncio.sleep(0.2)
 
     @request_action
-    async def set_ready_to_fight(self: "Character"):
+    async def set_ready_to_fight(self: Character):
         self._ready_to_fight_boss = True
 
     async def fight(
-        self: "Character", teammate: list[Character] | None = None
+        self: Character, teammate: list[Character] | None = None
     ) -> tuple[bool, dict]:
         """
         Fight with the character and optionally with teammates.
@@ -111,7 +111,7 @@ class FightMixin:
             print(f"❌ {self.surname} fight : {e}")
             return (False, {})
 
-    async def rest(self: "Character") -> bool:
+    async def rest(self: Character) -> bool:
         if self.hp >= self.max_hp:
             return True
         try:
@@ -123,7 +123,7 @@ class FightMixin:
             print(f"❌ {self.surname} Rest : {e}")
             return False
 
-    def how_much_hp_can_regenerate(self: "Character") -> int:
+    def how_much_hp_can_regenerate(self: Character) -> int:
         food = self.get_food
         if not food:
             return 0
@@ -141,7 +141,7 @@ class FightMixin:
 
         return total_heal
 
-    async def regenerate_hp(self: "Character", full: bool) -> None:
+    async def regenerate_hp(self: Character, full: bool) -> None:
         food = self.get_food
         if not food:
             print(f"❌ {self.surname} has no food to regenerate hp")
@@ -168,7 +168,7 @@ class FightMixin:
                 )
 
     def will_win_against(
-        self: "Character",
+        self: Character,
         monster: Monster,
         max_hp: bool = False,
         custom_hp: int | None = None,
@@ -181,7 +181,7 @@ class FightMixin:
 
         return win_rate >= 98.0
 
-    def need_food_to_farm(self: "Character", monster: Monster) -> bool:
+    def need_food_to_farm(self: Character, monster: Monster) -> bool:
 
         simulateData = SimulateData.from_models(self, monster)
         nb_turns = simulate(simulateData).average_turns
@@ -191,7 +191,7 @@ class FightMixin:
         return True
 
     async def get_ready_to_fight(
-        self: "Character", mob: Monster, need_auto_stuff: bool = True
+        self: Character, mob: Monster, need_auto_stuff: bool = True
     ):
         if need_auto_stuff:
             await self.weaponize(mob)
