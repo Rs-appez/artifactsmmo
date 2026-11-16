@@ -16,3 +16,4 @@
 (B) 2026-09-09 handle achivement for the desert bank
 (B) 2026-11-02 better handle craft/gather for level up job @refactor
 (B) 2026-11-08 fix useless deposit in make_food @fix
+(B) 2026-11-16 handle craft offering and autogenerate other offrering @feature
