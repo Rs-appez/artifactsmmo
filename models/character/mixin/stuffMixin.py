@@ -243,14 +243,16 @@ class StuffMixin:
                 and self.weapon.is_for_job(job, for_gathering)
                 else None
             )
-
+            job_effect = await Encyclopedia.get_effect_by_code(
+                job.get_job_effect_name(for_gathering)
+            )
             best_tool_in_inventory = max(
                 [
                     item
                     for item in self.inventory
                     if item.is_for_job(job, for_gathering) and item.can_be_used_by(self)
                 ],
-                key=lambda item: item.effects.get(job.value, 0),
+                key=lambda item: item.effects.get(job_effect, 0),
                 default=None,
             )
             if best_tool is not None and best_tool_in_inventory is not None:
