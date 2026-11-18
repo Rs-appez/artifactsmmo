@@ -62,7 +62,14 @@ class Effect:
     @property
     def get_job(self) -> JobType:
         for job in JobType:
+            if not job.value:
+                continue
             if self.code.startswith(job.value):
                 return job
 
         return JobType.NO_JOB
+
+    @property
+    def is_job_effect(self) -> bool:
+        """Returns True if the effect is associated with a job, False otherwise."""
+        return self.get_job.is_crafting or self.get_job.is_gathering

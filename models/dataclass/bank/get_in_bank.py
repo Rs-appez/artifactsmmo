@@ -95,7 +95,7 @@ async def get_tool(
         job_effect = await Encyclopedia.get_effect_by_code(
             job.get_job_effect_name(for_gathering)
         )
-        best_tool = min(tool_items, key=lambda item: item.effects.get(job_effect, 0))
+        best_tool = max(tool_items, key=lambda item: item.effects.get(job_effect, 0))
         token = await Bank._reserve_items({best_tool: 1})
     try:
         yield token, best_tool

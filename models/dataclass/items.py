@@ -47,7 +47,8 @@ class Item:
         effects_data = data.get("effects", [])
         for effect_data in effects_data:
             effect = await Encyclopedia.get_effect_by_code(effect_data["code"])
-            effects[effect] = effect_data["value"]
+            value = int(effect_data["value"])
+            effects[effect] = value if not effect.is_job_effect else -value
 
         # TODO : ugly temp (i hope)
         job = JobType(craft_data.get("skill", "no_job"))
@@ -227,7 +228,7 @@ class Item:
             job.get_job_effect_name(for_gathering)
         )
 
-        return self.effects.get(job_effect, 0) < other.effects.get(job_effect, 0)
+        return self.effects.get(job_effect, 0) > other.effects.get(job_effect, 0)
 
     @override
     def __hash__(self):
