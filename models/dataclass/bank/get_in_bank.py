@@ -105,8 +105,15 @@ async def get_tool(
 
 @asynccontextmanager
 async def get_best_stat_item(
-    character: Character, wanted_effect: Effect
+    character: Character, wanted_effects: list[Effect]
 ) -> AsyncGenerator[tuple[uuid.UUID, dict[Item, int]]]:
+    def _score(item: Item) -> tuple[int, ...]:
+        # Lexicographic: first effect has the highest priority
+        return tuple(item.effects.get(effect, 0) for effect in wanted_effects)
+
+    def _key(item: Item) -> tuple:
+        return (*_score(item), -item.level, item.code)
+
     async with Bank.items() as bank_items:
         all_items = {
             item: qty
@@ -114,7 +121,7 @@ async def get_best_stat_item(
             if item.is_equipment
             and item.type != EquipentType.WEAPON.value
             and item.can_be_used_by(character)
-            and wanted_effect in item.effects
+            and any(effect in item.effects for effect in wanted_effects)
         }
         for item in character.equipped_items:
             all_items[item] = all_items.get(item, 0) + 1
@@ -122,12 +129,7 @@ async def get_best_stat_item(
         best_equipment = {
             equipmentType: max(
                 (item for item in all_items if item.type == equipmentType.value),
-                key=lambda item: (
-                    item.effects.get(wanted_effect, 0),
-                    -item.level,
-                    item.code,
-                    all_items[item],
-                ),
+                key=lambda item: (*_key(item), all_items[item]),
                 default=None,
             )
             for equipmentType in EquipentType
@@ -143,22 +145,13 @@ async def get_best_stat_item(
                     if item.type == EquipentType.RING.value
                     for _ in range(qty)
                 ),
-                key=lambda item: (
-                    item.effects.get(wanted_effect, 0),
-                    -item.level,
-                    item.code,
-                    all_items[item],
-                ),
+                key=lambda item: (*_key(item), all_items[item]),
             )
         ).items()
         best_artifact = heapq.nlargest(
             3,
             (item for item in all_items if item.type == EquipentType.ARTIFACT.value),
-            key=lambda item: (
-                item.effects.get(wanted_effect, 0),
-                -item.level,
-                item.code,
-            ),
+            key=lambda item: (*_key(item), all_items[item]),
         )
 
         better_items = {item: 1 for item in best_equipment.values() if item is not None}
@@ -168,7 +161,7 @@ async def get_best_stat_item(
         better_items = {
             item: qty
             for item, qty in better_items.items()
-            if item.effects.get(wanted_effect, 0) > 0
+            if any(value > 0 for value in _score(item))
         }
 
         token = await _reserve_unequipped_items(character, better_items)
