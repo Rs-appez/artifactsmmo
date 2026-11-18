@@ -1,8 +1,9 @@
 import heapq
 import uuid
 from collections import Counter
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import TYPE_CHECKING, AsyncGenerator
+from typing import TYPE_CHECKING
 
 from models import Encyclopedia
 from models.dataclass import Effect, Item, Monster
@@ -21,7 +22,7 @@ async def get_max_items(
     keep_free_slots: int = 0,
     per_stack: int = 1,
     max_quantity: int = -1,
-) -> AsyncGenerator[tuple[uuid.UUID, int], None]:
+) -> AsyncGenerator[tuple[uuid.UUID, int]]:
     if per_stack <= 0:
         raise ValueError("per_stack must be > 0")
     if keep_free_slots < 0:
@@ -50,9 +51,7 @@ async def get_max_items(
 
 
 @asynccontextmanager
-async def get_food(
-    character: Character, quantity: int
-) -> AsyncGenerator[uuid.UUID, None]:
+async def get_food(character: Character, quantity: int) -> AsyncGenerator[uuid.UUID]:
     async with Bank.items() as bank_items:
         food_items = {
             item: quantity
@@ -107,7 +106,7 @@ async def get_tool(
 @asynccontextmanager
 async def get_best_stat_item(
     character: Character, wanted_effect: Effect
-) -> AsyncGenerator[tuple[uuid.UUID, dict[Item, int]], None]:
+) -> AsyncGenerator[tuple[uuid.UUID, dict[Item, int]]]:
     async with Bank.items() as bank_items:
         all_items = {
             item: qty
@@ -180,7 +179,7 @@ async def get_best_stat_item(
 
 
 @asynccontextmanager
-async def get_bag(character: Character) -> AsyncGenerator[tuple[uuid.UUID, Item], None]:
+async def get_bag(character: Character) -> AsyncGenerator[tuple[uuid.UUID, Item]]:
     inventory_bag_effect = await Encyclopedia.get_effect_by_code("inventory_space")
     current_bag = character.get_equipped_item_by_slot(EquipentType.BAG)
     async with Bank.items() as bank_items:
@@ -211,8 +210,8 @@ async def get_bag(character: Character) -> AsyncGenerator[tuple[uuid.UUID, Item]
 
 @asynccontextmanager
 async def get_best_equipment(
-    character: Character, monster: "Monster"
-) -> AsyncGenerator[tuple[uuid.UUID, dict[Item, int]], None]:
+    character: Character, monster: Monster
+) -> AsyncGenerator[tuple[uuid.UUID, dict[Item, int]]]:
     async with Bank.items() as bank_items:
         items = {
             item: qty
