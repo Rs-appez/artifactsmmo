@@ -53,10 +53,15 @@ async def _get_ready_to_gather(character: Character, item: Item) -> None:
         iter({job for resource in resources if (job := resource.skill).is_gathering})
     )
     await character.toolize(job, for_gathering=True)
+    job_stats = await Encyclopedia.get_effect_by_code(
+        job.get_job_effect_name(gathering_job=True)
+    )
+    wisdom = await Encyclopedia.get_effect_by_code("wisdom")
+    prospection = await Encyclopedia.get_effect_by_code("prospecting")
 
     if character.will_gain_xp_with(item, job):
-        wisdom = await Encyclopedia.get_effect_by_code("wisdom")
-        await character.maximaze_stats(wisdom)
+        await character.maximaze_stats([job_stats, wisdom, prospection])
     elif job.has_drop:
-        prospection = await Encyclopedia.get_effect_by_code("prospecting")
-        await character.maximaze_stats(prospection)
+        await character.maximaze_stats([job_stats, prospection])
+    else:
+        await character.maximaze_stats(job_stats)
