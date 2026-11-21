@@ -1,8 +1,6 @@
 {
-    "routine_name": "xp_skill",
-    "routine_module": "routines.level_up_skill",
-    "routine_args": [
-        "mining"
-    ],
+    "routine_name": "make_food",
+    "routine_module": "routines.make_food",
+    "routine_args": [],
     "routine_kwargs": {}
 }
