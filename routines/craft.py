@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 
 async def craft(
-    character: "Character",
+    character: Character,
     item: Item,
     quantity: int,
     recycling_after: bool = False,
@@ -156,7 +156,7 @@ async def __get_trips_info(
 
 
 async def __make_trip(
-    character: "Character",
+    character: Character,
     workshop_location: Map,
     bank_token: uuid.UUID,
     ingredients: dict[Item, int],
