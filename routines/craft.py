@@ -49,9 +49,17 @@ async def craft(
                 reserved_ingredients,
                 inventory=character.inventory,
             ) as bank_token:
+                effet_to_maximize = [
+                    await Encyclopedia.get_effect_by_code(
+                        item.job.get_job_effect_name(gathering_job=False)
+                    )
+                ]
                 if character.will_gain_xp_with(item):
-                    wisdom = await Encyclopedia.get_effect_by_code("wisdom")
-                    await character.maximaze_stats(wisdom)
+                    effet_to_maximize.insert(
+                        0, await Encyclopedia.get_effect_by_code("wisdom")
+                    )
+
+                await character.maximaze_stats(effet_to_maximize)
                 await character.toolize(item.job, for_gathering=False)
 
                 (
